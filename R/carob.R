@@ -37,31 +37,21 @@ get_terms <- function(js, d) {
 }
 
 
-write_files <- function(dset, records, id, path, cleanuri) {
-	stopifnot(nrow(dset) == 1)
-	stopifnot(id > 0)
-	outf <- file.path(path, "data", "clean", paste0(cleanuri, "_", id, ".csv"))
-	write.csv(records, outf, row.names=FALSE)
 
+write_files <- function(dset, records, path, cleanuri, id=NULL) {
+	stopifnot(nrow(dset) == 1)
+	if (!is.null(id)) {
+		stopifnot(id > 0)
+		outf <- file.path(path, "data", "clean", paste0(cleanuri, "_", id, ".csv"))
+	} else {
+		outf <- file.path(path, "data", "clean", paste0(cleanuri, ".csv"))
+	}
+	dir.create(dirname(outf), FALSE, FALSE)
+	write.csv(records, outf, row.names=FALSE)
 	mf <- gsub(".csv$", "_meta.csv", outf)
 	write.csv(dset, mf, row.names=FALSE)
 }
 
-
-make_carob <- function(path, quiet=FALSE) {
-	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE)
-	for (f in ff) {
-		if (!quiet) print(basename(f)); flush.console()
-		source(f)
-		if (!exists("carob_script")) {
-			stop(basename(f), "does not have a `carob_script` function")
-		}
-		if (!carob_script(path)) {
-			stop(basename(f), "failed")
-		}
-		rm(carob_script)
-	}
-}
 
 
 get_references <- function(x, path, format=TRUE) {
@@ -71,7 +61,7 @@ get_references <- function(x, path, format=TRUE) {
 	}
 	refs <- list.files(file.path(path, "references"), full.names=TRUE)
 	rn <- tools::file_path_sans_ext(basename(refs))
-	i <- match(uri, basename(refs))
+	i <- sapply(uri, function(u) grep(u, rn))
 	if (length(i == 0)) {
 		return("")
 	} 
@@ -88,4 +78,43 @@ get_references <- function(x, path, format=TRUE) {
 	d$url <- NULL
 	d$label <- NULL
 	d
+}
+
+.binder <- function(ff) {
+	x <- lapply(ff, read.csv)
+	nms <- unique(unlist(lapply(x, names)))
+	x <- lapply(x, function(x) data.frame(c(x, sapply(setdiff(nms, names(x)), function(y) NA))))
+	x$make.row.names <- FALSE
+	do.call(rbind, x)
+}
+
+
+carob_aggregate <- function(path) {
+	ff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", full.names=TRUE)
+	i <- grepl("_meta.csv$", ff)
+	mf <- ff[i]
+	ff <- ff[!i]
+	x <- .binder(mf)
+	write.csv(x, file.path(path, "data", "metadata.csv"), row.names=FALSE)
+
+	y <- .binder(ff)
+	write.csv(y, file.path(path, "data", "carob.csv"), row.names=FALSE)
+}
+
+
+
+make_carob <- function(path, quiet=FALSE) {
+	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE)
+	for (f in ff) {
+		if (!quiet) print(basename(f)); flush.console()
+		source(f)
+		if (!exists("carob_script")) {
+			stop(basename(f), "does not have a `carob_script` function")
+		}
+		if (!carob_script(path)) {
+			stop(basename(f), "failed")
+		}
+		rm(carob_script)
+	}
+	carob_aggregate(path)
 }

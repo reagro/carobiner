@@ -1,8 +1,9 @@
-Package: Rcarob
+Package: carobiner
 Type: Package
 Title: Aggregating agricultural research data 
 Version: 0.0-1
 Depends: agro, jsonlite
+Suggsts: revtools
 Date: 2021-05-31
 Author: Robert Hijmans
 Maintainer: <r.hijmans@gmail.com>
