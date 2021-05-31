@@ -37,7 +37,7 @@ get_terms <- function(js, d) {
 }
 
 
-write_files(dset, records, id, path, cleanuri) {
+write_files <- function(dset, records, id, path, cleanuri) {
 	stopifnot(nrow(dset) == 1)
 	stopifnot(id > 0)
 	outf <- file.path(path, "data", "clean", paste0(cleanuri, "_", id, ".csv"))
@@ -48,3 +48,44 @@ write_files(dset, records, id, path, cleanuri) {
 }
 
 
+make_carob <- function(path, quiet=FALSE) {
+	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE)
+	for (f in ff) {
+		if (!quiet) print(basename(f)); flush.console()
+		source(f)
+		if (!exists("carob_script")) {
+			stop(basename(f), "does not have a `carob_script` function")
+		}
+		if (!carob_script(path)) {
+			stop(basename(f), "failed")
+		}
+		rm(carob_script)
+	}
+}
+
+
+get_references <- function(x, path, format=TRUE) {
+	uri <- unique(x$uri)
+	if (length(uri == 0)) {
+		stop("no `uri` field")
+	}
+	refs <- list.files(file.path(path, "references"), full.names=TRUE)
+	rn <- tools::file_path_sans_ext(basename(refs))
+	i <- match(uri, basename(refs))
+	if (length(i == 0)) {
+		return("")
+	} 
+	d <- revtools::read_bibliography(refs[i])
+	if (format) {
+		dd <- revtools::format_citation(d)
+		names(dd) <- NULL
+		return(dd)
+	}
+	rownames(d) <- NULL
+	d$filename <- NULL
+	d$ID <- NULL
+	d$DA <- NULL
+	d$url <- NULL
+	d$label <- NULL
+	d
+}
