@@ -1,1 +1,1 @@
-exportPattern("^[^\\.\\_]")
+export( clean_uri, get_metadata, get_license, check_terms, write_files, get_references, compile_carob, process_carob, make_carob, capitalize_words, change_names )

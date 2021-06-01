@@ -2,13 +2,17 @@
 # January 2010
 # License GPL3
 
-clean_uri <- function(uri) {
-	gsub(":", "_", gsub("/", "_", uri))
+clean_uri <- function(x, reverse=FALSE) {
+	if (reverse) {
+		gsub("_", "/", sub("_", ":", x))	
+	} else {
+		gsub(":", "_", gsub("/", "_", x))
+	}
 }
 
 
-get_json <- function(cleanuri, path, major, minor) {
-	jf <- file.path(path, cleanuri, paste0(cleanuri, ".json"))
+get_metadata <- function(cleanuri, path, major, minor) {
+	jf <- file.path(path, "data", "raw", cleanuri, paste0(cleanuri, ".json"))
 	x <- jsonlite::fromJSON(readLines(jf))
 	jmajor <- x$data$latestVersion$versionNumber 
 	jminor <- x$data$latestVersion$versionMinorNumber 
@@ -17,9 +21,9 @@ get_json <- function(cleanuri, path, major, minor) {
 	x
 }
 
-get_license <- function(js, d) {
-	lic <- js$data$latestVersion$license
-	trm <- js$data$latestVersion$termsOfUse
+get_license <- function(x) {
+	lic <- x$data$latestVersion$license
+	trm <- x$data$latestVersion$termsOfUse
 	trm <- tolower(strsplit(trm, '\"')[[1]])
 	g <- grep("/creativecommons.org/", trm)
 	if (length(g) > 0) {
@@ -29,38 +33,59 @@ get_license <- function(js, d) {
 		trm <- gsub("creativecommons.org/licenses", "CC", trm)
 		trm <- gsub("/", "-", trm)
 		trm <- toupper(gsub("-$", "", trm))
+	} 
+	if (nchar(trm) > 0) {
 		if (lic == "NONE") {
-			lic <- trm	
+				lic <- trm	
 		} else {
 			lic <- paste0(lic, "; ", trm)
 		}
 	}
-	d$license <- lic
-	d
+	lic
 }
 
 check_terms <- function(x, type, path) {
+	type <- match.arg(type, c("records", "dataset"))
+	nms <- names(x)
+	answ <- TRUE
+
 	if (type == "records") {
-		trms <- read.csv(file.path(path, "terms", "records.csv"))
-		x <- x[!(x %in% trms[,1])]
-		if (length(x) > 0) {
-			warning("unknown record variable names: ", paste(x, collapse=", "))
+		trms <- utils::read.csv(file.path(path, "terms", "records.csv"))
+	} else {
+		trms <- utils::read.csv(file.path(path, "terms", "dataset.csv"))
+	}
+	names(trms)[1] <- "name" # excel seems to mess this up
+
+	xnms <- nms[!(nms %in% trms$name)]
+	if (length(xnms) > 0) {
+		warning(paste("unknown", type, "variable names: "), paste(xnms, collapse=", "))
+		answ <- FALSE
+	}
+	req <- trms[trms$required == "yes", ]
+	r <- req$name[!(req$name %in% nms)]
+	if (length(r) > 0) {
+		warning(paste("required", type, "variable name(s) missing: "), paste(r, collapse=", "))
+		answ <- FALSE
+	}
+	req <- req[req$vocabulary != "", ]
+	if (nrow(req) == 0) return(answ)
+	for (i in 1:nrow(req)) {
+		accepted <- utils::read.csv(file.path(path, "terms", paste0(req$vocabulary[i], ".csv")))[,1]
+		provided <- unique(x[, req$name[i]])
+		bad <- provided[!(provided %in% accepted)]
+		if (length(bad) > 0) {
+			warning(paste(req$name[i], "contains invalid terms: "), paste(bad, collapse=", "))
+			answ <- FALSE
 		}
 	}
-	if (type == "dataset") {
-		trms <- read.csv(file.path(path, "terms", "dataset.csv"))
-		x <- x[!(x %in% trms[,1])]
-		if (length(x) > 0) {
-			warning("unknown dataset variable names: ", paste(x, collapse=", "))
-		}
-	}
+	invisible(answ)
 }
 
 
-write_files <- function(dset, records, path, cleanuri, id=NULL) {
-	stopifnot(nrow(dset) == 1)
-	check_terms(names(records), "records", path)
-	check_terms(names(dset), "dataset", path)
+write_files <- function(dataset, records, path, cleanuri, id=NULL) {
+	stopifnot(nrow(dataset) == 1)
+	check_terms(records, "records", path)
+	check_terms(dataset, "dataset", path)
 
 	if (!is.null(id)) {
 		outf <- file.path(path, "data", "clean", paste0(cleanuri, "-", id, ".csv"))
@@ -68,9 +93,9 @@ write_files <- function(dset, records, path, cleanuri, id=NULL) {
 		outf <- file.path(path, "data", "clean", paste0(cleanuri, ".csv"))
 	}
 	dir.create(dirname(outf), FALSE, FALSE)
-	write.csv(records, outf, row.names=FALSE)
+	utils::write.csv(records, outf, row.names=FALSE)
 	mf <- gsub(".csv$", "_meta.csv", outf)
-	write.csv(dset, mf, row.names=FALSE)
+	utils::write.csv(dataset, mf, row.names=FALSE)
 }
 
 
@@ -102,7 +127,7 @@ get_references <- function(x, path, format=TRUE) {
 }
 
 .binder <- function(ff) {
-	x <- lapply(ff, read.csv)
+	x <- lapply(ff, utils::read.csv)
 	nms <- unique(unlist(lapply(x, names)))
 	x <- lapply(x, function(x) data.frame(c(x, sapply(setdiff(nms, names(x)), function(y) NA))))
 	x$make.row.names <- FALSE
@@ -110,24 +135,24 @@ get_references <- function(x, path, format=TRUE) {
 }
 
 
-carob_aggregate <- function(path) {
+compile_carob <- function(path) {
 	ff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", full.names=TRUE)
 	i <- grepl("_meta.csv$", ff)
 	mf <- ff[i]
 	ff <- ff[!i]
 	x <- .binder(mf)
-	write.csv(x, file.path(path, "data", "metadata.csv"), row.names=FALSE)
+	utils::write.csv(x, file.path(path, "data", "metadata.csv"), row.names=FALSE)
 
 	y <- .binder(ff)
-	write.csv(y, file.path(path, "data", "carob.csv"), row.names=FALSE)
+	utils::write.csv(y, file.path(path, "data", "carob.csv"), row.names=FALSE)
 }
 
-
-
-make_carob <- function(path, quiet=FALSE) {
+process_carob <- function(path, quiet=FALSE) {
 	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE)
+	carob_script <- function() {FALSE}
 	for (f in ff) {
-		if (!quiet) print(basename(f)); flush.console()
+		rm(carob_script)
+		if (!quiet) print(basename(f)); utils::flush.console()
 		source(f, local=TRUE)
 		if (!exists("carob_script")) {
 			stop(basename(f), "does not have a `carob_script` function")
@@ -136,18 +161,44 @@ make_carob <- function(path, quiet=FALSE) {
 			stop(basename(f), "failed")
 		}
 	}
-	carob_aggregate(path)
+	invisible(TRUE)
 }
 
 
-capitalize_words <- function(s) {
-	s <- tolower(s)
-	s <- gsub("-", "- ", s)
-    cap <- function(s) paste(toupper(substring(s, 1, 1)),
-                  { s <- substring(s, 2); s}, sep = "", collapse = " " )
-    s <- sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
-	gsub("- ", "-", s)
+make_carob <- function(path, quiet=FALSE) {
+	process_carob(path, quiet)
+	compile_carob(path)
 }
+
+
+capitalize_words <- function(x, skip="") {
+	x <- paste("", tolower(x), "")
+	
+	skip <- c("and", "of", "the", tolower(skip))
+	skip <- trimws(skip)
+	skip <- skip[skip != ""]
+	for (w in skip) {
+		x <- gsub(paste0(" ", w, " "), paste0(" #", w, " "), x)
+	}
+	x <- gsub("-", "- ", x)
+	x <- gsub(" d'", " #d' ", x)
+	x <- gsub("\\.", ".# ", x)
+	
+    cap <- function(x) paste(toupper(substring(x, 1, 1)),
+                  { x <- substring(x, 2); x}, sep = "", collapse = " " )
+    x <- sapply(strsplit(x, split = " "), cap, USE.NAMES = FALSE)
+	x <- paste("", x, "")
+
+	for (w in skip) {
+		x <- gsub(paste0(" #", w, " "), paste0(" ", w, " "), x)
+	}
+
+	x <- gsub("- ", "-", x)
+	x <- gsub(" #d' ", " d'", x)
+	x <- gsub("\\.# ", "\\.", x)
+	trimws(x)
+}
+
 
 
 change_names <- function(x, from, to) {
@@ -161,3 +212,4 @@ change_names <- function(x, from, to) {
 	}
 	x
 }
+

@@ -55,7 +55,7 @@ make_recipe <- function(uri, files, outfile=NULL) {
 		x$variables = vv
 	}
 	if (!is.null(outfile)) {
-		try( yaml::write_yaml(x, outfile) )
+	#	try( yaml::write_yaml(x, outfile) )
 		invisible(x)
 	} else {
 		x

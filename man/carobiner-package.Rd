@@ -14,7 +14,3 @@
 \packageDescription{carobiner}
 
 }
-\details{
-coming soon
-}
-

@@ -7,6 +7,6 @@ Suggests: revtools
 Date: 2021-05-31
 Author: Robert Hijmans
 Maintainer: <r.hijmans@gmail.com>
-Description: Functions for the "carob" project 
+Description: A collection of ideosyncratic functions to support the "carob" project.  
 License: GPL (>=3)
 
