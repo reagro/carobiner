@@ -29,23 +29,26 @@ get_license <- function(js, d) {
 		trm <- gsub("creativecommons.org/licenses", "CC", trm)
 		trm <- gsub("/", "-", trm)
 		trm <- toupper(gsub("-$", "", trm))
-		if (lic == "NONE") lic <- trm
+		if (lic == "NONE") {
+			lic <- trm	
+		} else {
+			lic <- paste0(lic, "; ", trm)
+		}
 	}
 	d$license <- lic
-	d$termsOfUse <- trm
 	d
 }
 
 check_terms <- function(x, type, path) {
 	if (type == "records") {
-		trms <- read.csv(file.path(path, terms), "records.csv")
+		trms <- read.csv(file.path(path, "terms", "records.csv"))
 		x <- x[!(x %in% trms[,1])]
 		if (length(x) > 0) {
 			warning("unknown record variable names: ", paste(x, collapse=", "))
 		}
 	}
 	if (type == "dataset") {
-		trms <- read.csv(file.path(path, terms), "dataset.csv")
+		trms <- read.csv(file.path(path, "terms", "dataset.csv"))
 		x <- x[!(x %in% trms[,1])]
 		if (length(x) > 0) {
 			warning("unknown dataset variable names: ", paste(x, collapse=", "))
@@ -56,14 +59,14 @@ check_terms <- function(x, type, path) {
 
 write_files <- function(dset, records, path, cleanuri, id=NULL) {
 	stopifnot(nrow(dset) == 1)
+	check_terms(names(records), "records", path)
+	check_terms(names(dset), "dataset", path)
+
 	if (!is.null(id)) {
-		stopifnot(id > 0)
-		outf <- file.path(path, "data", "clean", paste0(cleanuri, "_", id, ".csv"))
+		outf <- file.path(path, "data", "clean", paste0(cleanuri, "-", id, ".csv"))
 	} else {
 		outf <- file.path(path, "data", "clean", paste0(cleanuri, ".csv"))
 	}
-	check_terms(d, "records", path)
-	check_terms(dset, "dataset", path)
 	dir.create(dirname(outf), FALSE, FALSE)
 	write.csv(records, outf, row.names=FALSE)
 	mf <- gsub(".csv$", "_meta.csv", outf)
@@ -125,14 +128,36 @@ make_carob <- function(path, quiet=FALSE) {
 	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE)
 	for (f in ff) {
 		if (!quiet) print(basename(f)); flush.console()
-		source(f)
+		source(f, local=TRUE)
 		if (!exists("carob_script")) {
 			stop(basename(f), "does not have a `carob_script` function")
 		}
 		if (!carob_script(path)) {
 			stop(basename(f), "failed")
 		}
-		rm(carob_script)
 	}
 	carob_aggregate(path)
+}
+
+
+capitalize_words <- function(s) {
+	s <- tolower(s)
+	s <- gsub("-", "- ", s)
+    cap <- function(s) paste(toupper(substring(s, 1, 1)),
+                  { s <- substring(s, 2); s}, sep = "", collapse = " " )
+    s <- sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
+	gsub("- ", "-", s)
+}
+
+
+change_names <- function(x, from, to) {
+	stopifnot(length(from) == length(to))
+	for (i in 1:length(from)) {
+		w <- which(colnames(x) == from[i])
+		if (length(w) != 1) {
+			stop(paste(from[i], "is missing or duplicated"))
+		}
+		names(x)[w] <- to[i]
+	}
+	x
 }
