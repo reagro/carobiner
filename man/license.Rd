@@ -3,7 +3,7 @@
 \alias{get_license}
 
 \title{
-Get the JSON file
+Get the license of a dataset
 }
 
 \description{
@@ -22,4 +22,3 @@ get_license(x)
 \value{
 character
 }
-

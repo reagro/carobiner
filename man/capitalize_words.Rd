@@ -26,7 +26,8 @@ character
 
 
 \examples{
-d <- c("aruba", "BOM BINI", "saint-vincent and the grenadines", "the u.s. of america", "côte d'ivoire")
+d <- c("aruba", "BOM BINI", "saint-vincent and the grenadines",
+       "the u.s. of america", "côte d'ivoire")
 capitalize_words(d)
 capitalize_words(d, skip="bini")
 }

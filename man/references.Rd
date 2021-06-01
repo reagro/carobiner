@@ -24,4 +24,3 @@ get_references(x, path, format=TRUE)
 \value{
 character
 }
-

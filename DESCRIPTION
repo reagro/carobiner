@@ -1,12 +1,11 @@
 Package: carobiner
 Type: Package
-Title: Aggregating agricultural research data 
+Title: Compiling agricultural research data 
 Version: 0.1-1
-Depends: agro, jsonlite, readxl 
-Suggests: revtools
+Suggests: jsonlite, revtools, remotes
 Date: 2021-06-01
 Author: Robert Hijmans
 Maintainer: <r.hijmans@gmail.com>
-Description: A collection of ideosyncratic functions to support the "carob" project.  
+Description: A collection of ideosyncratic functions to support the "Carob" project.  
 License: GPL (>=3)
 
