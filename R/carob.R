@@ -17,7 +17,7 @@ get_json <- function(cleanuri, path, major, minor) {
 	x
 }
 
-get_terms <- function(js, d) {
+get_license <- function(js, d) {
 	lic <- js$data$latestVersion$license
 	trm <- js$data$latestVersion$termsOfUse
 	trm <- tolower(strsplit(trm, '\"')[[1]])
@@ -36,6 +36,22 @@ get_terms <- function(js, d) {
 	d
 }
 
+check_terms <- function(x, type, path) {
+	if (type == "records") {
+		trms <- read.csv(file.path(path, terms), "records.csv")
+		x <- x[!(x %in% trms[,1])]
+		if (length(x) > 0) {
+			warning("unknown record variable names: ", paste(x, collapse=", "))
+		}
+	}
+	if (type == "dataset") {
+		trms <- read.csv(file.path(path, terms), "dataset.csv")
+		x <- x[!(x %in% trms[,1])]
+		if (length(x) > 0) {
+			warning("unknown dataset variable names: ", paste(x, collapse=", "))
+		}
+	}
+}
 
 
 write_files <- function(dset, records, path, cleanuri, id=NULL) {
@@ -46,6 +62,8 @@ write_files <- function(dset, records, path, cleanuri, id=NULL) {
 	} else {
 		outf <- file.path(path, "data", "clean", paste0(cleanuri, ".csv"))
 	}
+	check_terms(d, "records", path)
+	check_terms(dset, "dataset", path)
 	dir.create(dirname(outf), FALSE, FALSE)
 	write.csv(records, outf, row.names=FALSE)
 	mf <- gsub(".csv$", "_meta.csv", outf)
