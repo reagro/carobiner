@@ -1,2 +1,3 @@
-# agro
-R package with helper function for agricultural data science
+# carobiner
+
+R package with helper function for the *Carob* project
