@@ -225,6 +225,8 @@ compile_carob <- function(path) {
 
 	y <- .binder(ff)
 	utils::write.csv(y, file.path(path, "data", "carob.csv"), row.names=FALSE)
+	
+	return(mf, ff)
 }
 
 
