@@ -1,5 +1,5 @@
 # Author: Robert Hijmans
-# January 2010
+# May 2021
 # License GPL3
 
 clean_uri <- function(x, reverse=FALSE) {
