@@ -7,7 +7,7 @@ Get the dataset level metadata
 }
 
 \description{
-Get the metadata file associated with a data set (from the JSON file) and check if the data set major and minor versions have changed.
+Get the metadata file associated with a data set (from the json file) and check if the data set major and minor versions have changed.
 }
 
 

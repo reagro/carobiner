@@ -16,8 +16,8 @@ get_metadata <- function(cleanuri, path, major, minor) {
 	x <- jsonlite::fromJSON(readLines(jf))
 	jmajor <- x$data$latestVersion$versionNumber 
 	jminor <- x$data$latestVersion$versionMinorNumber 
-	if (jmajor != major) stop(paste("new major version", major, "for", cleanuri))
-	if (jminor != minor) warning(paste("new minor version", minor, "for", cleanuri))
+	if (jmajor != major) stop(paste("new major version", jmajor, "for", cleanuri))
+	if (jminor != minor) warning(paste("new minor version", jminor, "for", cleanuri))
 	x
 }
 
