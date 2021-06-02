@@ -16,8 +16,8 @@ get_metadata <- function(cleanuri, path, major, minor) {
 	x <- jsonlite::fromJSON(readLines(jf))
 	jmajor <- x$data$latestVersion$versionNumber 
 	jminor <- x$data$latestVersion$versionMinorNumber 
-	if (jmajor != major) stop(paste("new major version", jmajor, "for", cleanuri))
-	if (jminor != minor) warning(paste("new minor version", jminor, "for", cleanuri))
+	if (jmajor != major) stop(paste("new major version", jmajor, "for", cleanuri), call.=FALSE)
+	if (jminor != minor) warning(paste("new minor version", jminor, "for", cleanuri), call.=FALSE)
 	x
 }
 
@@ -58,24 +58,37 @@ check_terms <- function(x, type, path) {
 
 	xnms <- nms[!(nms %in% trms$name)]
 	if (length(xnms) > 0) {
-		warning(paste("unknown", type, "variable names: "), paste(xnms, collapse=", "))
+		print(paste("  unknown", type, "variable names: "), paste(xnms, collapse=", "))
 		answ <- FALSE
 	}
 	req <- trms[trms$required == "yes", ]
 	r <- req$name[!(req$name %in% nms)]
 	if (length(r) > 0) {
-		warning(paste("required", type, "variable name(s) missing: "), paste(r, collapse=", "))
+		print(paste("  required", type, "variable name(s) missing: "), paste(r, collapse=", "))
 		answ <- FALSE
 	}
 	req <- req[req$vocabulary != "", ]
-	if (nrow(req) == 0) return(answ)
-	for (i in 1:nrow(req)) {
-		accepted <- utils::read.csv(file.path(path, "terms", paste0(req$vocabulary[i], ".csv")))[,1]
-		provided <- unique(x[, req$name[i]])
-		bad <- provided[!(provided %in% accepted)]
-		if (length(bad) > 0) {
-			warning(paste(req$name[i], "contains invalid terms: "), paste(bad, collapse=", "))
-			answ <- FALSE
+	if (nrow(req) > 0) {
+		for (i in 1:nrow(req)) {
+			accepted <- utils::read.csv(file.path(path, "terms", paste0(req$vocabulary[i], ".csv")))[,1]
+			provided <- unique(x[, req$name[i]])
+			bad <- provided[!(provided %in% accepted)]
+			if (length(bad) > 0) {
+				print(paste("  ", req$name[i], "contains invalid terms: "), paste(bad, collapse=", "))
+				answ <- FALSE
+			}
+		}
+	}
+
+	if ((type=="dataset") & (!(is.null(x$publication) | is.null(x$dataset_id) ))) {
+		if (nchar(x$publication[1]) > 0) {
+			pubs <- list.files(file.path(path, "references"))
+			id <- unlist(strsplit(x$dataset_id, "-"))[1]
+			i <- grep(id, pubs)
+			if (length(i) == 0) {
+				print("  reference file missing")
+				answ <- FALSE
+			}
 		}
 	}
 	invisible(answ)
@@ -96,6 +109,7 @@ write_files <- function(dataset, records, path, cleanuri, id=NULL) {
 	utils::write.csv(records, outf, row.names=FALSE)
 	mf <- gsub(".csv$", "_meta.csv", outf)
 	utils::write.csv(dataset, mf, row.names=FALSE)
+	TRUE
 }
 
 
@@ -103,7 +117,7 @@ write_files <- function(dataset, records, path, cleanuri, id=NULL) {
 get_references <- function(x, path, format=TRUE) {
 	uri <- unique(x$uri)
 	if (length(uri == 0)) {
-		stop("no `uri` field")
+		stop("no `uri` field", call.=FALSE)
 	}
 	refs <- list.files(file.path(path, "references"), full.names=TRUE)
 	rn <- tools::file_path_sans_ext(basename(refs))
@@ -134,18 +148,6 @@ get_references <- function(x, path, format=TRUE) {
 	do.call(rbind, x)
 }
 
-
-compile_carob <- function(path) {
-	ff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", full.names=TRUE)
-	i <- grepl("_meta.csv$", ff)
-	mf <- ff[i]
-	ff <- ff[!i]
-	x <- .binder(mf)
-	utils::write.csv(x, file.path(path, "data", "metadata.csv"), row.names=FALSE)
-
-	y <- .binder(ff)
-	utils::write.csv(y, file.path(path, "data", "carob.csv"), row.names=FALSE)
-}
 
 
 get_packages <- function(path) {
@@ -186,7 +188,7 @@ get_packages <- function(path) {
 	pkgs1 <- unique(unlist(sapply(ff, libfun1)))
 	pkgs2 <- unique(unlist(sapply(ff, libfun2)))
 	
-	pkgs <- unique(c(pkgs1, pkgs2, "readxl", "jsonlite"))
+	pkgs <- unique(c(pkgs1, pkgs2, "readxl", "jsonlite", "reshape2", "stringr"))
 	
 	ipkgs <- rownames(utils::installed.packages())
 
@@ -213,8 +215,23 @@ get_packages <- function(path) {
 
 
 
+compile_carob <- function(path) {
+	ff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", full.names=TRUE)
+	i <- grepl("_meta.csv$", ff)
+	mf <- ff[i]
+	ff <- ff[!i]
+	x <- .binder(mf)
+	utils::write.csv(x, file.path(path, "data", "metadata.csv"), row.names=FALSE)
+
+	y <- .binder(ff)
+	utils::write.csv(y, file.path(path, "data", "carob.csv"), row.names=FALSE)
+}
+
+
 process_carob <- function(path, quiet=FALSE) {
 	get_packages(path)
+	ff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", full.names=TRUE)
+	file.remove(ff)
 	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE)
 	carob_script <- function() {FALSE}
 	for (f in ff) {
@@ -222,12 +239,14 @@ process_carob <- function(path, quiet=FALSE) {
 		if (!quiet) print(basename(f)); utils::flush.console()
 		source(f, local=TRUE)
 		if (!exists("carob_script")) {
-			stop(basename(f), "does not have a `carob_script` function")
+			stop(basename(f), "does not have a `carob_script` function", call.=FALSE)
 		}
 		if (!carob_script(path)) {
-			stop(basename(f), "failed")
+			stop(basename(f), "failed", call.=FALSE)
 		}
+		flush.console()
 	}
+	print("done")
 	invisible(TRUE)
 }
 
@@ -273,7 +292,7 @@ change_names <- function(x, from, to) {
 	for (i in 1:length(from)) {
 		w <- which(colnames(x) == from[i])
 		if (length(w) != 1) {
-			stop(paste(from[i], "is missing or duplicated"))
+			stop(paste(from[i], "is missing or duplicated"), call.=FALSE)
 		}
 		names(x)[w] <- to[i]
 	}
