@@ -2,6 +2,7 @@ Package: carobiner
 Type: Package
 Title: Compiling agricultural research data 
 Version: 0.1-1
+Depends: agro
 Suggests: jsonlite, revtools, remotes
 Date: 2021-06-01
 Author: Robert Hijmans

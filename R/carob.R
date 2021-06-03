@@ -8,8 +8,6 @@ clean_uri <- function(x, reverse=FALSE) {
 }
 
 
-
-
 get_data <- function(uri, path, group="") {
 	path=file.path(path, "data/raw", group)
 	agro::get_data_from_uri(uri, path)
@@ -285,7 +283,7 @@ process_carob <- function(path, quiet=FALSE) {
 		if (!carob_script(path)) {
 			stop(basename(f), "failed", call.=FALSE)
 		}
-		flush.console()
+		utils::flush.console()
 	}
 	invisible(TRUE)
 }

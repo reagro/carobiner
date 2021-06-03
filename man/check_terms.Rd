@@ -12,13 +12,14 @@ Check the terms used in a dataset. A warning is given if bad or missing terms or
 
 
 \usage{
-check_terms(x, type, path)
+check_terms(x, type, path, group="")
 }
  
 \arguments{
   \item{x}{data.frame}
   \item{type}{character. "dataset" or "records"}
   \item{path}{character. Local path to the Carob repo}
+  \item{group}{character. Optional group}
 }
 
 \value{
