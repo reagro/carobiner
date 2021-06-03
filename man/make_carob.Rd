@@ -11,21 +11,25 @@ Make the Carob database
 \description{
 Make the Carob database. 
 
-\code{process_carob} runs all the dataset scripts (download to "carob/data/raw", format, check and write clean data to "carob/data/clean")
+\code{run_carob} runs a single Carob script for a dataset. Carob scripts download data to "carob/data/raw", re-organize th data, check the variable names and controlled vocabulary used, and write clean data to "carob/data/clean"
 
-\code{compile_carob} reads all the clean data and combines them into two files, one for the dataset descirptions, one for all records, and saves these to "carob/data")
+\code{process_carob} runs all the Carob scripts. 
+
+\code{compile_carob} reads all the clean data and combines them into two files, one for the dataset descriptions, one for all records, and saves these to "carob/data")
 
 \code{make_carob} is a convenience function that first runs \code{process_carob} and then runs \code{clean_carob} 
 }
 
 
 \usage{
+run_carob(cleanuri, path, quiet=FALSE)
 process_carob(path, quiet=FALSE)
 compile_carob(path)
 make_carob(path, quiet=FALSE)
 }
  
 \arguments{
+  \item{cleanuri}{character. A "clean" URI made with \code{\link[agro]{get_simple_URI}}}
   \item{path}{character. Local path to the Carob repo}
   \item{quiet}{logical. Be quiet?}
 }
