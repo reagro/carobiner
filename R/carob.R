@@ -103,6 +103,11 @@ bindr <- function( ...) {
 	do.call(rbind, x)
 }
 
+get_function <- function(name, path, group="") {
+	f <- file.path(path, "scripts", group, "_functions.R")
+	source(f, local=TRUE)
+	get(name)
+}
 
 
 .binder <- function(ff) {
@@ -158,7 +163,7 @@ run_carob <- function(cleanuri, path, quiet=FALSE) {
 		stop(basename(f), "does not have a `carob_script` function", call.=FALSE)
 	}
 	if (!carob_script(path)) {
-		stop(basename(f), "failed", call.=FALSE)
+		cat(basename(f), " failed\n")
 	}
 	invisible(TRUE)
 }
@@ -171,6 +176,8 @@ process_carob <- function(path, quiet=FALSE) {
 	ff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", full.names=TRUE)
 	file.remove(ff)
 	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE, recursive=TRUE)
+	ffun <- grepl("^_", basename(ff))
+	ff <- ff[!ffun]
 	carob_script <- function() {FALSE}
 	for (f in ff) {
 		rm(carob_script)
