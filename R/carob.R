@@ -3,11 +3,16 @@
 # License GPL3
 
 clean_uri <- function(x, reverse=FALSE) {
-	if (reverse) {
-		gsub("_", "/", sub("_", ":", x))	
-	} else {
-		gsub(":", "_", gsub("/", "_", x))
-	}
+	warning("use agro::get_simple_URI() instead")
+	agro::get_simple_URI(x, reverse)
+}
+
+
+
+
+get_data <- function(uri, path) {
+	path=file.path(path, "data/raw")
+	agro::get_data_from_uri(uri, path)
 }
 
 
@@ -166,16 +171,28 @@ get_packages <- function(path) {
 	libfun2 <- function(x) {
 		d <- readLines(x, warn=FALSE)
 		i <- grep('::', d)
+		if (length(i) ==0) {
+			return(NULL)
+		}
 		d <- d[unique(i)]
 		d <- d[!grepl("#", d)]
+		if (length(i) ==0) {
+			return(NULL)
+		}
 
 		d <- strsplit(d, "<-")
 		d <- sapply(d, function(e) ifelse(length(e)>1, e[2], e[1]))
 		d <- d[!is.na(d)]
+		if (length(i) ==0) {
+			return(NULL)
+		}
 
 		d <- strsplit(d, "=")
 		d <- sapply(d, function(e) ifelse(length(e)>1, e[2], e[1]))
 		d <- d[!is.na(d)]
+		if (length(i) ==0) {
+			return(NULL)
+		}
 
 		d <- strsplit(d, "::")
 		d <- sapply(d, function(e) e[1])
@@ -221,12 +238,14 @@ compile_carob <- function(path) {
 	mf <- ff[i]
 	ff <- ff[!i]
 	x <- .binder(mf)
-	utils::write.csv(x, file.path(path, "data", "metadata.csv"), row.names=FALSE)
+	outmf <- file.path(path, "data", "metadata.csv")
+	utils::write.csv(x, outmf, row.names=FALSE)
 
 	y <- .binder(ff)
-	utils::write.csv(y, file.path(path, "data", "carob.csv"), row.names=FALSE)
+	outff <- file.path(path, "data", "carob.csv")
+	utils::write.csv(y, outff, row.names=FALSE)
 	
-	return(mf, ff)
+	return(c(outmf, outff))
 }
 
 

@@ -19,7 +19,7 @@ write_files(dataset, records, path, cleanuri, id=NULL)
   \item{dataset}{data.frame. One row with dataset level variables}
   \item{records}{data.frame. Dataset records}
   \item{path}{chacter. Local path to the Carob repo}
-  \item{cleanuri}{character. A "clean" uri made with \code{\link{clean_uri}}}
+  \item{cleanuri}{character. A "clean" uri made with \code{\link[agro]{get_simple_URI}}}
   \item{id}{character. Optional identifies if a dataset has multiple subdatasets}
 }
 

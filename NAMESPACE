@@ -1,5 +1,5 @@
 export(
-capitalize_words, change_names, check_terms, clean_uri, compile_carob,  
-get_metadata, get_license, get_packages, get_references, 
+capitalize_words, change_names, check_terms, clean_uri, compile_carob, 
+get_data, get_metadata, get_license, get_packages, get_references, 
 make_carob, process_carob, write_files
 )
