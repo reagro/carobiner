@@ -95,15 +95,24 @@ write_files <- function(dataset, records, path, cleanuri, group="", id=NULL) {
 
 
 
-.binder <- function(x, read=TRUE) {
-	if (read) {
-		x <- lapply(x, utils::read.csv)
-	}
+bindr <- function( ...) {
+	x <- list(...)
 	nms <- unique(unlist(lapply(x, names)))
 	x <- lapply(x, function(x) data.frame(c(x, sapply(setdiff(nms, names(x)), function(y) NA))))
 	x$make.row.names <- FALSE
 	do.call(rbind, x)
 }
+
+
+
+.binder <- function(ff) {
+	x <- lapply(ff, utils::read.csv)
+	nms <- unique(unlist(lapply(x, names)))
+	x <- lapply(x, function(x) data.frame(c(x, sapply(setdiff(nms, names(x)), function(y) NA))))
+	x$make.row.names <- FALSE
+	do.call(rbind, x)
+}
+
 
 
 sort_by_terms <- function(x, type, group) {
@@ -215,12 +224,14 @@ capitalize_words <- function(x, skip="") {
 
 
 
-change_names <- function(x, from, to) {
+change_names <- function(x, from, to, must_have=TRUE) {
 	stopifnot(length(from) == length(to))
 	for (i in 1:length(from)) {
 		w <- which(colnames(x) == from[i])
-		if (length(w) != 1) {
-			stop(paste(from[i], "is missing or duplicated"), call.=FALSE)
+		if (length(w) > 1) {
+			stop(paste(from[i], "is duplicated"), call.=FALSE)
+		} else if (must_have && length(w) == 0) {
+			stop(paste(from[i], "is absent"), call.=FALSE)
 		}
 		names(x)[w] <- to[i]
 	}
