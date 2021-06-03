@@ -10,52 +10,64 @@ clean_uri <- function(x, reverse=FALSE) {
 
 
 
-get_data <- function(uri, path) {
-	path=file.path(path, "data/raw")
+get_data <- function(uri, path, group="") {
+	path=file.path(path, "data/raw", group)
 	agro::get_data_from_uri(uri, path)
 }
 
 
-get_metadata <- function(cleanuri, path, major, minor) {
-	jf <- file.path(path, "data", "raw", cleanuri, paste0(cleanuri, ".json"))
+get_metadata <- function(cleanuri, path, group="", major=1, minor=0) {
+	jf <- file.path(path, "data", "raw", group, cleanuri, paste0(cleanuri, ".json"))
 	x <- jsonlite::fromJSON(readLines(jf))
 	jmajor <- x$data$latestVersion$versionNumber 
-	jminor <- x$data$latestVersion$versionMinorNumber 
-	if (jmajor != major) stop(paste("new major version", jmajor, "for", cleanuri), call.=FALSE)
-	if (jminor != minor) warning(paste("new minor version", jminor, "for", cleanuri), call.=FALSE)
+	if (!is.null(jmajor)) {
+		jminor <- x$data$latestVersion$versionMinorNumber 
+		if (jmajor != major) stop(paste("new major version", jmajor, "for", cleanuri), call.=FALSE)
+		if (jminor != minor) warning(paste("new minor version", jminor, "for", cleanuri), call.=FALSE)
+	} else { # ckan
+		v <- x$result$version
+		if (!is.null(v)) {
+			if (v != major) stop(paste("new version", v, "for", cleanuri), call.=FALSE)
+		}
+	}
 	x
 }
 
 get_license <- function(x) {
 	lic <- x$data$latestVersion$license
-	trm <- x$data$latestVersion$termsOfUse
-	trm <- tolower(strsplit(trm, '\"')[[1]])
-	g <- grep("/creativecommons.org/", trm)
-	if (length(g) > 0) {
-		trm <- trm[g[1]]
-		trm <- gsub("http://", "", trm)
-		trm <- gsub("https://", "", trm)
-		trm <- gsub("creativecommons.org/licenses", "CC", trm)
-		trm <- gsub("/", "-", trm)
-		trm <- toupper(gsub("-$", "", trm))
-	} 
-	if (nchar(trm) > 0) {
-		if (lic == "NONE") {
-				lic <- trm	
-		} else {
-			lic <- paste0(lic, "; ", trm)
+	if (!is.null(lic)) {
+		trm <- x$data$latestVersion$termsOfUse
+		trm <- tolower(strsplit(trm, '\"')[[1]])
+		g <- grep("/creativecommons.org/", trm)
+		if (length(g) > 0) {
+			trm <- trm[g[1]]
+			trm <- gsub("http://", "", trm)
+			trm <- gsub("https://", "", trm)
+			trm <- gsub("creativecommons.org/licenses", "CC", trm)
+			trm <- gsub("/", "-", trm)
+			trm <- toupper(gsub("-$", "", trm))
+		} 
+		if (nchar(trm) > 0) {
+			if (lic == "NONE") {
+					lic <- trm	
+			} else {
+				lic <- paste0(lic, "; ", trm)
+			}
 		}
+	} else { #ckan
+		lic <- x$result$license_id 	
+		if (is.null(lic)) lic <- "?"
 	}
-	lic
+	toupper(lic)
 }
 
-check_terms <- function(x, type, path) {
+check_terms <- function(x, type, path, group="") {
 	type <- match.arg(type, c("records", "dataset"))
 	nms <- names(x)
 	answ <- TRUE
 
 	if (type == "records") {
-		trms <- utils::read.csv(file.path(path, "terms", "records.csv"))
+		trms <- utils::read.csv(file.path(path, "terms", group, "records.csv"))
 	} else {
 		trms <- utils::read.csv(file.path(path, "terms", "dataset.csv"))
 	}
@@ -63,23 +75,23 @@ check_terms <- function(x, type, path) {
 
 	xnms <- nms[!(nms %in% trms$name)]
 	if (length(xnms) > 0) {
-		print(paste("  unknown", type, "variable names: "), paste(xnms, collapse=", "))
+		print(paste("  unknown", type, "variable names: ", paste(xnms, collapse=", ")))
 		answ <- FALSE
 	}
 	req <- trms[trms$required == "yes", ]
 	r <- req$name[!(req$name %in% nms)]
 	if (length(r) > 0) {
-		print(paste("  required", type, "variable name(s) missing: "), paste(r, collapse=", "))
+		print(paste("  required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
 		answ <- FALSE
 	}
-	req <- req[req$vocabulary != "", ]
+	req <- req[!is.na(req$vocabulary) & (req$vocabulary != ""), ]
 	if (nrow(req) > 0) {
 		for (i in 1:nrow(req)) {
 			accepted <- utils::read.csv(file.path(path, "terms", paste0(req$vocabulary[i], ".csv")))[,1]
 			provided <- unique(x[, req$name[i]])
 			bad <- provided[!(provided %in% accepted)]
 			if (length(bad) > 0) {
-				print(paste("  ", req$name[i], "contains invalid terms: "), paste(bad, collapse=", "))
+				print(paste("  ", req$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
 				answ <- FALSE
 			}
 		}
@@ -100,15 +112,15 @@ check_terms <- function(x, type, path) {
 }
 
 
-write_files <- function(dataset, records, path, cleanuri, id=NULL) {
+write_files <- function(dataset, records, path, cleanuri, group="", id=NULL) {
 	stopifnot(nrow(dataset) == 1)
-	check_terms(records, "records", path)
-	check_terms(dataset, "dataset", path)
+	check_terms(records, "records", path, group)
+	check_terms(dataset, "dataset", path, group)
 
 	if (!is.null(id)) {
-		outf <- file.path(path, "data", "clean", paste0(cleanuri, "-", id, ".csv"))
+		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, "-", id, ".csv"))
 	} else {
-		outf <- file.path(path, "data", "clean", paste0(cleanuri, ".csv"))
+		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
 	}
 	dir.create(dirname(outf), FALSE, FALSE)
 	utils::write.csv(records, outf, row.names=FALSE)
@@ -171,25 +183,26 @@ get_packages <- function(path) {
 	libfun2 <- function(x) {
 		d <- readLines(x, warn=FALSE)
 		i <- grep('::', d)
-		if (length(i) ==0) {
+		if (length(d) ==0) {
 			return(NULL)
 		}
 		d <- d[unique(i)]
 		d <- d[!grepl("#", d)]
-		if (length(i) ==0) {
+		if (length(d) ==0) {
 			return(NULL)
 		}
 
 		d <- strsplit(d, "<-")
 		d <- sapply(d, function(e) ifelse(length(e)>1, e[2], e[1]))
 		d <- d[!is.na(d)]
-		if (length(i) ==0) {
+		if (length(d) ==0) {
 			return(NULL)
 		}
+		d <- trimws(d)
 
-		d <- strsplit(d, "=")
-		d <- sapply(d, function(e) ifelse(length(e)>1, e[2], e[1]))
-		d <- d[!is.na(d)]
+		#d <- strsplit(d, "=")
+		#d <- sapply(d, function(e) ifelse(length(e)>1, e[2], e[1]))
+		#d <- d[!is.na(d)]
 		if (length(i) ==0) {
 			return(NULL)
 		}
@@ -197,8 +210,7 @@ get_packages <- function(path) {
 		d <- strsplit(d, "::")
 		d <- sapply(d, function(e) e[1])
 		d <- unique(trimws(d[!is.na(d)]))
-		d <- d[!(grepl(",", d) | grepl("\\(", d))]
-		d
+		d[!(grepl(",", d) | grepl("\\(", d))]
 	}
 
 	ff <- list.files(file.path(path, "scripts"), pattern='\\.R$', full.names=TRUE, ignore.case=TRUE)
@@ -233,19 +245,27 @@ get_packages <- function(path) {
 
 
 compile_carob <- function(path) {
-	ff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", full.names=TRUE)
-	i <- grepl("_meta.csv$", ff)
-	mf <- ff[i]
-	ff <- ff[!i]
-	x <- .binder(mf)
-	outmf <- file.path(path, "data", "metadata.csv")
-	utils::write.csv(x, outmf, row.names=FALSE)
+	dir.create(file.path(path, "data", "compiled"), FALSE, FALSE)
+	fff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", recursive=TRUE)
+	ss <- unique(sapply(strsplit(fff, "/"), function(i) ifelse(length(i) > 1, i[1], "doi")))
+	ret <- NULL
+	for (s in ss) {
+		ff <- grep(paste0("^", s), fff, value=TRUE)
+		ff <- file.path(path, "data", "clean", ff)
+		i <- grepl("_meta.csv$", ff)
+		mf <- ff[i]
+		ff <- ff[!i]
+		x <- .binder(mf)
+		group <- ifelse(s == "doi", "", paste0(s, "-"))
+		outmf <- file.path(path, "data", "compiled", paste0(group, "metadata.csv"))
+		utils::write.csv(x, outmf, row.names=FALSE)
 
-	y <- .binder(ff)
-	outff <- file.path(path, "data", "carob.csv")
-	utils::write.csv(y, outff, row.names=FALSE)
-	
-	return(c(outmf, outff))
+		y <- .binder(ff)
+		outff <- file.path(path, "data", "compiled", paste0(group, "carob.csv"))
+		utils::write.csv(y, outff, row.names=FALSE)
+		ret <- c(ret, outmf, outff)
+	}
+	return(ret)
 }
 
 
@@ -253,7 +273,7 @@ process_carob <- function(path, quiet=FALSE) {
 	get_packages(path)
 	ff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", full.names=TRUE)
 	file.remove(ff)
-	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE)
+	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE, recursive=TRUE)
 	carob_script <- function() {FALSE}
 	for (f in ff) {
 		rm(carob_script)
@@ -267,7 +287,6 @@ process_carob <- function(path, quiet=FALSE) {
 		}
 		flush.console()
 	}
-	print("done")
 	invisible(TRUE)
 }
 
