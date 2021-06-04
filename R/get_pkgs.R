@@ -1,5 +1,5 @@
 
-get_packages <- function(path) {
+get_packages <- function(path, group="") {
 	libfun1 <- function(x) {
 		d <- readLines(x, warn=FALSE)
 		i <- grep('^library\\(', d)
@@ -45,7 +45,7 @@ get_packages <- function(path) {
 		d[!(grepl(",", d) | grepl("\\(", d))]
 	}
 
-	ff <- list.files(file.path(path, "scripts"), pattern='\\.R$', full.names=TRUE, ignore.case=TRUE)
+	ff <- list.files(file.path(path, "scripts", group), pattern='\\.R$', full.names=TRUE, ignore.case=TRUE)
 	pkgs1 <- unique(unlist(sapply(ff, libfun1)))
 	pkgs2 <- unique(unlist(sapply(ff, libfun2)))
 	

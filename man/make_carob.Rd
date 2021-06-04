@@ -22,15 +22,16 @@ Make the Carob database.
 
 
 \usage{
-run_carob(cleanuri, path, quiet=FALSE)
-process_carob(path, quiet=FALSE)
-compile_carob(path)
-make_carob(path, quiet=FALSE)
+run_carob(cleanuri, path, group="", quiet=FALSE)
+process_carob(path, group="", quiet=FALSE)
+compile_carob(path, group="")
+make_carob(path, group="", quiet=FALSE)
 }
  
 \arguments{
   \item{cleanuri}{character. A "clean" URI made with \code{\link[agro]{get_simple_URI}}}
   \item{path}{character. Local path to the Carob repo}
+  \item{group}{character. group name}
   \item{quiet}{logical. Be quiet?}
 }
 

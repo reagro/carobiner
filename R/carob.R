@@ -12,11 +12,14 @@ get_terms <- function(type, group) {
 	if (type == "records") {
 		trms <- utils::read.csv(file.path(path, "terms", "records.csv"))
 		if (group != "") {
-			trms2 <- utils::read.csv(file.path(path, "terms", group, "records.csv"))
-			trms <- rbind(trms, trms2)
-			tab <- table(trms[,1])
-			if (any(tab > 1)) {
-				print(paste("duplicated terms:", names(tab[tab>1])))
+			grp_terms <- file.path(path, "terms", group, "records.csv")
+			if (file.exists(grp_terms)) {
+				trms2 <- utils::read.csv(grp_terms)
+				trms <- rbind(trms, trms2)
+				tab <- table(trms[,1])
+				if (any(tab > 1)) {
+					print(paste("duplicated terms:", names(tab[tab>1])))
+				}
 			}
 		}
 	} else {
@@ -128,10 +131,14 @@ sort_by_terms <- function(x, type, group) {
 }
 
 
-compile_carob <- function(path) {
-	dir.create(file.path(path, "data", "compiled"), FALSE, FALSE)
-	fff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", recursive=TRUE)
-	grps <- unique(sapply(strsplit(fff, "/"), function(i) ifelse(length(i) > 1, i[1], "doi")))
+compile_carob <- function(path, group="") {
+	dir.create(file.path(path, "data", "compiled", group), FALSE, FALSE)
+	fff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", recursive=TRUE)
+	if (group == "") {
+		grps <- unique(sapply(strsplit(fff, "/"), function(i) ifelse(length(i) > 1, i[1], "doi")))
+	} else {
+		grps <- group
+	}
 	ret <- NULL
 	for (grp in grps) {
 		wgroup <- ifelse(grp == "doi", "", paste0("-", grp))
@@ -153,8 +160,8 @@ compile_carob <- function(path) {
 }
 
 
-run_carob <- function(cleanuri, path, quiet=FALSE) {
-	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE, recursive=TRUE)
+run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
+	ff <- list.files(file.path(path, "scripts", group), pattern="R$", full.names=TRUE, recursive=TRUE)
 	f <- grep(cleanuri, ff, value=TRUE)
 	carob_script <- function() {FALSE}
 	rm(carob_script)
@@ -171,12 +178,10 @@ run_carob <- function(cleanuri, path, quiet=FALSE) {
 
 
 
-
-process_carob <- function(path, quiet=FALSE) {
-	get_packages(path)
-	ff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", full.names=TRUE)
+process_carob <- function(path, group="", quiet=FALSE) {
+	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE)
 	file.remove(ff)
-	ff <- list.files(file.path(path, "scripts"), pattern="R$", full.names=TRUE, recursive=TRUE)
+	ff <- list.files(file.path(path, "scripts", group), pattern="R$", full.names=TRUE, recursive=TRUE)
 	ffun <- grepl("^_", basename(ff))
 	ff <- ff[!ffun]
 	carob_script <- function() {FALSE}
@@ -196,9 +201,10 @@ process_carob <- function(path, quiet=FALSE) {
 }
 
 
-make_carob <- function(path, quiet=FALSE) {
-	process_carob(path, quiet)
-	compile_carob(path)
+make_carob <- function(path, group="", pkgs=TRUE, quiet=FALSE) {
+	get_packages(group)
+	process_carob(path, group, quiet)
+	compile_carob(path, group)
 }
 
 
