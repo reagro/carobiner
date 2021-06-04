@@ -1,22 +1,22 @@
 \name{get_data}
 
-\alias{get_function}
+\alias{get_data}
 
 \title{
-Get a function
+Download a data set
 }
 
 \description{
-Get a data processing function that is shared bewteen scripts. The function must exist in a file called \code{_functions.R}
+Download the data file associated with a URI. This function calls \code{agro::get_data_from_uri}
 }
 
 
 \usage{
-get_function(name, path, group="") {
+get_data(uri, path, group="")
 }
  
 \arguments{
-  \item{name}{character. The name of the function}
+  \item{uri}{character. A dataset URI}
   \item{path}{character. The path to the Carob repo}
   \item{group}{character. Optional, a group name}
 }
@@ -24,4 +24,3 @@ get_function(name, path, group="") {
 \value{
 character
 }
-

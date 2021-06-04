@@ -59,13 +59,14 @@ check_terms <- function(x, type, path, group="") {
 		}
 	}
 
-	if ((type=="dataset") & (!(is.null(x$publication) | is.null(x$dataset_id) ))) {
-		if (nchar(x$publication[1]) > 0) {
-			pubs <- list.files(file.path(path, "references"))
-			id <- unlist(strsplit(x$dataset_id, "-"))[1]
-			i <- grep(id, pubs)
-			if (length(i) == 0) {
-				print("  reference file missing")
+	if ((type=="dataset") & isTRUE(nchar(x$publication) > 0 )) {
+		allpubs <- list.files(file.path(path, "references"))
+		pubs <- unlist(strsplit(x$publication, ";"))
+		pubs <- agro::get_simple_URI(pubs)
+		for (pub in pubs) {
+			where <- grep(pub, allpubs)
+			if (length(where) == 0) {
+				cat("  reference file missing:", pub, "\n")	
 				answ <- FALSE
 			}
 		}
