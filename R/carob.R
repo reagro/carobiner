@@ -84,7 +84,7 @@ write_files <- function(dataset, records, path, cleanuri, group="", id=NULL) {
 	stopifnot(nrow(dataset) == 1)
 	check_terms(records, "records", path, group)
 	check_terms(dataset, "dataset", path, group)
-
+	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 	if (!is.null(id)) {
 		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, "-", id, ".csv"))
 	} else {
@@ -165,7 +165,7 @@ run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
 	f <- grep(cleanuri, ff, value=TRUE)
 	carob_script <- function() {FALSE}
 	rm(carob_script)
-	if (!quiet) print(basename(f)); utils::flush.console()
+	if (!quiet) cat(basename(f), "\n"); utils::flush.console()
 	source(f, local=TRUE)
 	if (!exists("carob_script")) {
 		stop(basename(f), "does not have a `carob_script` function", call.=FALSE)
@@ -181,13 +181,14 @@ run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
 process_carob <- function(path, group="", quiet=FALSE) {
 	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE)
 	file.remove(ff)
-	ff <- list.files(file.path(path, "scripts", group), pattern="R$", full.names=TRUE, recursive=TRUE)
+	base <- file.path(path, "scripts")
+	ff <- list.files(file.path(base, group), pattern="R$", full.names=TRUE, recursive=TRUE)
 	ffun <- grepl("^_", basename(ff))
 	ff <- ff[!ffun]
 	carob_script <- function() {FALSE}
 	for (f in ff) {
 		rm(carob_script)
-		if (!quiet) print(basename(f)); utils::flush.console()
+		if (!quiet) cat(gsub(base, "", f), "\n"); utils::flush.console()
 		source(f, local=TRUE)
 		if (!exists("carob_script")) {
 			stop(basename(f), "does not have a `carob_script` function", call.=FALSE)
