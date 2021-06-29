@@ -1,12 +1,12 @@
 Package: carobiner
 Type: Package
 Title: Compiling agricultural research data 
-Version: 0.1-1
+Version: 0.1-2
 Depends: agro
 Suggests: jsonlite, revtools, remotes
-Date: 2021-06-01
+Date: 2021-06-29
 Author: Robert Hijmans
 Maintainer: <r.hijmans@gmail.com>
-Description: A collection of ideosyncratic functions to support the "Carob" project.  
+Description: A collection of idiosyncratic functions to support the "Carob" project.  
 License: GPL (>=3)
 
