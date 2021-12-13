@@ -25,7 +25,7 @@ get_license <- function(x) {
 		if (length(g) == 0) {
 			g <- grep("Creative Commons", trm, value=TRUE, ignore.case=TRUE)
 			if (length(g) == 0) {
-				return(trm)
+				return("Unknown")
 			}
   			g <- regmatches(g, gregexpr('Creative (.+?) license', g, ignore.case=TRUE))[[1]]
 			if (tolower(g) == "creative commons attribution 4.0 international license") {

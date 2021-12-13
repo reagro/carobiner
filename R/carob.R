@@ -54,6 +54,8 @@ check_terms <- function(x, type, path, group="") {
 		for (i in 1:nrow(req)) {
 			accepted <- utils::read.csv(file.path(path, "terms", paste0(req$vocabulary[i], ".csv")))[,1]
 			provided <- unique(x[, req$name[i]])
+			# split by ; for the case there are multiple, if allowed
+			
 			bad <- provided[!(provided %in% accepted)]
 			if (length(bad) > 0) {
 				print(paste("  ", req$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
@@ -85,6 +87,7 @@ write_files <- function(dataset, records, path, cleanuri, group="", id=NULL) {
 	check_terms(records, "records", path, group)
 	check_terms(dataset, "dataset", path, group)
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
+	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
 	if (!is.null(id)) {
 		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, "-", id, ".csv"))
 	} else {
