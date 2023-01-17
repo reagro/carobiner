@@ -118,7 +118,8 @@ get_function <- function(name, path, group="") {
 
 
 .binder <- function(ff) {
-	x <- lapply(ff, utils::read.csv)
+	#suppress "incomplete final line found by readTableHeader"
+	x <- suppressWarnings(lapply(ff, utils::read.csv))
 	nms <- unique(unlist(lapply(x, names)))
 	x <- lapply(x, function(x) data.frame(c(x, sapply(setdiff(nms, names(x)), function(y) NA))))
 	x$make.row.names <- FALSE
@@ -135,6 +136,11 @@ sort_by_terms <- function(x, type, group) {
 
 
 compile_carob <- function(path, group="") {
+	w <- options("warn")
+	if (w$warn < 1) {
+		on.exit(options(warn=w$warn))
+		options(warn=1)
+	}
 	dir.create(file.path(path, "data", "compiled", group), FALSE, FALSE)
 	fff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", recursive=TRUE)
 	if (group == "") {
@@ -164,6 +170,13 @@ compile_carob <- function(path, group="") {
 
 
 run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
+	w <- options("warn")
+	if (w$warn < 1) {
+		on.exit(options(warn=w$warn))
+		options(warn=1)
+	}
+
+
 	ff <- list.files(file.path(path, "scripts", group), pattern="R$", full.names=TRUE, recursive=TRUE)
 	f <- grep(cleanuri, ff, value=TRUE)
 	carob_script <- function() {FALSE}
@@ -183,8 +196,10 @@ run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
 
 process_carob <- function(path, group="", quiet=FALSE) {
 	w <- options("warn")
-	on.exit(options(warn=w$warn))
-	options(warn=1)
+	if (w$warn < 1) {
+		on.exit(options(warn=w$warn))
+		options(warn=1)
+	}
 	
 	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE)
 	file.remove(ff)
