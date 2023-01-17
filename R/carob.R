@@ -196,8 +196,9 @@ process_carob <- function(path, group="", quiet=FALSE) {
 		if (!exists("carob_script")) {
 			stop(basename(f), "does not have a `carob_script` function", call.=FALSE)
 		}
-		if (!carob_script(path)) {
-			stop(basename(f), "failed", call.=FALSE)
+		try(ok <- carob_script(path), silent=TRUE)
+		if (!ok) {
+			message(paste("processing failed for:\n", basename(f)))
 		}
 		utils::flush.console()
 	}
