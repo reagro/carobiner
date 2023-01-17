@@ -58,7 +58,7 @@ check_terms <- function(x, type, path, group="") {
 			
 			bad <- provided[!(provided %in% accepted)]
 			if (length(bad) > 0) {
-				print(paste("  ", req$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
+				message(paste("  ", req$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
 				answ <- FALSE
 			}
 		}
