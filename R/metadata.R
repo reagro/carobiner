@@ -19,7 +19,7 @@ get_metadata <- function(cleanuri, path, group="", major=1, minor=0) {
 get_license <- function(x) {
 	lic <- x$data$latestVersion$license
 	trm <- x$data$latestVersion$termsOfUse
-	if ((is.null(lic) || (lic == "NONE")) && (!is.null(trm))) {
+	if ((is.null(lic) || (lic[1] == "NONE")) && (!is.null(trm))) {
 		trm <- strsplit(trm, '\"')[[1]]
 		g <- grep("/creativecommons.org/", tolower(trm))
 		if (length(g) == 0) {
@@ -49,7 +49,7 @@ get_license <- function(x) {
 				lic <- paste0(lic, "; ", trm)
 			}
 		}
-	} else { #ckan
+	} else if (is.null(lic)) { #ckan
 		lic <- x$result$license_id 	
 		if (is.null(lic)) lic <- "?"
 		lic <- toupper(lic)
