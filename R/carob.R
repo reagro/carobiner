@@ -183,7 +183,7 @@ run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
 
 process_carob <- function(path, group="", quiet=FALSE) {
 	w <- options("warn")
-	on.exit(options(warn=w))
+	on.exit(options(warn=w$warn))
 	options(warn=1)
 	
 	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE)
