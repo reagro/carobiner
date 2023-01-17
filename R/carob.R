@@ -182,6 +182,10 @@ run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
 
 
 process_carob <- function(path, group="", quiet=FALSE) {
+	w <- options("warn")
+	on.exist(options(warn=w))
+	options(warn=1)
+	
 	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE)
 	file.remove(ff)
 	base <- file.path(path, "scripts")
