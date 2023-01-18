@@ -2,6 +2,28 @@
 # May 2021
 # License GPL3
 
+fix_adm <- function(x, country="", level="") {
+	# country and level could be used in the future to compare with GADM spelling
+	x <- tools::toTitleCase(tolower(trimws(x)))
+	x[x==""] <- NA
+	x
+}
+
+fix_name <- function(x, case="") {
+	x <- trimws(x)
+	x <- gsub("  ", " ", x)
+	x[x==""] <- NA
+	if (case == "first") {
+		s <- strsplit(x, "")
+		x <- sapply(s, \(i) if (is.na(i)) NA  else paste0(c(toupper(i[1]), i[-1]), collapse=""))
+	} else if (case=="lower") {
+		x <- tolower(x)
+	} else if (case=="title") {
+		x <- tools::toTitleCase(tolower(x))
+	}
+	x
+}
+
 
 get_data <- function(uri, path, group="") {
 	path=file.path(path, "data/raw", group)
