@@ -80,10 +80,29 @@ check_terms <- function(x, type, path, group="") {
 }
 
 
+check_empty <- function(x) {
+	bad <- rep(FALSE, ncol(x))
+	for (i in 1:ncol(x)) {
+		x[,i] <- trimws(x[,i])
+		bad[i] <- any(na.omit(x[,i]) == "")
+	}
+	if (any(bad)) {
+		b <- paste0(colnames(x)[bad], collapse= ", ")
+		message("whitespace in variable: ", b)
+	}
+	x
+}
+
+#d = data.frame(a = 1:3, b=letters[1:3], c=c(" A ", "", "D"))
+#x = check_empty(d)
+
 
 write_files <- function(dataset, records, path, cleanuri, group="", id=NULL) {
 
 	stopifnot(nrow(dataset) == 1)
+	dataset <- check_empty(dataset)
+	records <- check_empty(records)
+	
 	check_terms(records, "records", path, group)
 	check_terms(dataset, "dataset", path, group)
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
@@ -215,6 +234,7 @@ process_carob <- function(path, group="", quiet=FALSE) {
 		if (!exists("carob_script")) {
 			stop(basename(f), "does not have a `carob_script` function", call.=FALSE)
 		}
+		ok <- FALSE
 		try(ok <- carob_script(path), silent=TRUE)
 		if (!ok) {
 			message(paste("processing failed for:\n", basename(f)))
