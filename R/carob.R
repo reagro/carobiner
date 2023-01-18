@@ -15,7 +15,7 @@ fix_name <- function(x, case="") {
 	x[x==""] <- NA
 	if (case == "first") {
 		s <- strsplit(x, "")
-		x <- sapply(s, \(i) if (is.na(i)) NA  else paste0(c(toupper(i[1]), i[-1]), collapse=""))
+		x <- sapply(s, \(i) if (is.na(i[1])) NA  else paste0(c(toupper(i[1]), i[-1]), collapse=""))
 	} else if (case=="lower") {
 		x <- tolower(x)
 	} else if (case=="title") {
