@@ -110,7 +110,7 @@ check_empty <- function(x) {
 	}
 	if (any(bad)) {
 		b <- paste0(colnames(x)[bad], collapse= ", ")
-		message("whitespace in variable: ", b)
+		message("   whitespace in variable: ", b)
 	}
 	x
 }
