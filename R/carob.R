@@ -248,6 +248,9 @@ process_carob <- function(path, group="", quiet=FALSE) {
 	ff <- list.files(file.path(base, group), pattern="R$", full.names=TRUE, recursive=TRUE)
 	ffun <- grepl("^_", basename(ff))
 	ff <- ff[!ffun]
+	ff <- ff[!grepl("/_pending/", ff)]
+	ff <- ff[!grepl("/_removed/", ff)]
+
 	carob_script <- function() {FALSE}
 	for (f in ff) {
 		rm(carob_script)
