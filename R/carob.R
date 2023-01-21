@@ -34,11 +34,11 @@ get_terms <- function(type, group, path) {
 write_files <- function(dataset, records, path, cleanuri, group="", id=NULL) {
 
 	stopifnot(nrow(dataset) == 1)
-	dataset <- carobiner:::check_empty(dataset)
-	records <- carobiner:::check_empty(records)
+	dataset <- check_empty(dataset)
+	records <- check_empty(records)
 
-	carobiner:::check_terms(records, "records", path, group)
-	carobiner:::check_terms(dataset, "dataset", path, group)
+	check_terms(records, "records", path, group)
+	check_terms(dataset, "dataset", path, group)
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
 	if (!is.null(id)) {

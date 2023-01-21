@@ -1,4 +1,41 @@
 
+check_date <- function(x, name) {
+	x <- na.omit(x[[name]])
+	if (length(x) == 0) return(TRUE)
+	n <- nchar(x)
+	if (any(!(n %in% c(4, 7, 10)))) {
+#		message(paste("   bad format in", name))
+		return(FALSE)
+	}
+	ans <- TRUE
+	today <- as.character(as.Date(Sys.time()))
+	ymd <- x[n==10]
+	if (length(ymd) > 0) {
+		if (any((ymd < "1970-01-01") | (ymd > today))) {
+#			message(paste("   ", name, "yyyy-mm-dd dates out of range"))
+			ans <- FALSE
+		}
+	}
+	ym <- x[n==7]
+	if (length(ym) > 0) {
+		if (any((ym < "1970-01") | (ym > substr(today, 1, 7)))) {
+#			message(paste("   ", name, "yyyy-mm dates out of range"))
+			ans <- FALSE
+		}
+	}
+
+	y <- x[n==4]
+	if (length(y) > 0) {
+		if (any((y < "1970") | (y > substr(today, 1, 4)))) {
+#			message(paste("   ", name, "yyyy dates out of range"))
+			ans <- FALSE
+		}
+	}
+	ans
+}
+
+
+
 check_ranges <- function(x, trms) {
 	nms <- colnames(x)
 	trms <- trms[match(nms, trms[,1]), ]
@@ -14,9 +51,17 @@ check_ranges <- function(x, trms) {
 			bad <- c(bad, trms$name[i])
 		}
 	}
+	dats <- grep("_date", nms, value=TRUE)
+	for (dat in dats) {
+		if (!check_date(x, dat)) {
+			answ <- FALSE
+			bad <- c(bad, dat)
+		}
+	} 
+
 	if (!answ) {
 		bad <- paste(bad, collapse=", ")
-		message(paste("out of range:", bad))
+		message(paste("   invalid:", bad))
 	}
 	answ
 }
@@ -32,7 +77,7 @@ check_datatypes <- function(x, trms) {
 	answ <- TRUE
 	if (!all(i)) {
 		bad <- paste(cls[i,1], collapse=", ")
-		message(paste("bad datatype:", bad))
+		message(paste("   bad datatype:", bad))
 		answ <- FALSE
 	}
 	answ
