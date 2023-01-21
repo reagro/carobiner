@@ -12,11 +12,12 @@ Read an excel file and return a data.frame without generating warnings
 
 
 \usage{
-read.excel(f)
+read.excel(f, ...)
 }
  
 \arguments{
   \item{f}{character (filename)}
+  \item{...}{additional arguments passed on to \code{readxl::read_excel}}
 }
 
 \value{

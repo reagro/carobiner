@@ -34,8 +34,12 @@ bindr <- function( ...) {
 }
 
 
-read.excel <- function(f) {
-  suppressMessages(as.data.frame(readxl::read_excel(f)))
+read.excel <- function(f, ...) {
+  suppressMessages(
+		as.data.frame(
+			readxl::read_excel(f, ...)
+		)
+	)
 }
 
 
