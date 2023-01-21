@@ -7,6 +7,8 @@
 }
 
 .capitalize_words <- function(x, skip="") {
+	
+	isna <- is.na(x)
 	x <- paste("", tolower(x), "")
 	
 	skip <- c("and", "of", "the", tolower(skip))
@@ -31,15 +33,18 @@
 	x <- gsub("- ", "-", x)
 	x <- gsub(" #d' ", " d'", x)
 	x <- gsub("\\.# ", "\\.", x)
+	x[isna] <- NA
 	trimws(x)
 }
 
 
 
 fix_name <- function(x, case="", skip="") {
-	x <- trimws(x)
+	x <- trimws(x)	
 	x <- gsub("   ", " ", x)
 	x <- gsub("  ", " ", x)
+	x <- gsub("\n", "; ", x)
+	
 	x[x==""] <- NA
 	if (case == "first") {
 		s <- strsplit(x, "")

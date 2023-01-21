@@ -1,38 +1,45 @@
 
 check_date <- function(x, name) {
+
 	x <- stats::na.omit(x[[name]])
 	if (length(x) == 0) return(TRUE)
 	n <- nchar(x)
 	if (any(!(n %in% c(4, 7, 10)))) {
-#		message(paste("   bad format in", name))
 		return(FALSE)
 	}
 	ans <- TRUE
-	today <- as.character(as.Date(Sys.time()))
+	today <- as.Date(Sys.time())
 	ymd <- x[n==10]
 	if (length(ymd) > 0) {
-		if (any((ymd < "1970-01-01") | (ymd > today))) {
-#			message(paste("   ", name, "yyyy-mm-dd dates out of range"))
+		d <- as.Date(ymd)
+		if (any((ymd < as.Date("1960-01-01")) | (ymd > today))) {
 			ans <- FALSE
 		}
 	}
+	thisyear <- as.numeric(format(today, "%Y"))
+	today <- as.character(today)
 	ym <- x[n==7]
 	if (length(ym) > 0) {
-		if (any((ym < "1970-01") | (ym > substr(today, 1, 7)))) {
-#			message(paste("   ", name, "yyyy-mm dates out of range"))
-			ans <- FALSE
-		}
+		if (any((ym < "1960-01") | (ym > substr(today, 1, 7)))) ans <- FALSE
+		d <- substr(ym, 5, 5)
+		if (any(d != "-")) ans <- FALSE
+		y <- as.numeric(substr(ym, 1, 4))
+		if (any((y < 1960) | (y > thisyear))) ans <- FALSE
+		m <- as.numeric(substr(ym, 6, 7))
+		if (any((m < 1) | (m > 12))) ans <- FALSE
+		
 	}
 
 	y <- x[n==4]
 	if (length(y) > 0) {
-		if (any((y < "1970") | (y > substr(today, 1, 4)))) {
-#			message(paste("   ", name, "yyyy dates out of range"))
+		y <- as.numeric(y)
+		if (any((y < 1960) | (y > thisyear))) {
 			ans <- FALSE
 		}
 	}
 	ans
 }
+
 
 
 
