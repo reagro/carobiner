@@ -1,6 +1,6 @@
 
 check_date <- function(x, name) {
-	x <- na.omit(x[[name]])
+	x <- stats::na.omit(x[[name]])
 	if (length(x) == 0) return(TRUE)
 	n <- nchar(x)
 	if (any(!(n %in% c(4, 7, 10)))) {
@@ -45,8 +45,8 @@ check_ranges <- function(x, trms) {
 	bad <- NULL
 	for (i in 1:nrow(trms)) {
 		rng <- trms[i,c("valid_min", "valid_max")]
-		v <- na.omit(x[[trms$name[i]]])
-		if ( any(na.omit(v < rng[1])) || any(na.omit(v > rng[2])) ) {
+		v <- stats::na.omit(x[[trms$name[i]]])
+		if ( any(stats::na.omit(v < rng[1])) || any(stats::na.omit(v > rng[2])) ) {
 			answ <- FALSE
 			bad <- c(bad, trms$name[i])
 		}

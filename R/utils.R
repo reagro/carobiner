@@ -43,10 +43,16 @@ read.excel <- function(f, ...) {
 }
 
 
-replace_values <- function(x, from, to) {
+replace_values <- function(x, from, to, must_have=TRUE) {
 	stopifnot(length(from) == length(to))
 	for (i in 1:length(from)) {
+		if (must_have) {
+			if (!all(from[i] %in% x)) {
+				stop("not all names in 'from' are in 'x'")
+			}
+		}
 		x[x==from[i]] <- to[i]
 	}
 	x
 }
+
