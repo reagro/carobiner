@@ -3,8 +3,7 @@ Type: Package
 Title: Compiling agricultural research data 
 Description: A collection functions to support the "Carob" project. See https://github.com/reagro/carob for details.
 Version: 0.1-4
-Depends: readxl, jsonlite
-Suggests: revtools, httr, stringr, reshape2
+Suggests: readxl, jsonlite, revtools, httr, stringr, reshape2
 Date: 2023-01-20
 Encoding: UTF-8
 Authors@R: c(

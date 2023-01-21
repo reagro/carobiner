@@ -38,3 +38,11 @@ read.excel <- function(f) {
   suppressMessages(as.data.frame(readxl::read_excel(f)))
 }
 
+
+replace_values <- function(x, from, to) {
+	stopifnot(length(from) == length(to))
+	for (i in 1:length(from)) {
+		x[x==from[i]] <- to[i]
+	}
+	x
+}

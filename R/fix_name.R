@@ -46,6 +46,8 @@ fix_name <- function(x, case="", skip="") {
 		x <- sapply(s, \(i) if (is.na(i[1])) NA  else paste0(c(toupper(i[1]), i[-1]), collapse=""))
 	} else if (case=="lower") {
 		x <- tolower(x)
+	} else if (case=="upper") {
+		x <- tolower(x)
 	} else if (case=="title") {
 		x <- .capitalize_words(x)
 		#x <- tools::toTitleCase(tolower(x))
