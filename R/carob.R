@@ -8,7 +8,7 @@ get_data <- function(uri, path, group="") {
 }
 
 
-get_terms <- function(type, group) {
+get_terms <- function(type, group, path) {
 	if (type == "records") {
 		trms <- utils::read.csv(file.path(path, "terms", "records.csv"))
 		if (group != "") {
@@ -61,8 +61,8 @@ get_function <- function(name, path, group="") {
 }
 
 
-sort_by_terms <- function(x, type, group) {
-	trms <- get_terms(type, ifelse(group == "doi", "", group))
+sort_by_terms <- function(x, type, group, path) {
+	trms <- get_terms(type, ifelse(group == "doi", "", group), path)
 	trms <- trms$name[trms$name %in% names(x)]
 	x[, trms]
 }
@@ -88,11 +88,11 @@ compile_carob <- function(path, group="") {
 		ff <- file.path(path, "data", "clean", grep(paste0("^", grp), fff, value=TRUE))
 		mi <- grepl("_meta.csv$", ff)
 		
-		x <- sort_by_terms(.binder(ff[mi]), "dataset", grp)
+		x <- sort_by_terms(.binder(ff[mi]), "dataset", grp, path)
 		outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata.csv"))
 		utils::write.csv(x, outmf, row.names=FALSE)
 
-		y <- sort_by_terms(.binder(ff[!mi]), "records", grp)
+		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
 		outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
 		utils::write.csv(y, outff, row.names=FALSE)
 		ret <- c(ret, outmf, outff)
@@ -161,7 +161,7 @@ process_carob <- function(path, group="", quiet=FALSE) {
 }
 
 
-make_carob <- function(path, group="", pkgs=TRUE, quiet=FALSE) {
+make_carob <- function(path, group="", quiet=FALSE) {
 	get_packages(group)
 	process_carob(path, group, quiet)
 	compile_carob(path, group)

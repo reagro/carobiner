@@ -7,7 +7,7 @@
 simple_uri <- function(uri, reverse=FALSE) {
   
   if (reverse) {
-    return(gsub("_", "/", sub("_", ":", x))	)
+    return(gsub("_", "/", sub("_", ":", uri))	)
   }
   
   ur <- .removeprotocol(uri)
@@ -41,14 +41,14 @@ simple_uri <- function(uri, reverse=FALSE) {
 .dataverse_unzip <- function(zipf, path, unzip) {
   allzf <- NULL
   for (z in zipf) {
-    zf <- unzip(z, list=TRUE)
+    zf <- utils::unzip(z, list=TRUE)
     zf <- zf$Name[zf$Name != "MANIFEST.TXT"]
     allzf <- c(allzf, zf)
     if (unzip) {
       ff <- list.files(path)
       there <- (zf %in% ff)
       if (!all(there)) {
-        unzip(z, zf[!there], exdir = path)
+        utils::unzip(z, zf[!there], exdir = path)
       }	
     }
   }
@@ -144,7 +144,7 @@ simple_uri <- function(uri, reverse=FALSE) {
     u <- file.path(baseu, "dataset", d$package_id[i], "resource", d$id[i], "download", d$name[i])
     #if (d$available[i] == "yes") { "active" ?
     outf <- file.path(path, d$name[i])
-    ok <- try(download.file(d$url[i], outf, mode="wb", quiet=TRUE) )
+    ok <- try(utils::download.file(d$url[i], outf, mode="wb", quiet=TRUE) )
     if (inherits(ok, "try-error")) {
       print("cannot download", d$name[i])
       done <- FALSE
@@ -172,14 +172,14 @@ simple_uri <- function(uri, reverse=FALSE) {
   done <- TRUE
   files <- ""[0]
   outf <- file.path(path, paste0(uname, ".zip"))
-  ok <- try(download.file(file.path(uu,"download"), outf, mode="wb", quiet=TRUE) )
+  ok <- try(utils::download.file(file.path(uu,"download"), outf, mode="wb", quiet=TRUE) )
   if (inherits(ok, "try-error")) {
     print("cannot download ", uname)
     done <- FALSE
   } else {
     files <- c(files, outf)
   }
-  unzip(outf, exdir = path)
+  utils::unzip(outf, exdir = path)
   writeLines("ok", file.path(path, "ok.txt"))
   files
 }
@@ -190,7 +190,10 @@ simple_uri <- function(uri, reverse=FALSE) {
 .removeprotocol <- function(x) gsub("http://|https://|www\\.", "", x)
 
 
-data_from_uri <- function(uri, path, overwrite=FALSE, uripath=TRUE, unzip=TRUE) {
+data_from_uri <- function(uri, path, overwrite=FALSE) {
+  
+  uripath=TRUE
+  unzip=TRUE
   
   uname <- simple_uri(uri)
   if (uripath) path <- file.path(path, uname)

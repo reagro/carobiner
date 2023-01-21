@@ -12,11 +12,12 @@ The function finds the R packages used in the scripts, so it may not be 100% acc
 
 
 \usage{
-get_packages(group="")
+get_packages(path, group="")
 }
  
 \arguments{
-  \item{group}{optional, a group name}
+  \item{path}{character. The path where the scripts are stored}
+  \item{group}{character. optional, a group name}
 }
 
 

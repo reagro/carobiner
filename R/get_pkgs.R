@@ -1,4 +1,5 @@
 
+
 get_packages <- function(path, group="") {
 	libfun1 <- function(x) {
 		d <- readLines(x, warn=FALSE)
@@ -49,22 +50,7 @@ get_packages <- function(path, group="") {
 	pkgs1 <- unique(unlist(sapply(ff, libfun1)))
 	pkgs2 <- unique(unlist(sapply(ff, libfun2)))
 	
-	pkgs <- unique(c(pkgs1, pkgs2, "readxl", "jsonlite", "reshape2", "stringr"))
-	
-	ipkgs <- rownames(utils::installed.packages())
-
-	if (!("remotes" %in% ipkgs)) {
-		print(paste("installing remotes"))
-		utils::install.packages("remotes", repos="https://cloud.r-project.org/")
-	}
-	
-	gpkgs <- c("agro", "carobiner")
-	for (pk in gpkgs) {
-		if (!(pk %in% ipkgs)) {
-			print(paste("installing", pk))
-			remotes::install_github(paste0("reagro/", pk))
-		}
-	}
+	pkgs <- unique(c(pkgs1, pkgs2, "readxl", "jsonlite", "reshape2", "stringr", "revtools", "httr"))	
 	ipkgs <- rownames(utils::installed.packages())
 	for (pk in pkgs) {
 	  if (!(pk %in% ipkgs)) {
@@ -73,4 +59,3 @@ get_packages <- function(path, group="") {
 	  }
 	}
 }
-

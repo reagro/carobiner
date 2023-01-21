@@ -3,6 +3,7 @@
 \alias{make_carob}
 \alias{compile_carob}
 \alias{process_carob}
+\alias{run_carob}
 
 \title{
 Make the Carob database

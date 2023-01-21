@@ -3,7 +3,7 @@ check_empty <- function(x) {
 	bad <- rep(FALSE, ncol(x))
 	for (i in 1:ncol(x)) {
 		x[,i] <- trimws(x[,i])
-		bad[i] <- any(na.omit(x[,i]) == "")
+		bad[i] <- any(stats::na.omit(x[,i]) == "")
 	}
 	if (any(bad)) {
 		b <- paste0(colnames(x)[bad], collapse= ", ")
@@ -21,7 +21,7 @@ check_terms <- function(x, type, path, group="") {
 	type <- match.arg(type, c("records", "dataset"))
 	nms <- names(x)
 	answ <- TRUE
-	trms <- get_terms(type, group)
+	trms <- get_terms(type, group, path)
 
 	xnms <- nms[!(nms %in% trms$name)]
 	if (length(xnms) > 0) {
