@@ -141,6 +141,7 @@ process_carob <- function(path, group="", quiet=FALSE) {
 	ff <- ff[!ffun]
 	ff <- ff[!grepl("/_pending/", ff)]
 	ff <- ff[!grepl("/_removed/", ff)]
+	ff <- sort(ff)
 
 	carob_script <- function() {FALSE}
 	for (f in ff) {

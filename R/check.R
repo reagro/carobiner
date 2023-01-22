@@ -140,7 +140,7 @@ check_terms <- function(x, type, path, group="") {
 			accepted <- utils::read.csv(file.path(path, "terms", paste0(voc$vocabulary[i], ".csv")))[,1]
 			provided <- unique(x[, voc$name[i]])
 			if (voc$required[i] != "yes") {
-				provided <- na.omit(provided)
+				provided <- stats::na.omit(provided)
 			} 
 			if (!is.null(voc$multiple_allowed)) {
 				if (voc$multiple_allowed[i] == "yes") {
