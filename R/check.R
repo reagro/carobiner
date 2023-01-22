@@ -77,13 +77,12 @@ check_ranges <- function(x, trms) {
 check_datatypes <- function(x, trms) {
 	nms <- colnames(x)
 	trs <- trms[match(nms, trms[,1]), ]
-	types <- trs$type
-	cls <- cbind(sapply(x, class), trs$type)
+	cls <- cbind(sapply(x, class), trs$type, nms)
 	cls <- cls[cls[,2] != "", ]
-	i <- which(cls[,1] != cls[,2])
+	i <- cls[,1] != cls[,2]
 	answ <- TRUE
-	if (!all(i)) {
-		bad <- paste(cls[i,1], collapse=", ")
+	if (any(i)) {
+		bad <- paste(nms[i], collapse=", ")
 		message(paste("   bad datatype:", bad))
 		answ <- FALSE
 	}
