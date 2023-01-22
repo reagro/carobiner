@@ -140,7 +140,9 @@ check_terms <- function(x, type, path, group="") {
 		for (i in 1:nrow(voc)) {
 			accepted <- utils::read.csv(file.path(path, "terms", paste0(voc$vocabulary[i], ".csv")))[,1]
 			provided <- unique(x[, voc$name[i]])
-			# split by ; for the case there are multiple, if allowed
+			if (voc$required[i] != "yes") {
+				provided <- na.omit(provided)
+			} 
 			if (!is.null(voc$multiple_allowed)) {
 				if (voc$multiple_allowed[i] == "yes") {
 					provided <- unlist(strsplit(provided, "; "))
