@@ -82,7 +82,7 @@ check_datatypes <- function(x, trms) {
 	i <- cls[,1] != cls[,2]
 	answ <- TRUE
 	if (any(i)) {
-		bad <- paste(nms[i], collapse=", ")
+		bad <- paste(cls[i,3], collapse=", ")
 		message(paste("   bad datatype:", bad))
 		answ <- FALSE
 	}

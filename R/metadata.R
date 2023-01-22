@@ -21,7 +21,7 @@ get_license <- function(x) {
 	trm <- x$data$latestVersion$termsOfUse
 	if ((is.null(lic) || (lic[1] == "NONE")) && (!is.null(trm))) {
 		trm <- strsplit(trm, '\"')[[1]]
-		g <- grep("/creativecommons.org/", tolower(trm))
+		g <- grep("/creativecommons.org/", tolower(trm), value=TRUE)
 		if (length(g) == 0) {
 			g <- grep("Creative Commons", trm, value=TRUE, ignore.case=TRUE)
 			if (length(g) == 0) {
@@ -32,9 +32,8 @@ get_license <- function(x) {
 				g <- "CC-BY (4.0)"
 			}
 			return(g)
-		}
-		if (length(g) > 0) {
-			trm <- trm[g[1]]
+		} else {
+			trm <- g[1]
 			trm <- gsub("http://", "", trm)
 			trm <- gsub("https://", "", trm)
 			trm <- gsub("creativecommons.org/licenses", "CC", trm)
@@ -43,8 +42,8 @@ get_license <- function(x) {
 			trm <- toupper(trm)
 		} 
 		if (nchar(trm) > 0) {
-			if (lic == "NONE") {
-					lic <- trm	
+			if (is.null(lic) || (lic == "NONE")) {
+				lic <- trm	
 			} else {
 				lic <- paste0(lic, "; ", trm)
 			}
