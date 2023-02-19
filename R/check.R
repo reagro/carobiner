@@ -41,7 +41,19 @@ check_date <- function(x, name) {
 }
 
 
-
+check_outliers <- function(x, field) {
+	x <- x[[field]]
+	if (is.null(x)) return(TRUE)
+	q <- quantile(x, c(0.25, 0.75), na.rm=TRUE)
+	qrn <- diff(q)
+	mn <- q[1] - qrn
+	mx <- q[2] + qrn
+	res <- any(x < mn | x > mx)
+	if (res) {
+		message(paste("   outliers:", field))
+	}
+	!res
+}
 
 check_ranges <- function(x, trms) {
 	nms <- colnames(x)
@@ -174,8 +186,8 @@ check_terms <- function(x, type, path, group="") {
 		} else {
 			if (!check_ranges(x[, nms], trms)) answ <- FALSE
 		}
+		check_outliers(x, "yield")
 	}
-	
 	invisible(answ)
 }
 
