@@ -41,19 +41,35 @@ check_date <- function(x, name) {
 }
 
 
-check_outliers <- function(x, field) {
+check_outliers_iqr <- function(x, field, verbose=FALSE) {
 	x <- x[[field]]
-	if (is.null(x)) return(TRUE)
+	if (is.null(x)) return(invisible(NULL))
 	q <- quantile(x, c(0.25, 0.75), na.rm=TRUE)
 	qrn <- diff(q)
 	mn <- q[1] - qrn
 	mx <- q[2] + qrn
-	res <- any(x < mn | x > mx)
-	if (res) {
-		message(paste("   outliers:", field))
+	i <- (x < mn | x > mx)
+	if (verbose && any(i)) {
+		message(paste("   iq outliers:", field))
 	}
-	!res
+	invisible(which(i))
 }
+
+check_outliers_std <- function(x, field, verbose=FALSE) {
+	x <- x[[field]]
+	if (is.null(x)) return(invisible(NULL))
+	x <- na.omit(x)
+	m <- mean(x)
+	sd3 <- sd(x) * 3
+	mn <- m - sd3
+	mx <- m + sd3
+	i <- (x < mn | x > mx)
+	if (verbose && any(i)) {
+		message(paste("   sd outliers:", field))
+	}
+	invisible(which(i))
+}
+
 
 check_ranges <- function(x, trms) {
 	nms <- colnames(x)
@@ -186,10 +202,22 @@ check_terms <- function(x, type, path, group="") {
 		} else {
 			if (!check_ranges(x[, nms], trms)) answ <- FALSE
 		}
-		check_outliers(x, "yield")
+		check_outliers_iqr(x, "yield", TRUE)
 	}
 	invisible(answ)
 }
 
 
 #a = check_terms(x, type, path)
+
+find_outliers <- function(x, fields, method="iqr") {
+	method <- match.arg(tolower(method), c("iqr", "std"))
+	if (method == "iqr") {
+		out <- lapply(fields, function(f) check_outliers_iqr(x, f))
+	} else {
+		out <- lapply(fields, function(f) check_outliers_std(x, f))	
+	}
+	names(out) <- fields
+	out
+}
+
