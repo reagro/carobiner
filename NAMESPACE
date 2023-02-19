@@ -1,5 +1,5 @@
 export(
-bindr, change_names, check_terms, compile_carob, fix_name,
+bindr, change_names, check_terms, compile_carob, fix_name, find_outliers,
 get_data, get_function, get_metadata, get_license, get_references, 
 make_carob, process_carob, write_files, simple_uri, data_from_uri,
 replace_values, read.excel

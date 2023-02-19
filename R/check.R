@@ -202,7 +202,7 @@ check_terms <- function(x, type, path, group="") {
 		} else {
 			if (!check_ranges(x[, nms], trms)) answ <- FALSE
 		}
-		check_outliers_iqr(x, "yield", TRUE)
+		#check_outliers_iqr(x, "yield", TRUE)
 	}
 	invisible(answ)
 }
