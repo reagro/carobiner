@@ -3,7 +3,7 @@
 # License GPL3
 
 get_data <- function(uri, path, group="") {
-	path=file.path(path, "data/raw", group)
+	path <- file.path(path, "data/raw", group)
 	data_from_uri(uri, path)
 }
 
