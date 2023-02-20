@@ -144,9 +144,9 @@ simple_uri <- function(uri, reverse=FALSE) {
     u <- file.path(baseu, "dataset", d$package_id[i], "resource", d$id[i], "download", d$name[i])
     #if (d$available[i] == "yes") { "active" ?
     outf <- file.path(path, d$name[i])
-    ok <- try(utils::download.file(d$url[i], outf, mode="wb", quiet=TRUE) )
+    ok <- try(utils::download.file(d$url[i], outf, mode="wb", quiet=TRUE), silent=TRUE )
     if (inherits(ok, "try-error")) {
-      print("cannot download", d$name[i])
+      print("cannot download")
       done <- FALSE
     } else {
       files <- c(files, outf)
