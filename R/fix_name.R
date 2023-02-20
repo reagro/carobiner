@@ -47,12 +47,12 @@ fix_name <- function(x, case="", skip="") {
 	
 	x[x==""] <- NA
 	if (case == "first") {
-		s <- strsplit(x, "")
+		s <- strsplit(tolower(x), "")
 		x <- sapply(s, \(i) if (is.na(i[1])) NA  else paste0(c(toupper(i[1]), i[-1]), collapse=""))
 	} else if (case=="lower") {
 		x <- tolower(x)
 	} else if (case=="upper") {
-		x <- tolower(x)
+		x <- toupper(x)
 	} else if (case=="title") {
 		x <- .capitalize_words(x)
 		#x <- tools::toTitleCase(tolower(x))
