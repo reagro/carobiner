@@ -68,9 +68,12 @@ simple_uri <- function(uri, reverse=FALSE) {
 	#js <- httr::content(r, as = "text", encoding = "UTF-8")
 	# but for cimmyt...
 	tmpf <- tempfile()
-	# temporary fix because WorldAgroFor https cert has expired
-	utils::download.file(uu, tmpf, quiet=TRUE, method="curl", extra="-k")
-	# utils::download.file(uu, tmpf, quiet=TRUE)
+	if (grepl("worldagroforestry", uu)) {
+		# temporary fix because WorldAgroFor https cert has expired
+		utils::download.file(uu, tmpf, quiet=TRUE, method="curl", extra="-k")
+	} else {
+		utils::download.file(uu, tmpf, quiet=TRUE)
+	}
 	js <- readLines(tmpf, encoding = "UTF-8", warn=FALSE)
 	js <- jsonlite::fromJSON(js)
 	fjs <- js$data$latestVersion$files
@@ -106,8 +109,11 @@ simple_uri <- function(uri, reverse=FALSE) {
 		files <- paste0(f$id, collapse = ",")
 		fu <- paste0(protocol, domain, "/api/access/datafiles/", files, "?format=original")
 	## temporary fix because WorldAgroFor https cert has expired
-	##	utils::download.file(fu, zipf, quiet=TRUE, mode="wb", method="curl", extra="-k")
-		utils::download.file(fu, zipf, mode="wb", quiet=TRUE)
+		if (grepl("worldagroforestry", fu)) {
+			utils::download.file(fu, zipf, quiet=TRUE, mode="wb", method="curl", extra="-k")
+		} else {
+			utils::download.file(fu, zipf, mode="wb", quiet=TRUE)
+		}
 	} else {
 		#for (i in 1:nrow(f)) {
 		#	print(paste("part", i)); utils::flush.console()
@@ -130,9 +136,12 @@ simple_uri <- function(uri, reverse=FALSE) {
 			files <- paste0(f$id[k], collapse = ",")
 			fu <- paste0(protocol, domain, "/api/access/datafiles/", files, "?format=original")
 			zipi <- file.path(path, paste0(uname, "_", i, ".zip"))
-			utils::download.file(fu, zipi, mode="wb", quiet=TRUE)
+			if (grepl("worldagroforestry", uu)) {
 ## temporary fix because WorldAgroFor https cert has expired
-##			utils::download.file(fu, zipi, quiet=TRUE, mode="wb", method="curl", extra="-k")
+				utils::download.file(fu, zipi, quiet=TRUE, mode="wb", method="curl", extra="-k")
+			} else {
+				utils::download.file(fu, zipi, mode="wb", quiet=TRUE)
+			}
 			f <- f[-k,]
 			zipf <- c(zipf, zipi)
 			if (nrow(f) == 0) break

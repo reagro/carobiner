@@ -16,13 +16,14 @@ Alternatively, you can get title case with \code{tools::toTitleCase(fix_name(x, 
 
 
 \usage{
-fix_name(x, case="", skip="")
+fix_name(x, case="", skip="", lowothers=TRUE)
 }
  
 \arguments{
   \item{x}{character}
   \item{case}{character. If this is not \code{""}. The capitalization of the words is changed. You can use "first", "lower", or "title"}
-  \item{skip}{additional words to skip when case="title" (see details)}
+  \item{skip}{character. Additional words to skip when case="title" (see details)}
+  \item{skip}{logical. Only relevant when case is "first" or "title". Should all other characters be made lowercase?}
 }
 
 \value{

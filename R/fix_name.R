@@ -6,10 +6,11 @@
 	x
 }
 
-.capitalize_words <- function(x, skip="") {
+.capitalize_words <- function(x, skip="", lower=TRUE) {
 	
 	isna <- is.na(x)
-	x <- paste("", tolower(x), "")
+	if (lower) x <- tolower(x)
+	x <- paste("", x, "")
 	
 	skip <- c("and", "of", "the", tolower(skip))
 	skip <- trimws(skip)
@@ -39,7 +40,7 @@
 
 
 
-fix_name <- function(x, case="", skip="") {
+fix_name <- function(x, case="", skip="", lowothers=TRUE) {
 	x <- trimws(x)	
 	x <- gsub("   ", " ", x)
 	x <- gsub("  ", " ", x)
@@ -47,14 +48,15 @@ fix_name <- function(x, case="", skip="") {
 	
 	x[x==""] <- NA
 	if (case == "first") {
-		s <- strsplit(tolower(x), "")
+		if (lowothers) x <- tolower(x)
+		s <- strsplit(x, "")
 		x <- sapply(s, \(i) if (is.na(i[1])) NA  else paste0(c(toupper(i[1]), i[-1]), collapse=""))
 	} else if (case=="lower") {
 		x <- tolower(x)
 	} else if (case=="upper") {
 		x <- toupper(x)
 	} else if (case=="title") {
-		x <- .capitalize_words(x)
+		x <- .capitalize_words(x, skip=skip, lower=lowothers)
 		#x <- tools::toTitleCase(tolower(x))
 	}
 	x
