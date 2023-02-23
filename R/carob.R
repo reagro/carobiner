@@ -78,6 +78,7 @@ compile_carob <- function(path, group="") {
 	} else {
 		grps <- group
 	}
+		
 	ret <- NULL
 	for (grp in grps) {
 		wgroup <- ifelse(grp == "doi", "", paste0("-", grp))
@@ -113,10 +114,10 @@ run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
 	if (!quiet) cat(basename(f), "\n"); utils::flush.console()
 	source(f, local=TRUE)
 	if (!exists("carob_script")) {
-		stop(basename(f), "does not have a `carob_script` function", call.=FALSE)
+		stop(" ", basename(f), "does not have a `carob_script` function", call.=FALSE)
 	}
 	if (!carob_script(path)) {
-		cat(basename(f), " failed\n")
+		cat(paste(" ", basename(f), " failed\n"))
 	}
 	invisible(TRUE)
 }
@@ -140,7 +141,7 @@ process_carob <- function(path, group="", quiet=FALSE) {
 	ff <- ff[!grepl("/_removed/", ff)]
 	ff <- sort(ff)
 
-	tab <- table(ff)
+	tab <- table(basename(ff))
 	if (any(tab > 1)) {
 		dups <- names(tab[tab>1])
 		message(paste("duplicate files: ", paste(dups, collapse=", ")))
