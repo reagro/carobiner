@@ -137,7 +137,7 @@ check_empty <- function(x) {
 
 
 
-check_terms <- function(x, type, path, group="") {
+check_terms <- function(x, type, path, group) {
 
 	type <- match.arg(type, c("records", "dataset"))
 	nms <- names(x)
@@ -151,7 +151,7 @@ check_terms <- function(x, type, path, group="") {
 		answ <- FALSE		
 	}
 	
-	req <- trms[trms$required == "yes", ]
+	req <- trms[trms$required == "yes" | trms$required == group, ]
 	r <- req$name[!(req$name %in% nms)]
 	if (length(r) > 0) {
 		message(paste("  required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
