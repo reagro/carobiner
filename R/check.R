@@ -111,7 +111,7 @@ check_datatypes <- function(x, trms) {
 	answ <- TRUE
 	if (any(i)) {
 		bad <- paste(cls[i,3], collapse=", ")
-		message(paste("   bad datatype:", bad))
+		message(paste("    bad datatype:", bad))
 		answ <- FALSE
 	}
 	answ
@@ -161,7 +161,7 @@ check_terms <- function(dataset, records, path, group) {
 		if (any(bad)) {
 			if (answ) message(paste("   ", contributor))
 			b <- paste0(colnames(x)[bad], collapse= ", ")
-			message("   whitespace in variable: ", b)
+			message("    whitespace in variable: ", b)
 			answ <- FALSE		
 		}
 
@@ -204,7 +204,7 @@ check_terms <- function(dataset, records, path, group) {
 				bad <- provided[!(provided %in% accepted)]
 				if (length(bad) > 0) {
 					if (answ) message(paste("   ", contributor))
-					message(paste("    ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
+					message(paste("   ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
 					answ <- FALSE
 				}
 			}

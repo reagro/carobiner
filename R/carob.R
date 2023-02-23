@@ -140,6 +140,13 @@ process_carob <- function(path, group="", quiet=FALSE) {
 	ff <- ff[!grepl("/_removed/", ff)]
 	ff <- sort(ff)
 
+	tab <- table(ff)
+	if (any(tab > 1)) {
+		dups <- names(tab[tab>1])
+		message(paste("duplicate files: ", paste(dups, collapse=", ")))
+	}
+
+
 	carob_script <- function() {FALSE}
 	for (f in ff) {
 		rm(carob_script)
