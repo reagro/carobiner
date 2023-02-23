@@ -1,4 +1,5 @@
 
+
 check_date <- function(x, name) {
 
 	x <- stats::na.omit(x[[name]])
@@ -40,35 +41,6 @@ check_date <- function(x, name) {
 	ans
 }
 
-
-check_outliers_iqr <- function(x, field, verbose=FALSE) {
-	x <- x[[field]]
-	if (is.null(x)) return(invisible(NULL))
-	q <- quantile(x, c(0.25, 0.75), na.rm=TRUE)
-	qrn <- diff(q)
-	mn <- q[1] - qrn
-	mx <- q[2] + qrn
-	i <- (x < mn | x > mx)
-	if (verbose && any(i)) {
-		message(paste("   iq outliers:", field))
-	}
-	invisible(which(i))
-}
-
-check_outliers_std <- function(x, field, verbose=FALSE) {
-	x <- x[[field]]
-	if (is.null(x)) return(invisible(NULL))
-	x <- na.omit(x)
-	m <- mean(x)
-	sd3 <- sd(x) * 3
-	mn <- m - sd3
-	mx <- m + sd3
-	i <- (x < mn | x > mx)
-	if (verbose && any(i)) {
-		message(paste("   sd outliers:", field))
-	}
-	invisible(which(i))
-}
 
 
 check_ranges <- function(x, trms) {
@@ -135,11 +107,20 @@ check_datatypes <- function(x, trms) {
 #d = data.frame(a = 1:3, b=letters[1:3], c=c(" A ", "", "D"))
 #x = check_empty(d)
 
-
+check_group <- function(name) {
+	grp <- utils::read.csv(file.path(path, "terms", "groups.csv"))
+	ok <- name %in% grp$name
+	if (!ok) {
+		stop(paste("    invalid group:", name))
+	}
+	ok
+}
 
 check_terms <- function(dataset, records, path, group) {
 
 	answ <- TRUE
+
+	check_group(group)
 
 	contributor <- dataset$carob_contributor
 	
