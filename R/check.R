@@ -119,7 +119,7 @@ check_datatypes <- function(x, trms) {
 
 
 
-check_empty <- function(x) {
+.check_empty <- function(x) {
 	bad <- rep(FALSE, ncol(x))
 	chars <- sapply(x, is.character)
 	for (i in which(chars)) {
@@ -137,72 +137,101 @@ check_empty <- function(x) {
 
 
 
-check_terms <- function(x, type, path, group) {
+check_terms <- function(dataset, records, path, group) {
 
-	type <- match.arg(type, c("records", "dataset"))
-	nms <- names(x)
 	answ <- TRUE
+
+	contributor <- dataset$carob_contributor
 	
-	trms <- get_terms(type, group, path)
+	for (i in 1:2) {
+		if (i == 1) {
+			type <- "dataset"
+			x <- dataset
+		} else {
+			type <- "records"
+			x <- records
+		}
 
-	xnms <- nms[!(nms %in% trms$name)]
-	if (length(xnms) > 0) {
-		message(paste("  unknown", type, "variable names: ", paste(xnms, collapse=", ")))
-		answ <- FALSE		
-	}
-	
-	req <- trms[trms$required == "yes" | trms$required == group, ]
-	r <- req$name[!(req$name %in% nms)]
-	if (length(r) > 0) {
-		message(paste("  required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
-		answ <- FALSE
-	}
+		bad <- rep(FALSE, ncol(x))
+		chars <- sapply(x, is.character)
+		for (i in which(chars)) {
+			x[,i] <- trimws(x[,i])
+			bad[i] <- any(stats::na.omit(x[,i]) == "")
+		}
+		if (any(bad)) {
+			if (answ) message(paste("   ", contributor))
+			b <- paste0(colnames(x)[bad], collapse= ", ")
+			message("   whitespace in variable: ", b)
+			answ <- FALSE		
+		}
 
-	nms <- nms[nms %in% trms$name]
-	trms <- trms[trms$name %in% nms, ]
+		
+		nms <- names(x)
+		trms <- get_terms(type, group, path)
 
-	voc <- trms[!is.na(trms$vocabulary) & (trms$vocabulary != ""), ]
-	voc <- voc[voc$name %in% nms, ]
-	if (nrow(voc) > 0) {
-		for (i in 1:nrow(voc)) {
-			accepted <- utils::read.csv(file.path(path, "terms", paste0(voc$vocabulary[i], ".csv")))[,1]
-			provided <- unique(x[, voc$name[i]])
-			if (voc$required[i] != "yes") {
-				provided <- stats::na.omit(provided)
-			} 
-			if (!is.null(voc$multiple_allowed)) {
-				if (voc$multiple_allowed[i] == "yes") {
-					provided <- unlist(strsplit(provided, "; "))
+		xnms <- nms[!(nms %in% trms$name)]
+		if (length(xnms) > 0) {
+			if (answ) message(paste("   ", contributor))
+			message(paste("    unknown", type, "variable names: ", paste(xnms, collapse=", ")))
+			answ <- FALSE		
+		}
+		
+		req <- trms[trms$required == "yes" | trms$required == group, ]
+		r <- req$name[!(req$name %in% nms)]
+		if (length(r) > 0) {
+			if (answ) message(paste("   ", contributor))
+			message(paste("    required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
+			answ <- FALSE
+		}
+
+		nms <- nms[nms %in% trms$name]
+		trms <- trms[trms$name %in% nms, ]
+
+		voc <- trms[!is.na(trms$vocabulary) & (trms$vocabulary != ""), ]
+		voc <- voc[voc$name %in% nms, ]
+		if (nrow(voc) > 0) {
+			for (i in 1:nrow(voc)) {
+				accepted <- utils::read.csv(file.path(path, "terms", paste0(voc$vocabulary[i], ".csv")))[,1]
+				provided <- unique(x[, voc$name[i]])
+				if (voc$required[i] != "yes") {
+					provided <- stats::na.omit(provided)
+				} 
+				if (!is.null(voc$multiple_allowed)) {
+					if (voc$multiple_allowed[i] == "yes") {
+						provided <- unlist(strsplit(provided, "; "))
+					}
+				}
+				bad <- provided[!(provided %in% accepted)]
+				if (length(bad) > 0) {
+					if (answ) message(paste("   ", contributor))
+					message(paste("    ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
+					answ <- FALSE
 				}
 			}
-			bad <- provided[!(provided %in% accepted)]
-			if (length(bad) > 0) {
-				message(paste("  ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
-				answ <- FALSE
-			}
 		}
-	}
 
-	if ((type=="dataset") & isTRUE(nchar(x$publication) > 0 )) {
-		allpubs <- list.files(file.path(path, "references"))
-		pubs <- unlist(strsplit(x$publication, ";"))
-		pubs <- simple_uri(pubs)
-		for (pub in pubs) {
-			where <- grep(pub, allpubs)
-			if (length(where) == 0) {
-				cat("  reference file missing:", pub, "\n")	
-				answ <- FALSE
+		if ((type=="dataset") & isTRUE(nchar(x$publication) > 0 )) {
+			allpubs <- list.files(file.path(path, "references"))
+			pubs <- unlist(strsplit(x$publication, ";"))
+			pubs <- simple_uri(pubs)
+			for (pub in pubs) {
+				where <- grep(pub, allpubs)
+				if (length(where) == 0) {
+					if (answ) message(paste("   ", contributor))
+					cat("    citation reference file missing:", pub, "\n")	
+					answ <- FALSE
+				}
 			}
+		} 
+		
+		if (type=="records") {
+			if (!check_datatypes(x[, nms], trms)) {
+				answ <- FALSE
+			} else {
+				if (!check_ranges(x[, nms], trms)) answ <- FALSE
+			}
+			#check_outliers_iqr(x, "yield", TRUE)
 		}
-	} 
-	
-	if (type=="records") {
-		if (!check_datatypes(x[, nms], trms)) {
-			answ <- FALSE
-		} else {
-			if (!check_ranges(x[, nms], trms)) answ <- FALSE
-		}
-		#check_outliers_iqr(x, "yield", TRUE)
 	}
 	invisible(answ)
 }
