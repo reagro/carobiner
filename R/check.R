@@ -79,6 +79,8 @@ check_datatypes <- function(x, trms) {
 	trs <- trms[match(nms, trms[,1]), ]
 	cls <- cbind(sapply(x, class), trs$type, nms)
 	cls <- cls[cls[,2] != "", ]
+	i <- (cls[,1] == "integer") & (cls[,2] == "numeric")
+	cls[i, 1] <- "numeric"
 	i <- cls[,1] != cls[,2]
 	answ <- TRUE
 	if (any(i)) {
