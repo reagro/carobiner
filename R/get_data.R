@@ -260,7 +260,14 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 	# temporary fix because WorldAgroFor https cert has expired
 	httr::set_config(httr::config(ssl_verifypeer = 0L))
 
-	x <- httr::GET(uri)
+	# For CIRAD dataverse
+	if (grepl("18167", uri)) {
+	  x <- httr::GET(uri, httr::add_headers("user-agent" = "Mozilla/5.0", "Cache-Control" = "no-cache"))
+	}
+	else {
+	  x <- httr::GET(uri)
+	}
+
 	if (x$status_code != 200) {
 		message(paste("Dataset or resource not reachable.\nStatus code: ", x$status_code))
 		return()
