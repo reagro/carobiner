@@ -43,36 +43,54 @@ check_date <- function(x, name) {
 
 
 
-check_ranges <- function(x, trms) {
-	nms <- colnames(x)
-	trms <- trms[match(nms, trms[,1]), ]
-	trms <- trms[!(is.na(trms$valid_min) & is.na(trms$valid_max)), ]
-	if (nrow(trms) == 0) return(TRUE)
-	answ <- TRUE
-	bad <- NULL
-	for (i in 1:nrow(trms)) {
-		rng <- trms[i,c("valid_min", "valid_max")]
-		v <- stats::na.omit(x[[trms$name[i]]])
-		if ( any(stats::na.omit(v < rng[1])) || any(stats::na.omit(v > rng[2])) ) {
-			answ <- FALSE
-			bad <- c(bad, trms$name[i])
-		}
-	}
-	dats <- grep("_date", nms, value=TRUE)
-	for (dat in dats) {
-		if (!check_date(x, dat)) {
-			answ <- FALSE
-			bad <- c(bad, dat)
-		}
-	} 
-
-	if (!answ) {
-		bad <- paste(bad, collapse=", ")
-		message(paste("   invalid:", bad))
-	}
-	answ
+check_ranges <- function(x,trms){
+  nms<-colnames(x)
+  trms2<-read.csv(file.path(path, "terms", "crops.csv"))
+  trms <-trms[match(nms,trms$name),]
+  trms <- trms[!(is.na(trms$valid_min) & is.na(trms$valid_max)), ]
+  trms2 <-trms2[match(x$crop,trms2$name),]
+  if (nrow(trms) == 0) return(TRUE)
+  answ <- TRUE
+  bad <- NULL
+  for (i in 1:nrow(trms)){
+    rng <- trms[i,c("valid_min", "valid_max")]
+    k<-trms$name[i]
+    if (k %in% c("yield")){
+      for (i in 1:nrow(trms2)){
+        x_fil<-x[x$crop== as.character(trms2$name[i]),]
+        v1 <- stats::na.omit(x_fil[[k]])
+        rng1<-0
+        rng2 <- trms2[i,k]
+        if(any(stats::na.omit(v1<rng1)) || any(stats::na.omit(v1>rng2))){
+          answ=FALSE
+          
+          bad= c(bad, k)
+          break
+        }
+      }
+    }
+    else {
+      v <- stats::na.omit(x[[k]])
+      if( any(stats::na.omit(v < rng[1])) || any(stats::na.omit(v > rng[2])) ){
+        answ <- FALSE
+        bad <- c(bad, k)
+      }
+    }
+    #dats <- grep("_date", nms, value=TRUE)
+    #for (dat in dats) {
+     #if (!check_date(x, dat)) {
+       #answ <- FALSE
+       #bad <- c(bad, dat)
+      #}
+    #}   
+    
+  }
+  if (!answ) {
+    bad <- paste(bad, collapse=", ")
+    message(paste("   invalid:", bad))
+  }
+  answ
 }
-
 
 check_datatypes <- function(x, trms) {
 	nms <- colnames(x)
