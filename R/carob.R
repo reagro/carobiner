@@ -90,7 +90,7 @@ compile_carob <- function(path, group="", split_license=FALSE) {
 		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
 		
 		# LICENSE check
-		if (splot_license) {
+		if (split_license) {
 			xx <- x[grepl("CC", x[,"license"]), ]
 			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
 			if (nrow(xx) > 0) {
