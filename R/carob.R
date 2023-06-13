@@ -65,7 +65,7 @@ sort_by_terms <- function(x, type, group, path) {
 }
 
 
-compile_carob <- function(path, group="", cc = FALSE) {
+compile_carob <- function(path, group="", split_license=FALSE) {
 	w <- options("warn")
 	if (w$warn < 1) {
 		on.exit(options(warn=w$warn))
@@ -90,26 +90,20 @@ compile_carob <- function(path, group="", cc = FALSE) {
 		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
 		
 		# LICENSE check
-		if(cc == TRUE){
-		  x <- x[grepl("CC", x[,"license"]) & !grepl("SA", x[,"license"]), ]
-		  y <- y[y$dataset_id %in% x[, "dataset_id"], ]
+		if (splot_license) {
+			xx <- x[grepl("CC", x[,"license"]), ]
+			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
+			if (nrow(xx) > 0) {
+				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-CC.csv"))
+				utils::write.csv(x, outmf, row.names=FALSE)
+				outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-CC.csv"))
+				utils::write.csv(y, outff, row.names=FALSE)
+			}
 		}
-		if(nrow(x) < 1){
-		  next
-		}
-		# Conditional check on LICENSE
-		if(cc == TRUE){
-		  outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-CC.csv"))
-		  utils::write.csv(x, outmf, row.names=FALSE)
-		  outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-CC.csv"))
-		  utils::write.csv(y, outff, row.names=FALSE)
-		}
-		else {
-		  outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata.csv"))
-		  utils::write.csv(x, outmf, row.names=FALSE)
-		  outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
-		  utils::write.csv(y, outff, row.names=FALSE)
-		}
+		outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata.csv"))
+		utils::write.csv(x, outmf, row.names=FALSE)
+		outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
+		utils::write.csv(y, outff, row.names=FALSE)
 		ret <- c(ret, outmf, outff)
 	}
 	utils::flush.console()
@@ -184,10 +178,10 @@ process_carob <- function(path, group="", quiet=FALSE) {
 }
 
 
-make_carob <- function(path, group="", quiet=FALSE) {
+make_carob <- function(path, group="", split_license=FALSE, quiet=FALSE) {
 	get_packages(group)
 	process_carob(path, group, quiet)
-	compile_carob(path, group)
+	compile_carob(path, group, split_license)
 }
 
 
