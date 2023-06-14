@@ -65,7 +65,7 @@ sort_by_terms <- function(x, type, group, path) {
 }
 
 
-compile_carob <- function(path, group="") {
+compile_carob <- function(path, group="", split_license=FALSE) {
 	w <- options("warn")
 	if (w$warn < 1) {
 		on.exit(options(warn=w$warn))
@@ -87,10 +87,21 @@ compile_carob <- function(path, group="") {
 		mi <- grepl("_meta.csv$", ff)
 		
 		x <- sort_by_terms(.binder(ff[mi]), "dataset", grp, path)
+		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
+		
+		# LICENSE check
+		if (split_license) {
+			xx <- x[grepl("CC", x[,"license"]), ]
+			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
+			if (nrow(xx) > 0) {
+				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-CC.csv"))
+				utils::write.csv(x, outmf, row.names=FALSE)
+				outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-CC.csv"))
+				utils::write.csv(y, outff, row.names=FALSE)
+			}
+		}
 		outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata.csv"))
 		utils::write.csv(x, outmf, row.names=FALSE)
-
-		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
 		outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
 		utils::write.csv(y, outff, row.names=FALSE)
 		ret <- c(ret, outmf, outff)
@@ -167,10 +178,10 @@ process_carob <- function(path, group="", quiet=FALSE) {
 }
 
 
-make_carob <- function(path, group="", quiet=FALSE) {
+make_carob <- function(path, group="", split_license=FALSE, quiet=FALSE) {
 	get_packages(group)
 	process_carob(path, group, quiet)
-	compile_carob(path, group)
+	compile_carob(path, group, split_license)
 }
 
 
