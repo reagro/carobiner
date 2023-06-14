@@ -65,7 +65,7 @@ sort_by_terms <- function(x, type, group, path) {
 }
 
 
-compile_carob <- function(path, group="", split_license=FALSE) {
+compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 	w <- options("warn")
 	if (w$warn < 1) {
 		on.exit(options(warn=w$warn))
@@ -89,21 +89,30 @@ compile_carob <- function(path, group="", split_license=FALSE) {
 		x <- sort_by_terms(.binder(ff[mi]), "dataset", grp, path)
 		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
 		
-		# LICENSE check
 		if (split_license) {
 			xx <- x[grepl("CC", x[,"license"]), ]
 			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
 			if (nrow(xx) > 0) {
 				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-CC.csv"))
-				utils::write.csv(x, outmf, row.names=FALSE)
+				utils::write.csv(xx, outmf, row.names=FALSE)
 				outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-CC.csv"))
-				utils::write.csv(y, outff, row.names=FALSE)
+				utils::write.csv(yy, outff, row.names=FALSE)
+				if (zip) {
+					fzip <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-CC.zip"))
+					file.remove(fzip)
+					utils::zip(fzip, c(outmf, outff), "-jq")
+				}
 			}
 		}
 		outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata.csv"))
 		utils::write.csv(x, outmf, row.names=FALSE)
 		outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
 		utils::write.csv(y, outff, row.names=FALSE)
+		if (zip) {
+			fzip <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".zip"))
+			file.remove(fzip)
+			utils::zip(fzip, c(outmf, outff), flags="-jq")
+		}
 		ret <- c(ret, outmf, outff)
 	}
 	utils::flush.console()
@@ -178,10 +187,10 @@ process_carob <- function(path, group="", quiet=FALSE) {
 }
 
 
-make_carob <- function(path, group="", split_license=FALSE, quiet=FALSE) {
+make_carob <- function(path, group="", quiet=FALSE, ...) {
 	get_packages(group)
 	process_carob(path, group, quiet)
-	compile_carob(path, group, split_license)
+	compile_carob(path, group, ...)
 }
 
 
