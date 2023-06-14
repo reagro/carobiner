@@ -43,7 +43,7 @@ check_date <- function(x, name) {
 
 
 
-check_ranges <- function(x, trms) {
+check_ranges <- function(x, trms, contributor) {
 	nms <- colnames(x)
 	trms <- trms[match(nms, trms[,1]), ]
 	trms <- trms[!(is.na(trms$valid_min) & is.na(trms$valid_max)), ]
@@ -68,7 +68,7 @@ check_ranges <- function(x, trms) {
 
 	if (!answ) {
 		bad <- paste(bad, collapse=", ")
-		message(paste("   invalid:", bad))
+		message(paste0("   invalid (", contributor, "): ", bad))
 	}
 	answ
 }
@@ -211,7 +211,7 @@ check_terms <- function(dataset, records, path, group) {
 			if (!check_datatypes(x[, nms], trms)) {
 				answ <- FALSE
 			} else {
-				if (!check_ranges(x[, nms], trms)) answ <- FALSE
+				if (!check_ranges(x[, nms], trms, contributor)) answ <- FALSE
 			}
 			#check_outliers_iqr(x, "yield", TRUE)
 		}
