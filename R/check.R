@@ -41,6 +41,21 @@ check_date <- function(x, name) {
 	ans
 }
 
+check_cropyield <- function(x, contributor) {
+	trms <- read.csv(file.path(path, "terms", "crops.csv"))
+	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
+	trms <- na.omit(trms)
+	if (nrow(trms) == 0) return(TRUE)
+	x <- na.omit(merge(x[, c("crop", "yield")], trms, by=1))
+	i <- x$yield > x$max_yield
+	if (any(i)) {
+		crops <- unique(x$crop[i])
+		bad <- paste(crops, collapse=", ")
+		message(paste0("   (", contributor, ") crop yield too high?: ", bad))
+		return(FALSE)
+	}
+	return(TRUE)
+}
 
 
 check_ranges <- function(x, trms, contributor) {
@@ -58,6 +73,8 @@ check_ranges <- function(x, trms, contributor) {
 			bad <- c(bad, trms$name[i])
 		}
 	}
+	answ <- answ & check_cropyield(x, contributor)
+		
 	dats <- grep("_date", nms, value=TRUE)
 	for (dat in dats) {
 		if (!check_date(x, dat)) {
@@ -65,7 +82,6 @@ check_ranges <- function(x, trms, contributor) {
 			bad <- c(bad, dat)
 		}
 	} 
-
 	if (!answ) {
 		bad <- paste(bad, collapse=", ")
 		message(paste0("   invalid (", contributor, "): ", bad))
@@ -121,9 +137,7 @@ check_group <- function(name) {
 check_terms <- function(dataset, records, path, group) {
 
 	answ <- TRUE
-
 	check_group(group)
-
 	contributor <- dataset$carob_contributor
 	
 	for (i in 1:2) {
