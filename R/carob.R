@@ -91,18 +91,22 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		mi <- grepl("_meta.csv$", ff)
 		
 		x <- sort_by_terms(.binder(ff[mi]), "dataset", grp, path)
+		x[is.na(x)] <- ""
+		x[] <- sapply(x, \(i) gsub("\n", " ", i))
+		x[] <- sapply(x, \(i) gsub("\t", " ", i))
+
 		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
 		
 		if (split_license) {
 			xx <- x[grepl("CC", x[,"license"]), ]
 			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
 			if (nrow(xx) > 0) {
-				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-CC.csv"))
+				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-cc.csv"))
 				utils::write.csv(xx, outmf, row.names=FALSE)
-				outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-CC.csv"))
+				outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-cc.csv"))
 				utils::write.csv(yy, outff, row.names=FALSE)
 				if (zip) {
-					fzip <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-CC.zip"))
+					fzip <- gsub(".csv$", ".zip", outff)
 					if (file.exists(fzip)) file.remove(fzip)
 					utils::zip(fzip, c(outmf, outff), "-jq", zip=pzip)
 				}
@@ -113,7 +117,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
 		utils::write.csv(y, outff, row.names=FALSE)
 		if (zip) {
-			fzip <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".zip"))
+			fzip <- gsub(".csv$", ".zip", outff)
 			if (file.exists(fzip)) file.remove(fzip)
 			utils::zip(fzip, c(outmf, outff), flags="-jq", zip=pzip)
 		}
