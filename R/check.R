@@ -42,11 +42,21 @@ check_date <- function(x, name) {
 }
 
 check_cropyield <- function(x, contributor) {
+
+	x <- x[, c("crop", "yield")]
+	a <- aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
+	a <- a[a$yield < 100, ]
+	if (nrow(a) > 0) {
+		crops <- unique(a$crop)
+		bad <- paste(crops, collapse=", ")
+		message(paste0("   (", contributor, ") crop yield too low (tons not kg?): ", bad))
+		return(FALSE)
+	}
 	trms <- read.csv(file.path(path, "terms", "crops.csv"))
 	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
 	trms <- na.omit(trms)
 	if (nrow(trms) == 0) return(TRUE)
-	x <- na.omit(merge(x[, c("crop", "yield")], trms, by=1))
+	x <- na.omit(merge(x, trms, by=1))
 	i <- x$yield > x$max_yield
 	if (any(i)) {
 		crops <- unique(x$crop[i])
