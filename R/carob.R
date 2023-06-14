@@ -80,6 +80,10 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 	}
 		
 	ret <- NULL
+	if (zip) {
+		pzip <- Sys.getenv("R_ZIPCMD")
+		if (pzip == "") pzip <- "zip"
+	}
 	for (grp in grps) {
 		wgroup <- ifelse(grp == "doi", "", paste0("-", grp))
 
@@ -99,8 +103,8 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 				utils::write.csv(yy, outff, row.names=FALSE)
 				if (zip) {
 					fzip <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-CC.zip"))
-					file.remove(fzip)
-					utils::zip(fzip, c(outmf, outff), "-jq")
+					if (file.exists(fzip)) file.remove(fzip)
+					utils::zip(fzip, c(outmf, outff), "-jq", zip=pzip)
 				}
 			}
 		}
@@ -110,8 +114,8 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		utils::write.csv(y, outff, row.names=FALSE)
 		if (zip) {
 			fzip <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".zip"))
-			file.remove(fzip)
-			utils::zip(fzip, c(outmf, outff), flags="-jq")
+			if (file.exists(fzip)) file.remove(fzip)
+			utils::zip(fzip, c(outmf, outff), flags="-jq", zip=pzip)
 		}
 		ret <- c(ret, outmf, outff)
 	}
