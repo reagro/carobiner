@@ -23,7 +23,7 @@ fix_name(x, case="", skip="", lowothers=TRUE)
   \item{x}{character}
   \item{case}{character. If this is not \code{""}. The capitalization of the words is changed. You can use "first", "lower", or "title"}
   \item{skip}{character. Additional words to skip when case="title" (see details)}
-  \item{skip}{logical. Only relevant when case is "first" or "title". Should all other characters be made lowercase?}
+  \item{lowothers}{logical. Only relevant when case is "first" or "title". Should all other characters be made lowercase?}
 }
 
 \value{

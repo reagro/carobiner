@@ -25,15 +25,18 @@ Make the Carob database.
 \usage{
 run_carob(cleanuri, path, group="", quiet=FALSE)
 process_carob(path, group="", quiet=FALSE)
-compile_carob(path, group="")
-make_carob(path, group="", quiet=FALSE)
+compile_carob(path, group="", split_license=FALSE, zip=FALSE)
+make_carob(path, group="", quiet=FALSE, ...)
 }
  
 \arguments{
-  \item{cleanuri}{character. A "clean" URI made with \code{\link[agro]{get_simple_URI}}}
+  \item{cleanuri}{character. A "clean" URI made with \code{\link{simple_uri}}}
   \item{path}{character. Local path to the Carob repo}
   \item{group}{character. group name}
   \item{quiet}{logical. Be quiet?}
+  \item{split_license}{logical. Make a seperate aggregation for data with a CC license?}
+  \item{zip}{logical. zip the aggregated data?}
+  \item{...}{additional arguments passed to compile_carob}
 }
 
 \value{

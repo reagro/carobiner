@@ -151,7 +151,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 		}
 	}	
 	ff <- .dataverse_unzip(zipf, path, unzip)
-	writeLines(c(timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
 	ff
 }
 
@@ -183,7 +183,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 			files <- c(files, outf)
 		}
 	}
-	writeLines(c(timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
 	files
 }
 
@@ -211,7 +211,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 		files <- c(files, outf)
 	}
 	utils::unzip(outf, exdir = path)
-	writeLines(c(timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
 	files
 }
 
@@ -275,8 +275,8 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 		return()
 	}
 	u <- x$url
-	domain <- carobiner:::.getdomain(u)
-	protocol <- carobiner:::.getprotocol(u)
+	domain <- .getdomain(u)
+	protocol <- .getprotocol(u)
 	baseu <- paste0(protocol, domain)
 	if (grepl("/stash/", u)) {	
 		.download_dryad_files(u, baseu, path, uname)

@@ -41,14 +41,15 @@ check_date <- function(x, name) {
 	ans
 }
 
-check_lonlat <- function(x) {
+
+check_lonlat <- function(x, path) {
 
 	if (!all(c("longitude", "latitude") %in% colnames(x))) {
 		return(TRUE)
 	}
 	
 	w <- geodata::world(path=file.path(path, "data"))
-	x <- na.omit(x[, c("country", "longitude", "latitude")])
+	x <- stats::na.omit(x[, c("country", "longitude", "latitude")])
 	e <- terra::extract(w, x[, c("longitude", "latitude")])
 	e <- cbind(e, country=x$country)
 	i <- is.na(e$NAME_0)
@@ -58,7 +59,7 @@ check_lonlat <- function(x) {
 		message(paste0("    coordinates not on land for: ", bad))
 		return(FALSE)		
 	} 
-	e <- na.omit(e)
+	e <- stats::na.omit(e)
 	i <- e$NAME_0 != x$country
 	if (any(i)) {
 		u <- unique(e$NAME_0[i])
@@ -69,10 +70,10 @@ check_lonlat <- function(x) {
 	return(TRUE)		
 }
 
-check_cropyield <- function(x) {
+check_cropyield <- function(x, path) {
 
 	x <- x[, c("crop", "yield")]
-	a <- aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
+	a <- stats::aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
 	a <- a[a$yield < 100, ]
 	if (nrow(a) > 0) {
 		crops <- unique(a$crop)
@@ -80,11 +81,11 @@ check_cropyield <- function(x) {
 		message(paste0("    crop yield too low (tons not kg?): ", bad))
 		return(FALSE)
 	}
-	trms <- read.csv(file.path(path, "terms", "crops.csv"))
+	trms <- utils::read.csv(file.path(path, "terms", "crops.csv"))
 	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
-	trms <- na.omit(trms)
+	trms <- stats::na.omit(trms)
 	if (nrow(trms) == 0) return(TRUE)
-	x <- na.omit(merge(x, trms, by=1))
+	x <- stats::na.omit(merge(x, trms, by=1))
 	i <- x$yield > x$max_yield
 	if (any(i)) {
 		crops <- unique(x$crop[i])
@@ -99,7 +100,7 @@ check_cropyield <- function(x) {
 }
 
 
-check_ranges <- function(x, trms) {
+check_ranges <- function(x, trms, path) {
 	answ <- TRUE
 	nms <- colnames(x)
 	trms <- trms[match(nms, trms[,1]), ]
@@ -119,7 +120,7 @@ check_ranges <- function(x, trms) {
 		bad <- NULL
 	}
 	
-	trms <- na.omit(trms[, c("name", "valid_min", "valid_max"), ])
+	trms <- stats::na.omit(trms[, c("name", "valid_min", "valid_max"), ])
 	if (nrow(trms) == 0) return(TRUE)
 	for (i in 1:nrow(trms)) {
 		rng <- unlist(trms[i,c("valid_min", "valid_max")])
@@ -146,7 +147,7 @@ check_ranges <- function(x, trms) {
 		message(paste0("    invalid: ", bad))
 	}
 
-	answ <- answ & check_cropyield(x) & check_lonlat(x)
+	answ <- answ & check_cropyield(x, path) & check_lonlat(x, path)
 	answ
 }
 
@@ -186,7 +187,7 @@ check_datatypes <- function(x, trms) {
 #d = data.frame(a = 1:3, b=letters[1:3], c=c(" A ", "", "D"))
 #x = check_empty(d)
 
-check_group <- function(name) {
+check_group <- function(name, path) {
 	grp <- utils::read.csv(file.path(path, "terms", "groups.csv"))
 	ok <- name %in% grp$name
 	if (!ok) {
@@ -198,7 +199,7 @@ check_group <- function(name) {
 check_terms <- function(dataset, records, path, group) {
 
 	answ <- TRUE
-	check_group(group)
+	check_group(group, path)
 	
 	for (i in 1:2) {
 		if (i == 1) {
@@ -280,7 +281,7 @@ check_terms <- function(dataset, records, path, group) {
 			if (!check_datatypes(x[, nms], trms)) {
 				answ <- FALSE
 			} else {
-				if (!check_ranges(x[, nms], trms)) answ <- FALSE
+				if (!check_ranges(x[, nms], trms, path)) answ <- FALSE
 			}
 		}
 	}

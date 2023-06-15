@@ -7,7 +7,7 @@ Download a data set
 }
 
 \description{
-Download the data file associated with a URI. This function calls \code{agro::get_data_from_uri}
+Download the data file associated with a URI. 
 }
 
 

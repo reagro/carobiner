@@ -12,13 +12,13 @@ Find outliers with the IQR (numbers should be less than 1.5 times the interquart
 
 
 \usage{
-find_outliers(x, fields, method="IQR")
+find_outliers(x, fields, method="iqr")
 }
  
 \arguments{
   \item{x}{data.frame}
   \item{fields}{character. variable names in x}
-  \item{method}{"IQR" or "STD"}
+  \item{method}{"iqr" or "std"}
 }
 
 \value{
@@ -31,7 +31,6 @@ set.seed(3)
 d <- data.frame(a = runif(50), b=rnorm(50))
 d$a[1] <- 100
 find_outliers(d, c("a", "b"))
-
 }
 
 
