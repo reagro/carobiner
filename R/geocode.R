@@ -47,11 +47,19 @@ geocode_nominatim <- function(place) {
 } 
 
 
-geocode <- function(service="nominatim", country, place, adm1=NULL, adm2=NULL, adm3=NULL, adm4=NULL, adm5=NULL, ...) {
+geocode <- function(country, place, adm1=NULL, adm2=NULL, adm3=NULL, adm4=NULL, adm5=NULL, service="nominatim", ...) {
 	service <- tolower(service)
 	service <- match.arg(service, c("nominatim", "geonames"))
 
-	addr <- cbind(country, adm1, adm2, adm3, adm4, adm4, place)
+	stopifnot(!any(is.na(country)))
+
+	addr <- trimws(cbind(country, adm1, adm2, adm3, adm4, adm4, place))
+	addr[is.na(addr)] <- ""
+	noc <- addr[,-1, drop=FALSE]
+	noc <- apply(noc, 1, \(i) paste0(i, collapse=""))
+	if (any(noc=="")) {
+		stop("all records must include a country and a place or admin name")
+	}
 	addr <- apply(addr, 1, \(v) paste(v, collapse=","))
 	addr <- gsub("(,)\\1+", "\\1", addr)
 	addr <- gsub("( )\\1+", "\\1", addr)
