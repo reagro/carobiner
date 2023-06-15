@@ -41,7 +41,35 @@ check_date <- function(x, name) {
 	ans
 }
 
-check_cropyield <- function(x, contributor) {
+check_lonlat <- function(x) {
+
+	if (!all(c("longitude", "latitude") %in% colnames(x))) {
+		return(TRUE)
+	}
+	
+	w <- geodata::world(path=file.path(path, "data"))
+	x <- na.omit(x[, c("country", "longitude", "latitude")])
+	e <- terra::extract(w, x[, c("longitude", "latitude")])
+	e <- cbind(e, country=x$country)
+	i <- is.na(e$NAME_0)
+	if (any(i)) {
+		u <- unique(e$country[i])
+		bad <- paste(u, collapse=", ")
+		message(paste0("    coordinates not on land for: ", bad))
+		return(FALSE)		
+	} 
+	e <- na.omit(e)
+	i <- e$NAME_0 != x$country
+	if (any(i)) {
+		u <- unique(e$NAME_0[i])
+		bad <- paste(u, collapse=", ")
+		message(paste0("    coordinates in wrong country for: ", bad))
+		return(FALSE)		
+	}
+	return(TRUE)		
+}
+
+check_cropyield <- function(x) {
 
 	x <- x[, c("crop", "yield")]
 	a <- aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
@@ -49,7 +77,7 @@ check_cropyield <- function(x, contributor) {
 	if (nrow(a) > 0) {
 		crops <- unique(a$crop)
 		bad <- paste(crops, collapse=", ")
-		message(paste0("   (", contributor, ") crop yield too low (tons not kg?): ", bad))
+		message(paste0("    crop yield too low (tons not kg?): ", bad))
 		return(FALSE)
 	}
 	trms <- read.csv(file.path(path, "terms", "crops.csv"))
@@ -61,30 +89,51 @@ check_cropyield <- function(x, contributor) {
 	if (any(i)) {
 		crops <- unique(x$crop[i])
 		bad <- paste(crops, collapse=", ")
-		message(paste0("   (", contributor, ") crop yield too high?: ", bad))
+		message(paste0("    crop yield too high?: ", bad))
 		return(FALSE)
 	}
 	return(TRUE)
+
+	#check_outliers_iqr(x, "yield", TRUE)
+
 }
 
 
-check_ranges <- function(x, trms, contributor) {
+check_ranges <- function(x, trms) {
+	answ <- TRUE
 	nms <- colnames(x)
 	trms <- trms[match(nms, trms[,1]), ]
-	trms <- trms[!(is.na(trms$valid_min) & is.na(trms$valid_max)), ]
-	if (nrow(trms) == 0) return(TRUE)
-	answ <- TRUE
+
+	trmsna <- trms[!is.na(trms$NAok), ]
+	trmsna <- trmsna[trmsna$NAok == "no", ]
 	bad <- NULL
+	for (i in 1:nrow(trmsna)) {
+		v <- x[[trmsna$name[i]]]
+		if (any(is.na(v))) {
+			answ <- FALSE
+			bad <- c(bad, trmsna$name[i])
+		}
+	}
+	if (!answ) {
+		message(paste("    NA in:", paste(bad, collapse=", ")))
+		bad <- NULL
+	}
+	
+	trms <- na.omit(trms[, c("name", "valid_min", "valid_max"), ])
+	if (nrow(trms) == 0) return(TRUE)
 	for (i in 1:nrow(trms)) {
-		rng <- trms[i,c("valid_min", "valid_max")]
+		rng <- unlist(trms[i,c("valid_min", "valid_max")])
 		v <- stats::na.omit(x[[trms$name[i]]])
-		if ( any(stats::na.omit(v < rng[1])) || any(stats::na.omit(v > rng[2])) ) {
+		if ( any((v < rng[[1]]) | (v > rng[2])) ) {
 			answ <- FALSE
 			bad <- c(bad, trms$name[i])
 		}
 	}
-	answ <- answ & check_cropyield(x, contributor)
-		
+	if (!is.null(bad)) {
+		message(paste("    Out of bounds:", paste(bad, collapse=", ")))
+		bad <- NULL
+	}
+	
 	dats <- grep("_date", nms, value=TRUE)
 	for (dat in dats) {
 		if (!check_date(x, dat)) {
@@ -92,10 +141,12 @@ check_ranges <- function(x, trms, contributor) {
 			bad <- c(bad, dat)
 		}
 	} 
-	if (!answ) {
+	if (!is.null(bad)) {
 		bad <- paste(bad, collapse=", ")
-		message(paste0("   invalid (", contributor, "): ", bad))
+		message(paste0("    invalid: ", bad))
 	}
+
+	answ <- answ & check_cropyield(x) & check_lonlat(x)
 	answ
 }
 
@@ -148,7 +199,6 @@ check_terms <- function(dataset, records, path, group) {
 
 	answ <- TRUE
 	check_group(group)
-	contributor <- dataset$carob_contributor
 	
 	for (i in 1:2) {
 		if (i == 1) {
@@ -166,7 +216,6 @@ check_terms <- function(dataset, records, path, group) {
 			bad[i] <- any(stats::na.omit(x[,i]) == "")
 		}
 		if (any(bad)) {
-			if (answ) message(paste("   ", contributor))
 			b <- paste0(colnames(x)[bad], collapse= ", ")
 			message("    whitespace in variable: ", b)
 			answ <- FALSE		
@@ -178,7 +227,6 @@ check_terms <- function(dataset, records, path, group) {
 
 		xnms <- nms[!(nms %in% trms$name)]
 		if (length(xnms) > 0) {
-			if (answ) message(paste("   ", contributor))
 			message(paste("    unknown", type, "variable names: ", paste(xnms, collapse=", ")))
 			answ <- FALSE		
 		}
@@ -186,7 +234,6 @@ check_terms <- function(dataset, records, path, group) {
 		req <- trms[trms$required == "yes" | trms$required == group, ]
 		r <- req$name[!(req$name %in% nms)]
 		if (length(r) > 0) {
-			if (answ) message(paste("   ", contributor))
 			message(paste("    required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
 			answ <- FALSE
 		}
@@ -210,7 +257,6 @@ check_terms <- function(dataset, records, path, group) {
 				}
 				bad <- provided[!(provided %in% accepted)]
 				if (length(bad) > 0) {
-					if (answ) message(paste("   ", contributor))
 					message(paste("   ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
 					answ <- FALSE
 				}
@@ -224,8 +270,7 @@ check_terms <- function(dataset, records, path, group) {
 			for (pub in pubs) {
 				where <- grep(pub, allpubs)
 				if (length(where) == 0) {
-					if (answ) message(paste("   ", contributor))
-					cat("    citation reference file missing:", pub, "\n")	
+					message(paste("    citation reference file missing:", pub))	
 					answ <- FALSE
 				}
 			}
@@ -235,10 +280,12 @@ check_terms <- function(dataset, records, path, group) {
 			if (!check_datatypes(x[, nms], trms)) {
 				answ <- FALSE
 			} else {
-				if (!check_ranges(x[, nms], trms, contributor)) answ <- FALSE
+				if (!check_ranges(x[, nms], trms)) answ <- FALSE
 			}
-			#check_outliers_iqr(x, "yield", TRUE)
 		}
+	}
+	if (!answ) {
+		message("    contributor: ", dataset$carob_contributor)
 	}
 	invisible(answ)
 }
