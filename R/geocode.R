@@ -1,11 +1,10 @@
 
-# function to retrieve latitude and longitude data based on the name of a place
-# Author: Effie Ochieng' (efyrouwa)
   
 
 geocode_geonames <- function(place, username=NULL) { 
+	# Author: Effie Ochieng' (efyrouwa)
 	stopifnot(!is.null(username))
-    u <- paste0("http://api.geonames.org/searchJSON?q=", place, "&maxRows=1&username=", username) 
+    u <- paste0("http://api.geonames.org/searchJSON?q=", place, "&username=", username) 
 	out <- rep("", length(u))
 	for (i in 1:length(u)) {
 		print(place[i]); flush.console()
@@ -29,7 +28,22 @@ geocode_nominatim <- function(place) {
 			out[i] <- httr::content(response, as="text")  
 		} 
 	}
-	out
+	x <- sapply(out, terra::svc)
+	names(x) <- place
+	
+	y <- lapply(x, \(s) {
+			if (length(s) == 0) {
+				cbind(NA, NA)
+			} else {
+				v <- s[1]
+				v <- v[which.min(v$place_rank)]
+				crds(centroids(v))
+			}
+		})
+	y <- do.call(rbind, y)
+	colnames(y) <- c("longitude", "latitude")
+	y <- data.frame(place=place, y)		
+	list(df=y, svc=x)
 } 
 
 
@@ -43,14 +57,13 @@ geocode <- function(service="nominatim", country, place, adm1=NULL, adm2=NULL, a
 	addr <- gsub("( )\\1+", "\\1", addr)
 	addr <- gsub(", ,", ",", addr)
 	addr <- gsub(" ", "+", addr)
+	addr <- utils::URLencode(addr)
+	
 	if (service == "nominatim") {
-		x <- geocode_nominatim(addr)
+		geocode_nominatim(addr)
 	} else {
-		x <- geocode_geonames(addr, ...)	
+		geocode_geonames(addr, ...)	
 	}
-	## to do
-	## further processing of x
-	x
 }
 
 #g <- geocode("nominatim", "Kenya", c("Machakos", "Nairobi"))
