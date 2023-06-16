@@ -12,6 +12,7 @@ geocode_duplicates <- function(x, vars=NULL) {
 	xy$longitude <- NULL
 	xy$latitude <- NULL
 	m <- unique(merge(xy, xy_notna, by=vars))
+	m <- m[!duplicated(m[, vars]), ]
 	cn <- colnames(m)
 	cn <- gsub("longitude", "xlon", cn)
 	cn <- gsub("latitude", "ylat", cn)
