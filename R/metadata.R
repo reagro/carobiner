@@ -16,20 +16,28 @@ get_metadata <- function(cleanuri, path, group="", major=1, minor=0) {
 	x
 }
 
+
 get_license <- function(x) {
 	lic <- x$data$latestVersion$license
-	trm <- x$data$latestVersion$termsOfUse
-	if ((is.null(lic) || (lic[1] == "NONE")) && (!is.null(trm))) {
-		trm <- strsplit(trm, '\"')[[1]]
+	trms <- x$data$latestVersion$termsOfUse
+	if (is.null(trms)) trms <- x$license
+	if ((is.null(lic) || (lic[1] == "NONE")) && (!is.null(trms))) {
+		trm <- strsplit(trms, '\"')[[1]]
 		g <- grep("/creativecommons.org/", tolower(trm), value=TRUE)
 		if (length(g) == 0) {
 			g <- grep("Creative Commons", trm, value=TRUE, ignore.case=TRUE)
 			if (length(g) == 0) {
-				return("Unknown")
+				g <- grep("by-nc-nd", trm, value=TRUE, ignore.case=TRUE)
+				if (length(g) > 0) {
+					return("CC-BY-NC-ND")
+				}
+				if (grepl("CIMMYT", trms)) {
+					return("CIMMYT license")
+				}
 			}
   			g <- regmatches(g, gregexpr('Creative (.+?) license', g, ignore.case=TRUE))[[1]]
 			if (tolower(g) == "creative commons attribution 4.0 international license") {
-				g <- "CC-BY (4.0)"
+				g <- "CC-BY-4.0"
 			}
 			return(g)
 		} else {
@@ -37,9 +45,11 @@ get_license <- function(x) {
 			trm <- gsub("http://", "", trm)
 			trm <- gsub("https://", "", trm)
 			trm <- gsub("creativecommons.org/licenses", "CC", trm)
+			trm <- gsub("creativecommons.org/publicdomain/zero", "CC0", trm)		
 			trm <- gsub("/", "-", trm)
 			trm <- toupper(gsub("-$", "", trm))
 			trm <- toupper(trm)
+			trm <- gsub(" ", "-", trm)			
 		} 
 		if (nchar(trm) > 0) {
 			if (is.null(lic) || (lic == "NONE")) {
@@ -52,6 +62,11 @@ get_license <- function(x) {
 		lic <- x$result$license_id 	
 		if (is.null(lic)) lic <- "?"
 		lic <- toupper(lic)
+	}
+	if (is.list(lic)) {
+		lic <- lapply(lic, \(x) gsub(" ", "-", gsub("CC-ZERO", "CC-0", x)))
+	} else {
+		lic <- gsub(" ", "-", gsub("CC-ZERO", "CC-0", lic))
 	}
 	lic
 }

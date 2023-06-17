@@ -76,6 +76,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 	if (group == "") {
 		grps <- unique(sapply(strsplit(fff, "/"), function(i) ifelse(length(i) > 1, i[1], "doi")))
 	} else {
+		fff <- file.path(group, fff)
 		grps <- group
 	}
 		
@@ -100,8 +101,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		gterms <- get_terms("records", grp, path)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
 
-
-		outft <- file.path(path, "data", "compiled", paste0("carob_terms", wgroup, ".csv"))
+		outft <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_terms.csv"))
 		utils::write.csv(gterms, outft, row.names=FALSE)
 		
 		if (split_license) {
@@ -117,7 +117,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 					if (file.exists(fzip)) file.remove(fzip)
 					utils::zip(fzip, c(outft, outmf, outff), "-jq", zip=pzip)
 					fxls <- gsub(".csv$", ".xlsx", outff)
-					dx <- list(terms=gterms, sources=x, data=y)
+					dx <- list(sources=x, terms=gterms, data=y)
 					writexl::write_xlsx(dx, fxls)
 				}
 			}
@@ -131,7 +131,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 			if (file.exists(fzip)) file.remove(fzip)
 			utils::zip(fzip, c(outft, outmf, outff), flags="-jq", zip=pzip)
 			fxls <- gsub(".csv$", ".xlsx", outff)
-			dx <- list(terms=gterms, sources=x, data=y)
+			dx <- list(sources=x, terms=gterms, data=y)
 			writexl::write_xlsx(dx, fxls)
 		}
 		
