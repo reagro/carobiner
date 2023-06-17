@@ -2,7 +2,7 @@
 geocode_duplicates <- function(x, vars=NULL) {
 	if (is.null(vars)) {
 		cn <- colnames(x)
-		adm <- grep("adm", cn, values=TRUE)
+		adm <- grep("adm", cn, value=TRUE)
 		vars <- c("country", "location", adm)
 	}
 	uxy <- unique(x[, c(vars, "longitude", "latitude")])
