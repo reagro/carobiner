@@ -172,6 +172,9 @@ process_carob <- function(path, group="", quiet=FALSE) {
 		on.exit(options(warn=w$warn))
 		options(warn=1)
 	}
+	if (group != "") {
+		check_group(group, path)
+	}
 	
 	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE)
 	file.remove(ff)
@@ -199,7 +202,7 @@ process_carob <- function(path, group="", quiet=FALSE) {
 			stop(basename(f), "does not have a `carob_script` function", call.=FALSE)
 		}
 		ok <- FALSE
-		try(ok <- carob_script(path), silent=TRUE)
+		try(ok <- carob_script(path))
 		if (!ok) {
 			message(paste("processing failed for:\n", basename(f)))
 		}

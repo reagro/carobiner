@@ -189,9 +189,9 @@ check_datatypes <- function(x, trms) {
 
 check_group <- function(name, path) {
 	grp <- utils::read.csv(file.path(path, "terms", "groups.csv"))
-	ok <- name %in% grp$name
+	ok <- all(name %in% grp$name)
 	if (!ok) {
-		stop(paste("    invalid group:", name))
+		stop(paste("    invalid group:", paste(name, collapse=", ")))
 	}
 	ok
 }
