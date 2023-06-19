@@ -45,6 +45,7 @@ write_files <- function(dataset, records, path, cleanuri, group="", id=NULL) {
 	}
 	dir.create(dirname(outf), FALSE, FALSE)
 #	utils::write.csv(records, outf, row.names=FALSE)
+	records[] <- lapply(records, \(i) gsub
 	data.table::fwrite(records, outf, row.names=FALSE)
 	mf <- gsub(".csv$", "_meta.csv", outf)
 #	utils::write.csv(dataset, mf, row.names=FALSE)
@@ -86,6 +87,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 	if (zip) {
 		pzip <- Sys.getenv("R_ZIPCMD")
 		if (pzip == "") pzip <- "zip"
+		zipflags <- "-rjq9"
 	}
 	for (grp in grps) {
 		wgroup <- ifelse(grp == "doi", "", paste0("-", grp))
@@ -119,7 +121,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 				if (zip) {
 					fzip <- gsub(".csv$", ".zip", outff)
 					if (file.exists(fzip)) file.remove(fzip)
-					utils::zip(fzip, c(outft, outmf, outff), "-jq", zip=pzip)
+					utils::zip(fzip, c(outft, outmf, outff), zipflags, zip=pzip)
 					fxls <- gsub(".csv$", ".xlsx", outff)
 					dx <- list(sources=x, terms=gterms, data=y)
 					writexl::write_xlsx(dx, fxls)
@@ -135,7 +137,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		if (zip) {
 			fzip <- gsub(".csv$", ".zip", outff)
 			if (file.exists(fzip)) file.remove(fzip)
-			utils::zip(fzip, c(outft, outmf, outff), flags="-jq", zip=pzip)
+			utils::zip(fzip, c(outft, outmf, outff), flags=zipflags, zip=pzip)
 			fxls <- gsub(".csv$", ".xlsx", outff)
 			dx <- list(sources=x, terms=gterms, data=y)
 			writexl::write_xlsx(dx, fxls)
