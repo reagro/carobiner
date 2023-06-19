@@ -85,11 +85,15 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 	ret <- NULL
 	if (zip) {
 		pzip <- Sys.getenv("R_ZIPCMD")
-		if (pzip == "") pzip <- "zip"
-		zipflags <- "-rjq9"
+		if (pzip == "") {
+			pzip <- "gzip"
+			zipflags <- "-rjq9"
+		} else {
+			zipflags <- "-jq9"		
+		}
 	}
 	for (grp in grps) {
-		wgroup <- ifelse(grp == "doi", "", paste0("-", grp))
+		wgroup <- ifelse(grp == "doi", "", paste0("_", grp))
 
 		ff <- file.path(path, "data", "clean", grep(paste0("^", grp), fff, value=TRUE))
 		mi <- grepl("_meta.csv$", ff)
