@@ -44,9 +44,11 @@ write_files <- function(dataset, records, path, cleanuri, group="", id=NULL) {
 		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
 	}
 	dir.create(dirname(outf), FALSE, FALSE)
-	utils::write.csv(records, outf, row.names=FALSE)
+#	utils::write.csv(records, outf, row.names=FALSE)
+	data.table::fwrite(records, outf, row.names=FALSE)
 	mf <- gsub(".csv$", "_meta.csv", outf)
-	utils::write.csv(dataset, mf, row.names=FALSE)
+#	utils::write.csv(dataset, mf, row.names=FALSE)
+	data.table::fwrite(dataset, mf, row.names=FALSE)
 	TRUE
 }
 
@@ -102,16 +104,18 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		gterms <- gterms[, c("name", "type", "unit", "description")]
 
 		outft <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_terms.csv"))
-		utils::write.csv(gterms, outft, row.names=FALSE)
-		
+#		utils::write.csv(gterms, outft, row.names=FALSE)
+		data.table::fwrite(gterms, outft, row.names=FALSE)
 		if (split_license) {
 			xx <- x[grepl("CC", x[,"license"]), ]
 			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
 			if (nrow(xx) > 0) {
 				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-cc.csv"))
-				utils::write.csv(xx, outmf, row.names=FALSE)
+				#utils::write.csv(xx, outmf, row.names=FALSE)
+				data.table::fwrite(xx, outmf, row.names=FALSE)
 				outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-cc.csv"))
-				utils::write.csv(yy, outff, row.names=FALSE)
+				#utils::write.csv(yy, outff, row.names=FALSE)
+				data.table::fwrite(yy, outff, row.names=FALSE)
 				if (zip) {
 					fzip <- gsub(".csv$", ".zip", outff)
 					if (file.exists(fzip)) file.remove(fzip)
@@ -123,9 +127,11 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 			}
 		}
 		outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata.csv"))
-		utils::write.csv(x, outmf, row.names=FALSE)
+		#utils::write.csv(x, outmf, row.names=FALSE)
+		data.table::fwrite(x, outmf, row.names=FALSE)
 		outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
-		utils::write.csv(y, outff, row.names=FALSE)
+#		utils::write.csv(y, outff, row.names=FALSE)
+		data.table::fwrite(y, outff, row.names=FALSE)
 		if (zip) {
 			fzip <- gsub(".csv$", ".zip", outff)
 			if (file.exists(fzip)) file.remove(fzip)

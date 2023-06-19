@@ -93,8 +93,8 @@ simple_uri <- function(uri, reverse=FALSE) {
 		}
 	}
 	fn <- file.path(path, paste0(uname, "_files.txt"))
-	try(utils::write.csv(f, fn))
-	
+	#try(utils::write.csv(f, fn))
+	try(data.table::fwrite(f, fn))
 	rest <- f$restricted
 	if (!is.null(rest)) {
 		f <- f[!rest, ]
