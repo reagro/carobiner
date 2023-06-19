@@ -86,11 +86,9 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 	if (zip) {
 		pzip <- Sys.getenv("R_ZIPCMD")
 		if (pzip == "") {
-			pzip <- "gzip"
-			zipflags <- "-rjq9"
-		} else {
-			zipflags <- "-jq9"		
+			pzip <- "zip"
 		}
+		zipflags <- "-jq9"		
 	}
 	for (grp in grps) {
 		wgroup <- ifelse(grp == "doi", "", paste0("_", grp))
