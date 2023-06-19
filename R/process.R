@@ -45,7 +45,6 @@ write_files <- function(dataset, records, path, cleanuri, group="", id=NULL) {
 	}
 	dir.create(dirname(outf), FALSE, FALSE)
 #	utils::write.csv(records, outf, row.names=FALSE)
-	records[] <- lapply(records, \(i) gsub
 	data.table::fwrite(records, outf, row.names=FALSE)
 	mf <- gsub(".csv$", "_meta.csv", outf)
 #	utils::write.csv(dataset, mf, row.names=FALSE)
