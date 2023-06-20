@@ -102,8 +102,10 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		x[] <- sapply(x, \(i) gsub("\t", " ", i))
 
 		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
-		y$reference <- gsub("\n", " ", y$reference)
-		y$reference <- gsub("\t", " ", y$reference)
+		if ("reference" %in% colnames(y)) {
+			y$reference <- gsub("\n", " ", y$reference)
+			y$reference <- gsub("\t", " ", y$reference)
+		}
 		
 		gterms <- get_terms("records", grp, path)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
