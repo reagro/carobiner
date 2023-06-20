@@ -102,6 +102,8 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		x[] <- sapply(x, \(i) gsub("\t", " ", i))
 
 		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
+		y$reference <- gsub("\n", " ", y$reference)
+		y$reference <- gsub("\t", " ", y$reference)
 		
 		gterms <- get_terms("records", grp, path)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
@@ -124,7 +126,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 					if (file.exists(fzip)) file.remove(fzip)
 					utils::zip(fzip, c(outft, outmf, outff), zipflags, zip=pzip)
 					fxls <- gsub(".csv$", ".xlsx", outff)
-					dx <- list(sources=x, terms=gterms, data=y)
+					dx <- list(sources=xx, terms=gterms, data=yy)
 					writexl::write_xlsx(dx, fxls)
 				}
 			}
