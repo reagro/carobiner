@@ -31,15 +31,12 @@ get_terms <- function(type, group, path) {
 
 
 
-write_files <- function(dataset, records, path, cleanuri=NULL, group=NULL, id=NULL, timerecs) {
+write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 
 	stopifnot(nrow(dataset) == 1)
 
-	if (!is.null(cleanuri)) warning("argument 'cleanuri is deprecated")
-	if (!is.null(group)) warning("argument 'group is deprecated")
-
 	group <- dataset$group
-	clearuri <- dataset$dataset_id
+	cleanuri <- dataset$dataset_id
 	stopifnot(all(records$dataset_id == cleanuri))
 
 	check_terms(dataset, records, path, group)

@@ -12,15 +12,14 @@ Write Carob dataset files. This calls \code{\link{check_terms}}
 
 
 \usage{
-write_files(dataset, records, path, cleanuri, group="", id=NULL)
+write_files(path, dataset, records, timrecs=NULL, id=NULL)
 }
  
 \arguments{
+  \item{path}{character. Local path to the Carob repo}
   \item{dataset}{data.frame. One row with dataset level variables}
   \item{records}{data.frame. Dataset records}
-  \item{path}{chacter. Local path to the Carob repo}
-  \item{cleanuri}{character. A "clean" URI made with \code{\link{simple_uri}}}
-  \item{group}{character. Optional group}
+  \item{timerecs}{data.frame. Dataset with temporal records}
   \item{id}{character. Optional identifies if a dataset has multiple subdatasets}
 }
 
