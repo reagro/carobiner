@@ -35,11 +35,11 @@ get_license <- function(x) {
 					return("CIMMYT license")
 				}
 			}
-  			g <- regmatches(g, gregexpr('Creative (.+?) license', g, ignore.case=TRUE))[[1]]
-			if (tolower(g) == "creative commons attribution 4.0 international license") {
-				g <- "CC-BY-4.0"
-			}
-			return(g)
+  			gg <- regmatches(g, gregexpr('Creative (.+?) license', g, ignore.case=TRUE)) |> unlist()
+			if (any(tolower(gg) == "creative commons attribution 4.0 international license")) {
+				gg <- "CC-BY-4.0"
+			} 
+			return(gg[1])
 		} else {
 			trm <- g[1]
 			trm <- gsub("http://", "", trm)
