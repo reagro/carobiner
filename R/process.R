@@ -104,7 +104,6 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		x[is.na(x)] <- ""
 		x[] <- sapply(x, \(i) gsub("\n", " ", i))
 		x[] <- sapply(x, \(i) gsub("\t", " ", i))
-
 		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
 		if ("reference" %in% colnames(y)) {
 			y$reference <- gsub("\n", " ", y$reference)
