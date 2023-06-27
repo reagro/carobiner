@@ -12,7 +12,7 @@ Make the Carob database
 \description{
 Make the Carob database. 
 
-\code{run_carob} runs a single Carob script for a dataset. Carob scripts download data to "carob/data/raw", re-organize th data, check the variable names and controlled vocabulary used, and write clean data to "carob/data/clean"
+\code{run_carob} runs a single Carob script for a dataset. Carob scripts download data to "carob/data/raw", re-organize th data, check the variable names and controlled vocabulary used, check data types, ranges, and location of the coordinates, and write clean data to "carob/data/clean"
 
 \code{process_carob} runs all the Carob scripts. 
 
@@ -24,9 +24,9 @@ Make the Carob database.
 
 \usage{
 run_carob(cleanuri, path, group="", quiet=FALSE)
-process_carob(path, group="", quiet=FALSE)
+process_carob(path, group="", quiet=FALSE, check="all")
 compile_carob(path, group="", split_license=FALSE, zip=FALSE)
-make_carob(path, group="", quiet=FALSE, ...)
+make_carob(path, group="", quiet=FALSE, check="all", ...)
 }
  
 \arguments{
@@ -34,7 +34,8 @@ make_carob(path, group="", quiet=FALSE, ...)
   \item{path}{character. Local path to the Carob repo}
   \item{group}{character. group name}
   \item{quiet}{logical. Be quiet?}
-  \item{split_license}{logical. Make a seperate aggregation for data with a CC license?}
+  \item{check}{character. "none" to do no checking; "nogeo" to not check coordinates. "all" and all other values to do all checks}
+  \item{split_license}{logical. Make a separate aggregation for data with a CC license?}
   \item{zip}{logical. zip the aggregated data?}
   \item{...}{additional arguments passed to compile_carob}
 }

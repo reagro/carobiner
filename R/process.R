@@ -39,7 +39,9 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 	cleanuri <- dataset$dataset_id
 	stopifnot(all(records$dataset_id == cleanuri))
 
-	check_terms(dataset, records, path, group)
+	opt <- options("carobiner_check")
+	check_terms(dataset, records, path, group, check=opt)	
+	
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
 	if (!is.null(id)) {
@@ -182,12 +184,18 @@ run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
 
 
 
-process_carob <- function(path, group="", quiet=FALSE) {
+process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
+
+	options(carobiner_check=check)
+	on.exit(options(carobiner_check=NULL))
+
 	w <- options("warn")
 	if (w$warn < 1) {
-		on.exit(options(warn=w$warn))
+		on.exit(options(warn=w$warn), add=TRUE)
 		options(warn=1)
 	}
+
+
 	if (group != "") {
 		check_group(group, path)
 	}
@@ -228,10 +236,10 @@ process_carob <- function(path, group="", quiet=FALSE) {
 }
 
 
-make_carob <- function(path, group="", quiet=FALSE, ...) {
+make_carob <- function(path, group="", quiet=FALSE, check="all", ...) {
 	get_packages(group)
-	process_carob(path, group, quiet)
-	compile_carob(path, group, ...)
+	process_carob(path, group=group, quiet=quiet, check=check)
+	compile_carob(path, group=group, ...)
 }
 
 

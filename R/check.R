@@ -147,8 +147,7 @@ check_ranges <- function(x, trms, path) {
 		message(paste0("    invalid: ", bad))
 	}
 
-	answ <- answ & check_cropyield(x, path) & check_lonlat(x, path)
-	answ
+	answ & check_cropyield(x, path)
 }
 
 
@@ -196,10 +195,14 @@ check_group <- function(name, path) {
 	ok
 }
 
-check_terms <- function(dataset, records, path, group) {
+check_terms <- function(dataset, records, path, group, check="all") {
 
 	answ <- TRUE
 	check_group(group, path)
+
+	if (check == "none") {
+		return(answ)
+	}
 	
 	for (i in 1:2) {
 		if (i == 1) {
@@ -282,6 +285,9 @@ check_terms <- function(dataset, records, path, group) {
 				answ <- FALSE
 			} else {
 				if (!check_ranges(x[, nms], trms, path)) answ <- FALSE
+			}
+			if (check != "nogeo") {
+				if (!check_lonlat(x, path)) answ <- FALSE
 			}
 		}
 	}
