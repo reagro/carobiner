@@ -127,7 +127,9 @@ check_ranges <- function(x, trms, path) {
 		v <- stats::na.omit(x[[trms$name[i]]])
 		if ( any((v < rng[[1]]) | (v > rng[2])) ) {
 			answ <- FALSE
-			bad <- c(bad, trms$name[i])
+			vrng <- round(range(v, na.rm=TRUE),3)
+			msg  <- paste0(trms$name[i], " (", vrng[1], ", ", vrng[2], ")")
+			bad  <- c(bad, msg)
 		}
 	}
 	if (!is.null(bad)) {
