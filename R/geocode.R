@@ -59,14 +59,15 @@ geocode_nominatim <- function(place, input) {
 	names(x) <- place
 	
 	y <- lapply(x, \(s) {
-			if (length(s) == 0) {
-				cbind(NA, NA)
-			} else {
-				v <- s[1]
-				v <- v[which.min(v$place_rank)]
-				terra::crds(terra::centroids(v))
-			}
-		})
+		if (length(s) == 0) {
+			cbind(NA, NA)
+		} else {
+			v <- s[1]
+			v <- v[which.min(v$place_rank)]
+			terra::crds(terra::centroids(v, inside=TRUE))
+		}
+	})
+	
 	y <- do.call(rbind, y)
 	colnames(y) <- c("lon", "lat")
 	y <- data.frame(input, y)
