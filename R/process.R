@@ -36,6 +36,10 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 	stopifnot(nrow(dataset) == 1)
 
 	group <- dataset$group
+	if (!check_group(group, path)) {
+		stop(paste(group, "is not a known group"))
+	}
+
 	cleanuri <- dataset$dataset_id
 	stopifnot(all(records$dataset_id == cleanuri))
 

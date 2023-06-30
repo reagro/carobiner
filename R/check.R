@@ -204,11 +204,39 @@ check_group <- function(name, path) {
 	ok
 }
 
+check_dataset <- function(x, trms) {
+	answ <- TRUE
+	if (grepl("http", x$uri)) {
+		message("http in uri")
+		answ <- FALSE
+	}
+	nms <- trms$name[trms$NAok == "no"]
+	j <- is.na(x[,nms])
+	if (any(j)) {
+		message(paste0("    NA in ", paste(nms[j], collapse=", ")))
+		answ <- FALSE
+	}
+	
+	if (isTRUE(nchar(x$publication) > 0 )) {
+		allpubs <- list.files(file.path(path, "references"))
+		pubs <- unlist(strsplit(x$publication, ";"))
+		pubs <- simple_uri(pubs)
+		for (pub in pubs) {
+			where <- grep(pub, allpubs)
+			if (length(where) == 0) {
+				message(paste("    citation reference file missing:", pub))	
+				answ <- FALSE
+			}
+		}
+	} 
+	
+	answ
+}
+
+
 check_terms <- function(dataset, records, path, group, check="all") {
 
 	answ <- TRUE
-	check_group(group, path)
-
 	if (check == "none") {
 		return(answ)
 	}
@@ -233,8 +261,6 @@ check_terms <- function(dataset, records, path, group, check="all") {
 			message("    whitespace in variable: ", b)
 			answ <- FALSE		
 		}
-
-		
 		nms <- names(x)
 		trms <- get_terms(type, group, path)
 
@@ -276,18 +302,6 @@ check_terms <- function(dataset, records, path, group, check="all") {
 			}
 		}
 
-		if ((type=="dataset") & isTRUE(nchar(x$publication) > 0 )) {
-			allpubs <- list.files(file.path(path, "references"))
-			pubs <- unlist(strsplit(x$publication, ";"))
-			pubs <- simple_uri(pubs)
-			for (pub in pubs) {
-				where <- grep(pub, allpubs)
-				if (length(where) == 0) {
-					message(paste("    citation reference file missing:", pub))	
-					answ <- FALSE
-				}
-			}
-		} 
 		
 		if (type=="records") {
 			if (!check_datatypes(x[, nms], trms)) {
@@ -298,6 +312,8 @@ check_terms <- function(dataset, records, path, group, check="all") {
 			if (check != "nogeo") {
 				if (!check_lonlat(x, path)) answ <- FALSE
 			}
+		} else {
+			if (!check_dataset(x, trms)) answ <- FALSE
 		}
 	}
 	if (!answ) {
