@@ -1,5 +1,10 @@
 
 
+check_consistency <- function(x, name) {
+	#e.g. if OM is used, then the type and amount should be specifiec 
+	TRUE
+}
+
 check_date <- function(x, name) {
 
 	x <- stats::na.omit(x[[name]])
@@ -149,6 +154,8 @@ check_ranges <- function(x, trms, path) {
 		message(paste0("    invalid: ", bad))
 	}
 
+	answ <- answ & check_consistency(x, path)
+	
 	answ & check_cropyield(x, path)
 }
 
