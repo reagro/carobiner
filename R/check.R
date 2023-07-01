@@ -53,7 +53,8 @@ check_lonlat <- function(x, path, res) {
 		return(TRUE)
 	}
 
-	wres <- ifelse(res=="high", 1, 5)
+#	wres <- ifelse(res=="high", 1, 5)
+	wres <- 1
 	w <- geodata::world(path=file.path(path, "data"), res=wres)
 	x <- unique(stats::na.omit(x[, c("country", "longitude", "latitude")]))
 	e <- terra::extract(w, x[, c("longitude", "latitude")])
