@@ -1,4 +1,10 @@
 
+is_excel <- function(f) {
+	v <- readBin(f, "raw", n=4)
+	all(as.numeric(v) == c(80, 75, 3, 4))
+}
+
+
 
 
 change_names <- function(x, from, to, must_have=TRUE) {
