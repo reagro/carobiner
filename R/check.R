@@ -47,14 +47,15 @@ check_date <- function(x, name) {
 }
 
 
-check_lonlat <- function(x, path) {
+check_lonlat <- function(x, path, res) {
 
 	if (!all(c("longitude", "latitude") %in% colnames(x))) {
 		return(TRUE)
 	}
-	
-	w <- geodata::world(path=file.path(path, "data"), res=1)
-	x <- stats::na.omit(x[, c("country", "longitude", "latitude")])
+
+	wres <- ifelse(res=="high", 1, 5)
+	w <- geodata::world(path=file.path(path, "data"), res=wres)
+	x <- unique(stats::na.omit(x[, c("country", "longitude", "latitude")]))
 	e <- terra::extract(w, x[, c("longitude", "latitude")])
 	e <- cbind(e, country=x$country)
 	i <- is.na(e$NAME_0)
@@ -310,7 +311,7 @@ check_terms <- function(dataset, records, path, group, check="all") {
 				if (!check_ranges(x[, nms], trms, path)) answ <- FALSE
 			}
 			if (check != "nogeo") {
-				if (!check_lonlat(x, path)) answ <- FALSE
+				if (!check_lonlat(x, path, check)) answ <- FALSE
 			}
 		} else {
 			if (!check_dataset(x, trms)) answ <- FALSE
