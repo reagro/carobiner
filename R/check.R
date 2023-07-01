@@ -50,31 +50,34 @@ check_date <- function(x, name) {
 check_lonlat <- function(x, path, res) {
 
 	if (!all(c("longitude", "latitude") %in% colnames(x))) {
+		# there is already a message for missing required variables
 		return(TRUE)
 	}
+	answ <- TRUE
 
 #	wres <- ifelse(res=="high", 1, 5)
 	wres <- 1
 	w <- geodata::world(path=file.path(path, "data"), res=wres)
 	x <- unique(stats::na.omit(x[, c("country", "longitude", "latitude")]))
 	e <- terra::extract(w, x[, c("longitude", "latitude")])
-	e <- cbind(e, country=x$country)
+	e$country <- x$country
+	e <- e[, c("NAME_0", "country")]
 	i <- is.na(e$NAME_0)
 	if (any(i)) {
 		u <- unique(e$country[i])
 		bad <- paste(u, collapse=", ")
 		message(paste0("    coordinates not on land for: ", bad))
-		return(FALSE)		
+		answ <- FALSE
 	} 
-	e <- stats::na.omit(e)
-	i <- e$NAME_0 != x$country
+	e <- unique(stats::na.omit(e))
+	i <- e$NAME_0 != e$country
 	if (any(i)) {
-		u <- unique(e$NAME_0[i])
+		u <- apply(e[i, ,drop=FALSE], 1, paste, collapse="/")
 		bad <- paste(u, collapse=", ")
-		message(paste0("    coordinates in wrong country for: ", bad))
-		return(FALSE)		
+		message(paste0("    coordinates in wrong country: ", bad))
+		answ <- FALSE
 	}
-	return(TRUE)		
+	return(answ)		
 }
 
 check_cropyield <- function(x, path) {
