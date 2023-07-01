@@ -3,7 +3,7 @@ Type: Package
 Title: Compiling agricultural research data 
 Description: A collection functions to support the "Carob" project. See https://github.com/reagro/carob for details.
 Version: 0.3-1
-Depends: geodata, terra, readxl, writexl, data.table	
+Depends: geodata, terra, readxl, writexl, data.table, archive	
 Suggests: jsonlite, revtools, httr, stringr, reshape2
 Date: 2023-06-15
 Encoding: UTF-8
