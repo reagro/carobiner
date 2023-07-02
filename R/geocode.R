@@ -69,8 +69,10 @@ geocode_nominatim <- function(place, input) {
 	})
 	
 	y <- do.call(rbind, y)
+	y <- round(y, 4)
 	colnames(y) <- c("lon", "lat")
 	y <- data.frame(input, y)
+	
 	put <- parse(text = utils::capture.output(dput(y[!is.na(y$lon), ])))[[1]]
 	list(df=y, svc=x, put=put)
 } 

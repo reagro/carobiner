@@ -74,7 +74,7 @@ check_lonlat <- function(x, path, res) {
 	if (any(i)) {
 		u <- apply(e[i, ,drop=FALSE], 1, paste, collapse="/")
 		bad <- paste(u, collapse=", ")
-		message(paste0("    coordinates in wrong country: ", bad))
+		message(paste0("    coordinates/country conflict: ", bad))
 		answ <- FALSE
 	}
 	return(answ)		
