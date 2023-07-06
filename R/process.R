@@ -12,7 +12,7 @@ get_terms <- function(type, group, path) {
 	if (type == "records") {
 		trms <- utils::read.csv(file.path(path, "terms", "records.csv"))
 		if (group != "") {
-			grp_terms <- file.path(path, "terms", group, "records.csv")
+			grp_terms <- file.path(path, "terms", paste0(group, "_records.csv"))
 			if (file.exists(grp_terms)) {
 				trms2 <- utils::read.csv(grp_terms)
 				trms <- rbind(trms, trms2)
