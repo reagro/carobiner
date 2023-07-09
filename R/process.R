@@ -2,9 +2,20 @@
 # May 2021
 # License GPL3
 
-get_data <- function(uri, path, group="") {
+get_data <- function(uri, path, group) {
 	path <- file.path(path, "data/raw", group)
 	data_from_uri(uri, path)
+}
+
+get_more_data <- function(url, dataset_id, path, group) {
+	f <- basename(url)
+	path <- file.path(path, "data/raw", group, dataset_id, f)
+	for (i in seq_along(f)) {
+		if (!file.exists(path[i])) {
+			download.file(path[i], f[i], mode="wb")
+		}
+	}
+	f
 }
 
 

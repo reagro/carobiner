@@ -7,18 +7,18 @@ Download a data set
 }
 
 \description{
-Download the data file associated with a URI. 
+Download the files associated with a URI. 
 }
 
 
 \usage{
-get_data(uri, path, group="")
+get_data(uri, path, group)
 }
  
 \arguments{
-  \item{uri}{character. A dataset URI}
+  \item{uri}{character. The URI of a dataset}
   \item{path}{character. The path to the Carob repo}
-  \item{group}{character. Optional, a group name}
+  \item{group}{character. The group name}
 }
 
 \value{
