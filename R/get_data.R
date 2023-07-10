@@ -113,7 +113,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 		files <- paste0(f$id, collapse = ",")
 		fu <- paste0(protocol, domain, "/api/access/datafiles/", files, "?format=original")
 	## temporary fix because WorldAgroFor https cert has expired
-		if (grepl("worldagroforestry", fu) || grepl("cirad.fr", fu)) {
+		if (grepl("worldagroforestry", fu) || grepl("cirad.fr", fu) || grepl("cipotato", fu)) {
 			utils::download.file(fu, zipf, quiet=TRUE, mode="wb", method="curl", extra="-k")
 		} else {
 			utils::download.file(fu, zipf, mode="wb", quiet=TRUE)
@@ -140,7 +140,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 			files <- paste0(f$id[k], collapse = ",")
 			fu <- paste0(protocol, domain, "/api/access/datafiles/", files, "?format=original")
 			zipi <- file.path(path, paste0(uname, "_", i, ".zip"))
-			if (grepl("worldagroforestry", uu)  || grepl("cirad.fr", fu) ) {
+			if (grepl("worldagroforestry", uu)  || grepl("cirad.fr", fu) || grepl("cipotato", fu)) {
 ## temporary fix because WorldAgroFor https cert has expired
 				utils::download.file(fu, zipi, quiet=TRUE, mode="wb", method="curl", extra="-k")
 			} else {
