@@ -70,8 +70,10 @@ simple_uri <- function(uri, reverse=FALSE) {
 	#js <- httr::content(r, as = "text", encoding = "UTF-8")
 	# but for cimmyt...
 	tmpf <- tempfile()
-	if (grepl("worldagroforestry", uu) || grepl("cirad.fr", uu)) {
+	
+	if (grepl("worldagroforestry", uu) || grepl("cirad.fr", uu) || grepl("cipotato", uu)) {
 		# temporary fix because WorldAgroFor https cert has expired
+		# not sure why for CIP on Ubuntu (cert expired)
 		utils::download.file(uu, tmpf, quiet=TRUE, method="curl", extra="-k")
 	} else {
 		utils::download.file(uu, tmpf, quiet=TRUE)
