@@ -209,7 +209,7 @@ check_group <- function(name, path) {
 	ok
 }
 
-check_dataset <- function(x, trms) {
+check_dataset <- function(x, trms, path) {
 	answ <- TRUE
 	if (grepl("http", x$uri)) {
 		message("http in uri")
@@ -318,7 +318,7 @@ check_terms <- function(dataset, records, path, group, check="all") {
 				if (!check_lonlat(x, path, check)) answ <- FALSE
 			}
 		} else {
-			if (!check_dataset(x, trms)) answ <- FALSE
+			if (!check_dataset(x, trms, path)) answ <- FALSE
 		}
 	}
 	if (!answ) {

@@ -12,7 +12,7 @@ Write Carob dataset files. This calls \code{\link{check_terms}}
 
 
 \usage{
-write_files(path, dataset, records, timrecs=NULL, id=NULL)
+write_files(path, dataset, records, timerecs=NULL, id=NULL)
 }
  
 \arguments{

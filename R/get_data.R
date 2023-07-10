@@ -151,7 +151,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 		}
 	}	
 	ff <- .dataverse_unzip(zipf, path, unzip)
-	f7 <- list.files(path, pattern="\\.7z$", full=TRUE)
+	f7 <- list.files(path, pattern="\\.7z$", full.names=TRUE)
 	if (length(f7) > 0) {
 		for (f in f7) {
 			fext <- archive::archive_extract(f, path)

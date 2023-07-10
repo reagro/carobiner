@@ -12,7 +12,7 @@ get_more_data <- function(url, dataset_id, path, group) {
 	path <- file.path(path, "data/raw", group, dataset_id, f)
 	for (i in seq_along(f)) {
 		if (!file.exists(path[i])) {
-			download.file(path[i], f[i], mode="wb")
+			utils::download.file(path[i], f[i], mode="wb")
 		}
 	}
 	f
@@ -33,8 +33,10 @@ get_terms <- function(type, group, path) {
 				}
 			}
 		}
-	} else {
+	} else if (type=="dataset") {
 		trms <- utils::read.csv(file.path(path, "terms", "dataset.csv"))
+	} else {
+		stop("invalid 'type' argument; should be 'records' or 'dataset'") 
 	}
 	names(trms)[1] <- "name" # excel seems to mess this up
 	trms
