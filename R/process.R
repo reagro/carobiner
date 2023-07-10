@@ -23,7 +23,7 @@ get_terms <- function(type, group, path) {
 	if (type == "records") {
 		trms <- utils::read.csv(file.path(path, "terms", "records.csv"))
 		if (group != "") {
-			grp_terms <- file.path(path, "terms", paste0(group, "_records.csv"))
+			grp_terms <- file.path(path, "terms", paste0("records_", group, ".csv"))
 			if (file.exists(grp_terms)) {
 				trms2 <- utils::read.csv(grp_terms)
 				trms <- rbind(trms, trms2)
@@ -42,6 +42,16 @@ get_terms <- function(type, group, path) {
 	trms
 }
 
+
+get_accepted_values <- function(term, path) {
+	f <- file.path(path, "terms", paste0(term, ".csv"))
+	if (file.exists(f)) {
+		utils::read.csv(f)
+	} else {
+		warning("no accepted values available for this term")
+		return(NULL)
+	}
+}
 
 
 write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {

@@ -3,11 +3,11 @@
 \alias{get_terms}
 
 \title{
-Get a controlled vocabulary
+Get accepted terms
 }
 
 \description{
-Get a controlled vocabulary
+Get a data.frame with accepted terms (variable names)
 }
 
 
@@ -24,3 +24,4 @@ get_terms(type, group, path)
 \value{
 character
 }
+

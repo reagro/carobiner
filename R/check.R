@@ -91,7 +91,7 @@ check_cropyield <- function(x, path) {
 		message(paste0("    crop yield too low (tons not kg?): ", bad))
 		return(FALSE)
 	}
-	trms <- utils::read.csv(file.path(path, "terms", "crops.csv"))
+	trms <- utils::read.csv(file.path(path, "terms", "crop.csv"))
 	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
 	trms <- stats::na.omit(trms)
 	if (nrow(trms) == 0) return(TRUE)
