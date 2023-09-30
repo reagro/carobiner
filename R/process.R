@@ -25,8 +25,11 @@ get_terms <- function(type, group, path) {
 		grps <- utils::read.csv(file.path(path, "terms", "groups.csv"))
 		include <- grps$include[grps$name == group]
 		if (include != "") {
-			add <- utils::read.csv(file.path(path, "terms", paste0("records_", include, ".csv")))
-			trms <- rbind(trms, add)
+			include <- trimws(unlist(strsplit(include, ";")))
+			for (inc in include) {
+				add <- utils::read.csv(file.path(path, "terms", paste0("records_", inc, ".csv")))
+				trms <- rbind(trms, add)
+			}
 		}
 		grp_terms <- file.path(path, "terms", paste0("records_", group, ".csv"))
 		if (file.exists(grp_terms)) {

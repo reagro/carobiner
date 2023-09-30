@@ -81,7 +81,7 @@ check_lonlat <- function(x, path, res) {
 }
 
 check_cropyield <- function(x, path) {
-
+	if (!all(c("crop", "yield") %in% names(x))) return(TRUE)
 	x <- x[, c("crop", "yield")]
 	a <- stats::aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
 	a <- a[a$yield < 100, ]
