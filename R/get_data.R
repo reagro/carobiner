@@ -57,7 +57,6 @@ simple_uri <- function(uri, reverse=FALSE) {
 	file.path(path, zf)
 }
 
-#		.download_dataverse_files(u, baseu, path, uname, domain, protocol, unzip, zipf1)
 
 
 .download_dataverse_files <- function(u, baseu, path, uname, domain, protocol, unzip, zipf) {
@@ -274,8 +273,7 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 	# For CIRAD dataverse
 	if (grepl("18167", uri)) {
 	  x <- httr::GET(uri, httr::add_headers("user-agent" = "Mozilla/5.0", "Cache-Control" = "no-cache"))
-	}
-	else {
+	} else {
 	  x <- httr::GET(uri)
 	}
 

@@ -22,15 +22,19 @@ get_more_data <- function(url, dataset_id, path, group) {
 get_terms <- function(type, group, path) {
 	if (type == "records") {
 		trms <- utils::read.csv(file.path(path, "terms", "records.csv"))
-		if (group != "") {
-			grp_terms <- file.path(path, "terms", paste0("records_", group, ".csv"))
-			if (file.exists(grp_terms)) {
-				trms2 <- utils::read.csv(grp_terms)
-				trms <- rbind(trms, trms2)
-				tab <- table(trms[,1])
-				if (any(tab > 1)) {
-					print(paste("duplicated terms:", names(tab[tab>1])))
-				}
+		grps <- utils::read.csv(file.path(path, "terms", "groups.csv"))
+		include <- grps$include[grps$name == group]
+		if (include != "") {
+			add <- utils::read.csv(file.path(path, "terms", paste0("records_", include, ".csv")))
+			trms <- rbind(trms, add)
+		}
+		grp_terms <- file.path(path, "terms", paste0("records_", group, ".csv"))
+		if (file.exists(grp_terms)) {
+			trms2 <- utils::read.csv(grp_terms)
+			trms <- rbind(trms, trms2)
+			tab <- table(trms[,1])
+			if (any(tab > 1)) {
+				print(paste("duplicated terms:", names(tab[tab>1])))
 			}
 		}
 	} else if (type=="dataset") {
