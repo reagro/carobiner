@@ -2,7 +2,7 @@
 
 update_todo <- function(path) {
 
-	ftodo <- file.path(path, "data", "to-do.csv")
+	ftodo <- file.path(path, "todo", "to-do.csv")
 	todo <- utils::read.csv(ftodo)
 	todo$uri <- trimws(todo$uri)
 	uri <- gsub("https://doi.org/", "doi:", todo$uri)
