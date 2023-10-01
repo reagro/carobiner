@@ -51,7 +51,7 @@ get_terms <- function(type, group, path) {
 
 
 get_accepted_values <- function(term, path) {
-	f <- file.path(path, "terms", paste0(term, ".csv"))
+	f <- file.path(path, "terms", paste0("voc_", term, ".csv"))
 	if (file.exists(f)) {
 		utils::read.csv(f)
 	} else {

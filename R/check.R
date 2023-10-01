@@ -91,7 +91,7 @@ check_cropyield <- function(x, path) {
 		message(paste0("    crop yield too low (tons not kg?): ", bad))
 		return(FALSE)
 	}
-	trms <- utils::read.csv(file.path(path, "terms", "crop.csv"))
+	trms <- utils::read.csv(file.path(path, "terms", "voc_crop.csv"))
 	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
 	trms <- stats::na.omit(trms)
 	if (nrow(trms) == 0) return(TRUE)
@@ -289,7 +289,7 @@ check_terms <- function(dataset, records, path, group, check="all") {
 		voc <- voc[voc$name %in% nms, ]
 		if (nrow(voc) > 0) {
 			for (i in 1:nrow(voc)) {
-				accepted <- utils::read.csv(file.path(path, "terms", paste0(voc$vocabulary[i], ".csv")))[,1]
+				accepted <- utils::read.csv(file.path(path, "terms", paste0("voc_", voc$vocabulary[i], ".csv")))[,1]
 				provided <- unique(x[, voc$name[i]])
 				if (voc$required[i] != "yes") {
 					provided <- stats::na.omit(provided)
