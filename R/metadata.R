@@ -21,6 +21,9 @@ get_license <- function(x) {
 	lic <- x$data$latestVersion$license
 	trms <- x$data$latestVersion$termsOfUse
 	if (is.null(trms)) trms <- x$license
+	if (isTRUE(grepl("This dataset is made available without information", trms))) {
+		return("unknown")
+	}
 	if ((is.null(lic) || (lic[1] == "NONE")) && (!is.null(trms))) {
 		trm <- strsplit(trms, '\"')[[1]]
 		g <- grep("/creativecommons.org/", tolower(trm), value=TRUE)
@@ -68,6 +71,7 @@ get_license <- function(x) {
 	} else {
 		lic <- gsub(" ", "-", gsub("CC-ZERO", "CC-0", lic))
 	}
+	if (is.null(lic)) lic <- "unknown"
 	lic
 }
 
