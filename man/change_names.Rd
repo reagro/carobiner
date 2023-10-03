@@ -17,9 +17,9 @@ change_names(x, from, to, must_have=TRUE)
  
 \arguments{
   \item{x}{data.frame}
-  \item{from}{names to be changed}
-  \item{to}{what names need to be changed to}
-  \item{must_have}{logical. Give an error of one of the names is not present}
+  \item{from}{column names to be changed}
+  \item{to}{what column names need to be changed to}
+  \item{must_have}{logical. Give an error of one of the names is not present or duplicated}
 }
 
 \value{

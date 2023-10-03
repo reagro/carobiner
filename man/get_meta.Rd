@@ -19,8 +19,8 @@ get_metadata(cleanuri, path, group="", major=1, minor=0)
   \item{cleanuri}{character. A "clean" URI made with \code{\link{simple_uri}}}
   \item{path}{the path to the Carob repo}
   \item{group}{optinal, a group name}
-  \item{major}{major version to check for}
-  \item{minor}{minor version to check for}
+  \item{major}{major version to check for, alerts when there's a new major version}
+  \item{minor}{minor version to check for, alerts when there's a new minor version}
 }
 
 \value{
