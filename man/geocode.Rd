@@ -42,7 +42,7 @@ list
 
   h <- geocode (country = x$country, location = x$adm2, service = “nominatim”) 
 
-  h <- geocode (country = x$country, location = x$adm2, service = “geonames”,          username = “myname”) 
+  h <- geocode (country = x$country, location = x$adm2, service = “geonames”, username = “myname”) 
   
   d <- geocode_duplicates(x, vars = NULL)
   
