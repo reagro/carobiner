@@ -3,11 +3,11 @@
 \alias{replace_values}
 
 \title{
-Change values in a vector
+Replace values in a vector
 }
 
 \description{
-Change the values in a vector
+Replace the values in a vector
 }
 
 \usage{
@@ -18,7 +18,7 @@ replace_values(x, from, to, must_have=TRUE)
   \item{x}{vector}
   \item{from}{values to be changed}
   \item{to}{what values need to be changed to}
-  \item{must_have}{logical. Give an error if a value is not present}
+  \item{must_have}{logical. Give an error if a value in from is not in x}
 }
 
 \value{

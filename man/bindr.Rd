@@ -3,7 +3,7 @@
 \alias{bindr}
 
 \title{
-rbind data.frames possibly with different column names
+rbind data.frames that do not necessarily have the same column names
 }
 
 \description{
