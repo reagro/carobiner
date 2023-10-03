@@ -19,14 +19,14 @@ geocode(country, location, adm1=NULL, adm2=NULL, adm3=NULL, adm4=NULL, adm5=NULL
 }
  
 \arguments{
-  \item{country}{character or vector. cannot be missing, cannot contain NAs}
-  \item{location}{character or vector.cannot be missing,cannot contain NAs}
-  \item{adm1}{character, vector or NULL}
-  \item{adm2}{character, vector or NULL}
-  \item{adm3}{character, vector or NULL}
-  \item{adm4}{character, vector or NULL}
-  \item{adm5}{character, vector or NULL}
-  \item{service}{character. two "nominatim","geonames" (more to follow)}
+  \item{country}{character or vector. Cannot be missing or contain \code{NA}s}
+  \item{location}{character or vector. Cannot be missing or contain \code{NA}s}
+  \item{adm1}{character or NULL}
+  \item{adm2}{character or NULL}
+  \item{adm3}{character or NULL}
+  \item{adm4}{character or NULL}
+  \item{adm5}{character or NULL}
+  \item{service}{character. one of "nominatim" or "geonames"}
   \item{...}{character,additional arguments to pass to the service (e.g., "username=myname")}
 
   \item{x}{data.frame with carob records}
