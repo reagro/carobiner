@@ -24,7 +24,3 @@ read.excel(f, ...)
 data.frame
 }
 
-\example{
-f <- "carob_fertilizer.csv"
-read.excel(f)
-}

@@ -176,7 +176,7 @@ check_datatypes <- function(x, trms) {
 	answ <- TRUE
 	if (any(i)) {
 		bad <- paste(cls[i,3], collapse=", ")
-		message(paste("    bad datatype:", bad))
+		stop(paste("    bad datatype:", bad))
 		answ <- FALSE
 	}
 	answ
