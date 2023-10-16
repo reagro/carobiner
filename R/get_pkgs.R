@@ -50,7 +50,7 @@ get_packages <- function(path, group="") {
 	pkgs1 <- unique(unlist(sapply(ff, libfun1)))
 	pkgs2 <- unique(unlist(sapply(ff, libfun2)))
 	
-	pkgs <- unique(c(pkgs1, pkgs2, "terra", "geodata", "data.table", "writexl", "readxl", "jsonlite", "revtools", "httr"))	
+	pkgs <- unique(c(pkgs1, pkgs2, "terra", "geodata", "data.table", "writexl", "readxl", "jsonlite", "revtools", "httr", "stringr"))	
 	ipkgs <- rownames(utils::installed.packages())
 	for (pk in pkgs) {
 	  if (!(pk %in% ipkgs)) {
