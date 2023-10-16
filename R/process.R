@@ -88,6 +88,7 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 	data.table::fwrite(records, outf, row.names=FALSE)
 	mf <- gsub(".csv$", "_meta.csv", outf)
 #	utils::write.csv(dataset, mf, row.names=FALSE)
+	if (is.null(dataset$carob_date)) dataset$carob_date <- ""
 	data.table::fwrite(dataset, mf, row.names=FALSE)
 	TRUE
 }
