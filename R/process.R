@@ -234,7 +234,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 		check_group(group, path)
 	}
 	
-	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE)
+	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE, recursive=TRUE)
 	file.remove(ff)
 	base <- file.path(path, "scripts")
 	ff <- list.files(file.path(base, group), pattern="R$", full.names=TRUE, recursive=TRUE)
