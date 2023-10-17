@@ -168,7 +168,13 @@ check_ranges <- function(x, trms, path) {
 check_datatypes <- function(x, trms) {
 	nms <- colnames(x)
 	trs <- trms[match(nms, trms[,1]), ]
-	cls <- cbind(sapply(x, class), trs$type, nms)
+	cls <- sapply(x, class)
+	if (is.list(cls)) {
+		i <- sapply(cls, length)
+		i <- names(i[i>1])
+		stop(paste("    bad datatype:", paste(i, collapse=", ")))
+	}
+	cls <- cbind(cls, trs$type, nms)
 	cls <- cls[cls[,2] != "", ]
 	i <- (cls[,1] == "integer") & (cls[,2] == "numeric")
 	cls[i, 1] <- "numeric"
@@ -267,7 +273,7 @@ check_terms <- function(dataset, records, path, group, check="all") {
 			answ <- FALSE		
 		}
 		nms <- names(x)
-		trms <- get_terms(type, group, path)
+		trms <- carobiner:::get_terms(type, group, path)
 
 		xnms <- nms[!(nms %in% trms$name)]
 		if (length(xnms) > 0) {
@@ -294,15 +300,17 @@ check_terms <- function(dataset, records, path, group, check="all") {
 				if (voc$required[i] != "yes") {
 					provided <- stats::na.omit(provided)
 				} 
-				if (!is.null(voc$multiple_allowed)) {
-					if (voc$multiple_allowed[i] == "yes") {
-						provided <- unlist(strsplit(provided, "; "))
+				if (length(provided) > 0) {
+					if (!is.null(voc$multiple_allowed)) {
+						if (voc$multiple_allowed[i] == "yes") {
+							provided <- unlist(strsplit(provided, "; "))
+						}
 					}
-				}
-				bad <- provided[!(provided %in% accepted)]
-				if (length(bad) > 0) {
-					message(paste("   ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
-					answ <- FALSE
+					bad <- provided[!(provided %in% accepted)]
+					if (length(bad) > 0) {
+						message(paste("   ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
+						answ <- FALSE
+					}
 				}
 			}
 		}
