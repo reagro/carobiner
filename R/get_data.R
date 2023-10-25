@@ -218,8 +218,9 @@ simple_uri <- function(uri, reverse=FALSE) {
 	} else {
 		files <- c(files, outf)
 	}
-	utils::unzip(outf, exdir = path)
+	utils::unzip(outf, exdir = file.path(path))
 	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+	files <- list.files(file.path(path), full.names = TRUE)
 	files
 }
 
