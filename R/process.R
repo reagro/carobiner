@@ -73,8 +73,23 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 	cleanuri <- dataset$dataset_id
 	stopifnot(all(records$dataset_id == cleanuri))
 
+	dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
+
 	opt <- options("carobiner_check")
-	check_terms(dataset, records, path, group, check=opt)	
+	answ <- carobiner:::check_terms(dataset, records, path, group, check=opt)	
+	fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
+	if (nrow(answ) > 0) {
+		answ$group <- group
+		answ$dataset_id <- cleanuri
+		answ$contributor <- dataset$carob_contributor
+		data.table::fwrite(answ, fmsg, row.names=FALSE)
+		for (i in 1:nrow(answ)) {
+			message(paste("   ", answ$msg[i]))
+		}
+		message(paste("    contributor:", dataset$carob_contributor))
+	} else {
+		if (file.exists(fmsg)) file.remove(fmsg)
+	}
 	
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
@@ -90,6 +105,7 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 #	utils::write.csv(dataset, mf, row.names=FALSE)
 	if (is.null(dataset$carob_date)) dataset$carob_date <- ""
 	data.table::fwrite(dataset, mf, row.names=FALSE)
+
 	TRUE
 }
 
@@ -237,6 +253,9 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 	
 	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE, recursive=TRUE)
 	file.remove(ff)
+	ff <- list.files(file.path(path, "data", "messages", group), pattern=".csv$", full.names=TRUE)
+	file.remove(ff)
+
 	base <- file.path(path, "scripts")
 	ff <- list.files(file.path(base, group), pattern="R$", full.names=TRUE, recursive=TRUE)
 	ffun <- grepl("^_", basename(ff))
@@ -263,7 +282,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 		ok <- FALSE
 		try(ok <- carob_script(path))
 		if (!ok) {
-			message(paste("processing failed for:\n", basename(f)))
+			message(paste("  processing failed for:\n", basename(f)))
 		}
 		utils::flush.console()
 	}

@@ -1,8 +1,8 @@
 
 
-check_consistency <- function(x, name) {
+check_consistency <- function(x, name, answ) {
 	#e.g. if OM is used, then the type and amount should be specifiec 
-	TRUE
+	answ
 }
 
 check_date <- function(x, name) {
@@ -13,26 +13,26 @@ check_date <- function(x, name) {
 	if (any(!(n %in% c(4, 7, 10)))) {
 		return(FALSE)
 	}
-	ans <- TRUE
+	ok <- TRUE
 	today <- as.Date(Sys.time())
 	ymd <- x[n==10]
 	if (length(ymd) > 0) {
 		d <- as.Date(ymd)
 		if (any((ymd < as.Date("1960-01-01")) | (ymd > today))) {
-			ans <- FALSE
+			ok <- FALSE
 		}
 	}
 	thisyear <- as.numeric(format(today, "%Y"))
 	today <- as.character(today)
 	ym <- x[n==7]
 	if (length(ym) > 0) {
-		if (any((ym < "1960-01") | (ym > substr(today, 1, 7)))) ans <- FALSE
+		if (any((ym < "1960-01") | (ym > substr(today, 1, 7)))) ok <- FALSE
 		d <- substr(ym, 5, 5)
-		if (any(d != "-")) ans <- FALSE
+		if (any(d != "-")) ok <- FALSE
 		y <- as.numeric(substr(ym, 1, 4))
-		if (any((y < 1960) | (y > thisyear))) ans <- FALSE
+		if (any((y < 1960) | (y > thisyear))) ok <- FALSE
 		m <- as.numeric(substr(ym, 6, 7))
-		if (any((m < 1) | (m > 12))) ans <- FALSE
+		if (any((m < 1) | (m > 12))) ok <- FALSE
 		
 	}
 
@@ -40,20 +40,19 @@ check_date <- function(x, name) {
 	if (length(y) > 0) {
 		y <- as.numeric(y)
 		if (any((y < 1960) | (y > thisyear))) {
-			ans <- FALSE
+			ok <- FALSE
 		}
 	}
-	ans
+	ok
 }
 
 
-check_lonlat <- function(x, path, res) {
+check_lonlat <- function(x, path, res, answ) {
 
 	if (!all(c("longitude", "latitude") %in% colnames(x))) {
 		# there is already a message for missing required variables
-		return(TRUE)
+		return(answ)
 	}
-	answ <- TRUE
 
 #	wres <- ifelse(res=="high", 1, 5)
 	wres <- 1
@@ -66,106 +65,103 @@ check_lonlat <- function(x, path, res) {
 	if (any(i)) {
 		u <- unique(e$country[i])
 		bad <- paste(u, collapse=", ")
-		message(paste0("    coordinates not on land for: ", bad))
-		answ <- FALSE
+		answ[nrow(answ)+1, ] <- c("not on land",
+				paste0("coordinates not on land for: ", bad))
 	} 
 	e <- unique(stats::na.omit(e))
 	i <- e$NAME_0 != e$country
 	if (any(i)) {
 		u <- apply(e[i, ,drop=FALSE], 1, paste, collapse="/")
 		bad <- paste(u, collapse=", ")
-		message(paste0("    coordinates/country conflict: ", bad))
-		answ <- FALSE
+		answ[nrow(answ)+1, ] <- c("not on land",
+				paste0("coordinates/country conflict: ", bad))
 	}
 	return(answ)		
 }
 
-check_cropyield <- function(x, path) {
-	if (!all(c("crop", "yield") %in% names(x))) return(TRUE)
+check_cropyield <- function(x, path, answ) {
+	if (!all(c("crop", "yield") %in% names(x))) return(answ)
 	x <- x[, c("crop", "yield")]
 	a <- stats::aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
 	a <- a[a$yield < 100, ]
 	if (nrow(a) > 0) {
 		crops <- unique(a$crop)
 		bad <- paste(crops, collapse=", ")
-		message(paste0("    crop yield too low (tons not kg?): ", bad))
-		return(FALSE)
+		answ[nrow(answ)+1, ] <- c("low yield",
+				paste0("crop yield too low (tons not kg?): ", bad))
+		return(answ)
 	}
 	trms <- utils::read.csv(file.path(path, "terms", "voc_crop.csv"))
 	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
 	trms <- stats::na.omit(trms)
-	if (nrow(trms) == 0) return(TRUE)
+	if (nrow(trms) == 0) return(answ)
 	x <- stats::na.omit(merge(x, trms, by=1))
 	i <- x$yield > x$max_yield
 	if (any(i)) {
 		crops <- unique(x$crop[i])
 		bad <- paste(crops, collapse=", ")
-		message(paste0("    crop yield too high?: ", bad))
-		return(FALSE)
+		answ[nrow(answ)+1, ] <- c("low yield",
+				paste0("crop yield too high?: ", bad))
 	}
-	return(TRUE)
-
 	#check_outliers_iqr(x, "yield", TRUE)
 
+	answ
 }
 
 
-check_ranges <- function(x, trms, path) {
-	answ <- TRUE
+check_ranges <- function(x, trms, path, answ) {
 	nms <- colnames(x)
 	trms <- trms[match(nms, trms[,1]), ]
 
 	trmsna <- trms[!is.na(trms$NAok), ]
 	trmsna <- trmsna[trmsna$NAok == "no", ]
+
 	bad <- NULL
 	for (i in 1:nrow(trmsna)) {
 		v <- x[[trmsna$name[i]]]
 		if (any(is.na(v))) {
-			answ <- FALSE
 			bad <- c(bad, trmsna$name[i])
 		}
 	}
-	if (!answ) {
-		message(paste("    NA in:", paste(bad, collapse=", ")))
+	if (!is.null(bad)) {
+		answ[nrow(answ)+1, ] <- c("NA terms", paste("NA in:", paste(bad, collapse=", ")))
 		bad <- NULL
 	}
 	
 	trms <- stats::na.omit(trms[, c("name", "valid_min", "valid_max"), ])
-	if (nrow(trms) == 0) return(TRUE)
+	if (nrow(trms) == 0) return(answ)
 	for (i in 1:nrow(trms)) {
 		rng <- unlist(trms[i,c("valid_min", "valid_max")])
 		v <- stats::na.omit(x[[trms$name[i]]])
 		if ( any((v < rng[[1]]) | (v > rng[2])) ) {
-			answ <- FALSE
+			ok <- FALSE
 			vrng <- round(range(v, na.rm=TRUE),3)
 			msg  <- paste0(trms$name[i], " (", vrng[1], ", ", vrng[2], ")")
 			bad  <- c(bad, msg)
 		}
 	}
 	if (!is.null(bad)) {
-		message(paste("    Out of bounds:", paste(bad, collapse=", ")))
+		answ[nrow(answ)+1, ] <- c("bounds", paste("Out of bounds:", paste(bad, collapse=", ")))
 		bad <- NULL
 	}
 	
 	dats <- grep("_date", nms, value=TRUE)
 	for (dat in dats) {
 		if (!check_date(x, dat)) {
-			answ <- FALSE
 			bad <- c(bad, dat)
 		}
 	} 
 	if (!is.null(bad)) {
 		bad <- paste(bad, collapse=", ")
-		message(paste0("    invalid: ", bad))
+		answ[nrow(answ)+1, ] <- c("invalid", paste0("invalid: ", bad))
 	}
 
-	answ <- answ & check_consistency(x, path)
-	
-	answ & check_cropyield(x, path)
+#	answ <- check_consistency(x, path, answ)
+	check_cropyield(x, path, answ)
 }
 
 
-check_datatypes <- function(x, trms) {
+check_datatypes <- function(x, trms, answ) {
 	nms <- colnames(x)
 	trs <- trms[match(nms, trms[,1]), ]
 	cls <- sapply(x, class)
@@ -179,18 +175,19 @@ check_datatypes <- function(x, trms) {
 	i <- (cls[,1] == "integer") & (cls[,2] == "numeric")
 	cls[i, 1] <- "numeric"
 	i <- cls[,1] != cls[,2]
-	answ <- TRUE
 	if (any(i)) {
 		bad <- paste(cls[i,3], collapse=", ")
-		stop(paste("    bad datatype:", bad))
-		answ <- FALSE
+		answ[nrow(answ)+1, ] <- c("bad datatype", paste("bad datatype:", bad))
+	} else {
+		answ <- check_ranges(x[, nms], trms, path, answ)
 	}
+	
 	answ
 }
 
 
 
-.check_empty <- function(x) {
+.check_empty <- function(x, answ) {
 	bad <- rep(FALSE, ncol(x))
 	chars <- sapply(x, is.character)
 	for (i in which(chars)) {
@@ -199,12 +196,13 @@ check_datatypes <- function(x, trms) {
 	}
 	if (any(bad)) {
 		b <- paste0(colnames(x)[bad], collapse= ", ")
-		message("   whitespace in variable: ", b)
+		answ[nrow(answ)+1, ] <- c("whitespace variable", paste("   whitespace in variable: ", b))
 	}
-	x
+	answ
 }
 #d = data.frame(a = 1:3, b=letters[1:3], c=c(" A ", "", "D"))
 #x = check_empty(d)
+
 
 check_group <- function(name, path) {
 	grp <- utils::read.csv(file.path(path, "terms", "groups.csv"))
@@ -215,17 +213,14 @@ check_group <- function(name, path) {
 	ok
 }
 
-check_dataset <- function(x, trms, path) {
-	answ <- TRUE
+check_dataset <- function(x, trms, path, answ) {
 	if (grepl("http", x$uri)) {
-		message("http in uri")
-		answ <- FALSE
+		answ[nrow(answ)+1, ] <- c("uri", "http in uri")
 	}
 	nms <- trms$name[trms$NAok == "no"]
 	j <- is.na(x[,nms])
 	if (any(j)) {
-		message(paste0("    NA in ", paste(nms[j], collapse=", ")))
-		answ <- FALSE
+		answ[nrow(answ)+1, ] <- c("NA values", paste0("NA in ", paste(nms[j], collapse=", ")))
 	}
 	
 	if (isTRUE(nchar(x$publication) > 0 )) {
@@ -235,19 +230,17 @@ check_dataset <- function(x, trms, path) {
 		for (pub in pubs) {
 			where <- grep(pub, allpubs)
 			if (length(where) == 0) {
-				message(paste("    citation reference file missing:", pub))	
-				answ <- FALSE
+				answ[nrow(answ)+1, ] <- c("reference", paste("citation reference file missing:", pub))	
 			}
 		}
-	} 
-	
+	} 	
 	answ
 }
 
 
 check_terms <- function(dataset, records, path, group, check="all") {
 
-	answ <- TRUE
+	answ <- data.frame(check="", msg="")[0,]
 	if (check == "none") {
 		return(answ)
 	}
@@ -269,23 +262,23 @@ check_terms <- function(dataset, records, path, group, check="all") {
 		}
 		if (any(bad)) {
 			b <- paste0(colnames(x)[bad], collapse= ", ")
-			message("    whitespace in variable: ", b)
-			answ <- FALSE		
+			answ[nrow(answ)+1, ] <- c("whitespace", 
+					paste0("whitespace in variable: ", b))
 		}
 		nms <- names(x)
 		trms <- carobiner:::get_terms(type, group, path)
 
 		xnms <- nms[!(nms %in% trms$name)]
 		if (length(xnms) > 0) {
-			message(paste("    unknown", type, "variable names: ", paste(xnms, collapse=", ")))
-			answ <- FALSE		
+			answ[nrow(answ)+1, ] <- c("unknown variables", 
+					paste("unknown variables: ", paste(xnms, collapse=", ")))
 		}
 		
 		req <- trms[trms$required == "yes" | trms$required == group, ]
 		r <- req$name[!(req$name %in% nms)]
 		if (length(r) > 0) {
-			message(paste("    required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
-			answ <- FALSE
+			answ[nrow(answ)+1, ] <- c("required variable missing",
+					paste("required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
 		}
 
 		nms <- nms[nms %in% trms$name]
@@ -308,8 +301,8 @@ check_terms <- function(dataset, records, path, group, check="all") {
 					}
 					bad <- provided[!(provided %in% accepted)]
 					if (length(bad) > 0) {
-						message(paste("   ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
-						answ <- FALSE
+					answ[nrow(answ)+1, ] <- c("invalid terms",
+							paste("   ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
 					}
 				}
 			}
@@ -317,22 +310,16 @@ check_terms <- function(dataset, records, path, group, check="all") {
 
 		
 		if (type=="records") {
-			if (!check_datatypes(x[, nms], trms)) {
-				answ <- FALSE
-			} else {
-				if (!check_ranges(x[, nms], trms, path)) answ <- FALSE
-			}
+			answ <- check_datatypes(x[, nms], trms, answ)
+
 			if (check != "nogeo") {
-				if (!check_lonlat(x, path, check)) answ <- FALSE
+				answ <- check_lonlat(x, path, check, answ)	
 			}
 		} else {
-			if (!check_dataset(x, trms, path)) answ <- FALSE
+			answ <- check_dataset(x, trms, path, answ)
 		}
 	}
-	if (!answ) {
-		message("    contributor: ", dataset$carob_contributor)
-	}
-	invisible(answ)
+	answ
 }
 
 
