@@ -82,7 +82,6 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 		answ$group <- group
 		answ$dataset_id <- cleanuri
 		answ$contributor <- dataset$carob_contributor
-		data.table::fwrite(answ, fmsg, row.names=FALSE)
 
 		fign <- file.path(path, "scripts", group, "ignore.csv")
 		if (file.exists(fign)) {
@@ -95,14 +94,13 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 			}
 		}
 		if (nrow(answ) > 0) {
+			data.table::fwrite(answ, fmsg, row.names=FALSE)
 			for (i in 1:nrow(answ)) {
 				message(paste("   ", answ$msg[i]))
 			}
 			message(paste("    contributor:", dataset$carob_contributor))
 		}
-	} else {
-		if (file.exists(fmsg)) file.remove(fmsg)
-	}
+	} 
 	
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
@@ -161,6 +159,9 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		zipflags <- "-jq9"		
 	}
 	for (grp in grps) {
+		fmsg <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", full=TRUE)
+		file.remove(fmsg)
+
 		wgroup <- ifelse(grp == "doi", "", paste0("_", grp))
 
 		ff <- file.path(path, "data", "clean", grep(paste0("^", grp), fff, value=TRUE))
@@ -299,6 +300,12 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 		}
 		utils::flush.console()
 	}
+	
+	ff <- list.files(file.path(path, "data", "messages"), pattern=".csv$", full.names=TRUE, recursive=TRUE)
+	msg <- lapply(ff, read.csv)
+	msg <- do.call(rbind, msg)
+	write.csv(msg, file.path(path, "data", "messages.csv"), row.names=FALSE)
+	
 	invisible(TRUE)
 }
 
