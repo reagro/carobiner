@@ -73,7 +73,7 @@ check_lonlat <- function(x, path, res, answ) {
 	if (any(i)) {
 		u <- apply(e[i, ,drop=FALSE], 1, paste, collapse="/")
 		bad <- paste(u, collapse=", ")
-		answ[nrow(answ)+1, ] <- c("not on land",
+		answ[nrow(answ)+1, ] <- c("wrong country",
 				paste0("coordinates/country conflict: ", bad))
 	}
 	return(answ)		

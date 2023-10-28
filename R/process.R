@@ -83,10 +83,23 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 		answ$dataset_id <- cleanuri
 		answ$contributor <- dataset$carob_contributor
 		data.table::fwrite(answ, fmsg, row.names=FALSE)
-		for (i in 1:nrow(answ)) {
-			message(paste("   ", answ$msg[i]))
+
+		fign <- file.path(path, "scripts", group, "ignore.csv")
+		if (file.exists(fign)) {
+			ign <- read.csv(fign)
+			ign <- apply(ign, 1, \(i) paste(i, collapse="#"))
+			ans <- apply(answ, 1, \(i) paste(i, collapse="#"))
+			m <- na.omit(match(ign, ans))
+			if (length(m)  > 0) {
+				answ <- answ[-m, ]
+			}
 		}
-		message(paste("    contributor:", dataset$carob_contributor))
+		if (nrow(answ) > 0) {
+			for (i in 1:nrow(answ)) {
+				message(paste("   ", answ$msg[i]))
+			}
+			message(paste("    contributor:", dataset$carob_contributor))
+		}
 	} else {
 		if (file.exists(fmsg)) file.remove(fmsg)
 	}
