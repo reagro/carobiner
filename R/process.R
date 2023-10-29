@@ -141,7 +141,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		on.exit(options(warn=w$warn))
 		options(warn=1)
 	}
-	dir.create(file.path(path, "data", "compiled", group), showWarnings = FALSE, recursive = TRUE)
+	dir.create(file.path(path, "data", "compiled"), showWarnings = FALSE, recursive = TRUE)
 	fff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", recursive=TRUE)
 	if (group == "") {
 		grps <- unique(sapply(strsplit(fff, "/"), function(i) ifelse(length(i) > 1, i[1], "doi")))
@@ -180,17 +180,17 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		gterms <- get_terms("records", grp, path)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
 
-		outft <- file.path(path, "data", "compiled", grp, paste0("carob", wgroup, "_terms.csv"))
+		outft <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_terms.csv"))
 #		utils::write.csv(gterms, outft, row.names=FALSE)
 		data.table::fwrite(gterms, outft, row.names=FALSE)
 		if (split_license) {
 			xx <- x[grepl("CC", x[,"license"]), ]
 			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
 			if (nrow(xx) > 0) {
-				outmf <- file.path(path, "data", "compiled", grp, paste0("carob", wgroup, "_metadata-cc.csv"))
+				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-cc.csv"))
 				#utils::write.csv(xx, outmf, row.names=FALSE)
 				data.table::fwrite(xx, outmf, row.names=FALSE)
-				outff <- file.path(path, "data", "compiled", grp, paste0("carob", wgroup, "-cc.csv"))
+				outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-cc.csv"))
 				#utils::write.csv(yy, outff, row.names=FALSE)
 				data.table::fwrite(yy, outff, row.names=FALSE)
 				if (zip) {
@@ -203,10 +203,10 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 				}
 			}
 		}
-		outmf <- file.path(path, "data", "compiled", grp, paste0("carob", wgroup, "_metadata.csv"))
+		outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata.csv"))
 		#utils::write.csv(x, outmf, row.names=FALSE)
 		data.table::fwrite(x, outmf, row.names=FALSE)
-		outff <- file.path(path, "data", "compiled", grp, paste0("carob", wgroup, ".csv"))
+		outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
 #		utils::write.csv(y, outff, row.names=FALSE)
 		data.table::fwrite(y, outff, row.names=FALSE)
 		if (zip) {
@@ -313,6 +313,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 make_carob <- function(path, group="", quiet=FALSE, check="all", ...) {
 	get_packages(group)
 	process_carob(path, group=group, quiet=quiet, check=check)
+	message(" === compiling ===")
 	compile_carob(path, group=group, ...)
 }
 
