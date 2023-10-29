@@ -76,7 +76,7 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 	dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
 
 	opt <- options("carobiner_check")
-	answ <- carobiner:::check_terms(dataset, records, path, group, check=opt)	
+	answ <- check_terms(dataset, records, path, group, check=opt)	
 	fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
 	if (nrow(answ) > 0) {
 		answ$group <- group
@@ -85,10 +85,10 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 
 		fign <- file.path(path, "scripts", group, "ignore.csv")
 		if (file.exists(fign)) {
-			ign <- read.csv(fign)
+			ign <- utils::read.csv(fign)
 			ign <- apply(ign, 1, \(i) paste(i, collapse="#"))
 			ans <- apply(answ, 1, \(i) paste(i, collapse="#"))
-			m <- na.omit(match(ign, ans))
+			m <- stats::na.omit(match(ign, ans))
 			if (length(m)  > 0) {
 				answ <- answ[-m, ]
 			}
@@ -159,7 +159,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		zipflags <- "-jq9"		
 	}
 	for (grp in grps) {
-		fmsg <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", full=TRUE)
+		fmsg <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", full.names=TRUE)
 		file.remove(fmsg)
 
 		wgroup <- ifelse(grp == "doi", "", paste0("_", grp))
@@ -302,9 +302,9 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 	}
 	
 	ff <- list.files(file.path(path, "data", "messages"), pattern=".csv$", full.names=TRUE, recursive=TRUE)
-	msg <- lapply(ff, read.csv)
+	msg <- lapply(ff, utils::read.csv)
 	msg <- do.call(rbind, msg)
-	write.csv(msg, file.path(path, "data", "messages.csv"), row.names=FALSE)
+	utils::write.csv(msg, file.path(path, "data", "messages.csv"), row.names=FALSE)
 	
 	invisible(TRUE)
 }

@@ -17,7 +17,7 @@ read.excel(f, ...)
  
 \arguments{
   \item{f}{character (filename)}
-  \item{...}{additional arguments passed on to \code{\link{readxl::read_excel}}}.
+  \item{...}{additional arguments passed on to \code{\link[readxl]{read_excel}}}.
 }
 
 \value{

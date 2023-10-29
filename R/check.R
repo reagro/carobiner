@@ -141,7 +141,7 @@ check_ranges <- function(x, trms, path, answ) {
 		}
 	}
 	if (!is.null(bad)) {
-		answ[nrow(answ)+1, ] <- c("bounds", paste("Out of bounds:", paste(bad, collapse=", ")))
+		answ[nrow(answ)+1, ] <- c("bounds", paste("out of bounds:", paste(bad, collapse=", ")))
 		bad <- NULL
 	}
 	
@@ -161,7 +161,7 @@ check_ranges <- function(x, trms, path, answ) {
 }
 
 
-check_datatypes <- function(x, trms, answ) {
+check_datatypes <- function(x, trms, path, answ) {
 	nms <- colnames(x)
 	trs <- trms[match(nms, trms[,1]), ]
 	cls <- sapply(x, class)
@@ -266,7 +266,7 @@ check_terms <- function(dataset, records, path, group, check="all") {
 					paste0("whitespace in variable: ", b))
 		}
 		nms <- names(x)
-		trms <- carobiner:::get_terms(type, group, path)
+		trms <- get_terms(type, group, path)
 
 		xnms <- nms[!(nms %in% trms$name)]
 		if (length(xnms) > 0) {
@@ -310,7 +310,7 @@ check_terms <- function(dataset, records, path, group, check="all") {
 
 		
 		if (type=="records") {
-			answ <- check_datatypes(x[, nms], trms, answ)
+			answ <- check_datatypes(x[, nms], trms, path, answ)
 
 			if (check != "nogeo") {
 				answ <- check_lonlat(x, path, check, answ)	
