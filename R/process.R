@@ -159,9 +159,6 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		zipflags <- "-jq9"		
 	}
 	for (grp in grps) {
-		fmsg <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", full.names=TRUE)
-		file.remove(fmsg)
-
 		wgroup <- ifelse(grp == "doi", "", paste0("_", grp))
 
 		ff <- file.path(path, "data", "clean", grep(paste0("^", grp), fff, value=TRUE))
@@ -267,7 +264,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 	
 	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE, recursive=TRUE)
 	file.remove(ff)
-	ff <- list.files(file.path(path, "data", "messages", group), pattern=".csv$", full.names=TRUE)
+	ff <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", recursive=TRUE, full.names=TRUE)
 	file.remove(ff)
 
 	base <- file.path(path, "scripts")
