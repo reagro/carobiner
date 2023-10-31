@@ -39,14 +39,43 @@ bindr <- function( ...) {
 	do.call(rbind, x)
 }
 
-
-read.excel <- function(f, ...) {
-  suppressMessages(
-		as.data.frame(
-			readxl::read_excel(f, ...)
-		)
-	)
+fix_varnames <- function(x) {
+	nms <- make.names(x, unique=TRUE)
+	nms <- gsub("\\.\\.\\.\\.", ".", nms)	
+	nms <- gsub("\\.\\.\\.", ".", nms)	
+	nms <- gsub("\\.\\.", ".", nms)	
+	nms <- gsub("\\.$", "", nms)	
+	make.names(nms, unique=TRUE)
 }
+
+
+read.excel <- function(f, fix_names=FALSE, ...) {
+	suppressMessages(x <- as.data.frame(readxl::read_excel(f, ...)))
+	if (fix_names) {
+		colnames(x) <- fix_varnames(colnames(x))
+	}
+	x
+}
+
+read.excel.hdr <- function(f, skip, hdr=1, fix_names=TRUE, ...) {
+	skip = as.integer(skip)
+	hdr = as.integer(hdr)
+	if ((skip==0) && (hdr==1)) {
+		return(read.excel(f, fix_names=fix_names, ...))
+	}
+	stopifnot(skip >= 0)
+	stopifnot(hdr >= 1)
+	stopifnot(skip >= hdr)
+	suppressMessages(x <- as.data.frame(readxl::read_excel(f, skip=skip, ...)))
+	suppressMessages(nms <- as.data.frame(readxl::read_excel(f, skip=skip-hdr, n_max=hdr+1, col_names=FALSE, ...)))
+	nms <- apply(nms, 2, \(i) paste(i[!is.na(i)], collapse="_"))
+	if (fix_names) {
+		nms <- fix_varnames(nms)
+	}
+	colnames(x) <- nms
+	x
+}
+
 
 
 replace_values <- function(x, from, to, must_have=TRUE) {
