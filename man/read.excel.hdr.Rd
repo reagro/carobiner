@@ -12,8 +12,7 @@ Read an excel file where the variable names are spread over more than one column
 
 
 \usage{
-read.excel.hdr(f, skip, hdr=1, fix_names=TRUE, ...) {
-
+read.excel.hdr(f, skip, hdr=1, fix_names=TRUE, ...)
 }
  
 \arguments{

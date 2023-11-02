@@ -9,7 +9,7 @@ update_todo <- function(path) {
 	uri <- gsub("https://hdl.handle.net/", "hdl:", uri)
 
 	fdone <- list.files(file.path(path, "data", "compiled"), pattern="_metadata.csv$", full.names=TRUE)
-	done <- do.call(rbind, lapply(fdone, utils::read.csv))
+	done <- do.call(bindr, lapply(fdone, utils::read.csv))
 
 	i <- unique(stats::na.omit(match(done$uri, uri)))
 	if (length(i) > 0) {

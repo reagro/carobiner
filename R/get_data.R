@@ -242,7 +242,7 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 		overwrite <- TRUE
 	}
 
-	if (!(overwrite) && (file.exists(file.path(path, "ok.txt")))) {
+	if ((!overwrite) && file.exists(file.path(path, "ok.txt"))) {
 		ff <- list.files(path, full.names=TRUE, recursive=TRUE)
 		ff <- ff[!grepl(".json$", ff)]
 		ff <- ff[!grepl(".pdf$", ff)]
