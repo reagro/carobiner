@@ -12,7 +12,7 @@ Read an excel file where the variable names are spread over more than one column
 
 
 \usage{
-read.excel.hdr(f, skip, hdr=1, fix_names=TRUE, ...)
+read.excel.hdr(f, skip, hdr=1, fix_names=TRUE, lower=FALSE, ...)
 }
  
 \arguments{
@@ -20,6 +20,7 @@ read.excel.hdr(f, skip, hdr=1, fix_names=TRUE, ...)
   \item{skip}{non-negative integer. How many rows to skip to reach the values}
   \item{hdr}{positive integer. How many rows are used for the variable names}
   \item{fix.names}{logical. If \code{TRUE} variable names are made valid. Spaces and other characters such as parenthesis are replaced by a dot. Multiple dots are replaced by a single dot}
+  \item{lower}{logical. If \code{TRUE}, returned column names are all in lowercase}
   \item{...}{additional arguments passed on to \code{\link[readxl]{read_excel}}}.
 }
 
