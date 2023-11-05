@@ -26,7 +26,7 @@ read.excel.hdr <- function(f, skip, hdr=1, fix_names=TRUE, lower=FALSE, ...) {
 	stopifnot(skip >= 0)
 	stopifnot(hdr >= 1)
 	stopifnot(skip >= hdr)
-	suppressMessages(x <- as.data.frame(readxl::read_excel(f, skip=skip+1, col_names=FALSE, ...)))
+	suppressMessages(x <- as.data.frame(readxl::read_excel(f, skip=skip, ...)))
 	suppressMessages(nms <- as.data.frame(readxl::read_excel(f, skip=skip-hdr, n_max=hdr+1, col_names=FALSE, ...)))
 	nms <- apply(nms, 2, \(i) paste(i[!is.na(i)], collapse="_"))
 	if (fix_names) {
