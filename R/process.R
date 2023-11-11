@@ -21,19 +21,18 @@ get_more_data <- function(url, dataset_id, path, group) {
 
 get_terms <- function(type, group, path) {
 	if (type == "records") {
-		trms <- utils::read.csv(file.path(path, "terms", "records.csv"))
-		grps <- utils::read.csv(file.path(path, "terms", "groups.csv"))
+		trms <- get_records(path)
+		grps <- get_groups(path)
 		include <- grps$include[grps$name == group]
 		if (include != "") {
 			include <- trimws(unlist(strsplit(include, ";")))
 			for (inc in include) {
-				add <- utils::read.csv(file.path(path, "terms", paste0("records_", inc, ".csv")))
+				add <- get_records(path, inc)
 				trms <- rbind(trms, add)
 			}
 		}
-		grp_terms <- file.path(path, "terms", paste0("records_", group, ".csv"))
-		if (file.exists(grp_terms)) {
-			trms2 <- utils::read.csv(grp_terms)
+		trms2 <- get_records(path, group)
+		if (!is.null(trms2)) {
 			trms <- rbind(trms, trms2)
 			tab <- table(trms[,1])
 			if (any(tab > 1)) {
@@ -41,7 +40,7 @@ get_terms <- function(type, group, path) {
 			}
 		}
 	} else if (type=="dataset") {
-		trms <- utils::read.csv(file.path(path, "terms", "dataset.csv"))
+		trms <- get_dataset(path, "")
 	} else {
 		stop("invalid 'type' argument; should be 'records' or 'dataset'") 
 	}
@@ -49,16 +48,6 @@ get_terms <- function(type, group, path) {
 	trms
 }
 
-
-get_accepted_values <- function(term, path) {
-	f <- file.path(path, "terms", paste0("voc_", term, ".csv"))
-	if (file.exists(f)) {
-		utils::read.csv(f)
-	} else {
-		warning("no accepted values available for this term")
-		return(NULL)
-	}
-}
 
 
 write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
@@ -261,7 +250,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 	if (group != "") {
 		check_group(group, path)
 	}
-	
+
 	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE, recursive=TRUE)
 	file.remove(ff)
 	ff <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", recursive=TRUE, full.names=TRUE)
@@ -281,8 +270,8 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 		message(paste("duplicate files: ", paste(dups, collapse=", ")))
 	}
 
-
 	carob_script <- function() {FALSE}
+	#rm(list=ls(globalenv()))
 	for (f in ff) {
 		rm(carob_script)
 		if (!quiet) cat(gsub(base, "", f), "\n"); utils::flush.console()

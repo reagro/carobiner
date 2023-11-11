@@ -1,12 +1,17 @@
 
 aggregated_data <- function(path, group, cc=FALSE) {
+	g <- get_groups(path)
+	if (!(group %in% g$name)) {
+		stop("this group does not exist")
+	}
+
 	if (cc) {
 		f <- file.path(path, "data", "compiled", paste0("carob_", group, "-cc.csv"))	
 	} else {
 		f <- file.path(path, "data", "compiled", paste0("carob_", group, ".csv"))
 	}
 	if (!file.exists(f)) {
-		stop("the aggregated data do not exist. First run 'make_carob'")
+		stop("these data do not exist. First run 'make_carob'")
 	}
 	data.frame(data.table::fread(f))	
 }

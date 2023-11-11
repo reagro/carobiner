@@ -1,4 +1,80 @@
 
+get_groups <- function(path) {
+	f <- file.path(path, "terms", "groups.csv")
+	if (!isTRUE(file.exists(f))) {
+		path <- system.file("terms", package="carobiner")
+		f <- file.path(path, "groups.csv")
+	}
+	if (!file.exists(f)) {
+		stop("the groups file is missing")
+	}
+	read.csv(f)	
+}
+
+get_records <- function(path, group=NULL) {
+	if (is.null(group) || (group == "")) {
+		f <- file.path(path, "terms", "records.csv")
+	} else {
+		f <- file.path(path, "terms", paste0("records_", group, ".csv"))	
+	}
+	if (!isTRUE(file.exists(f))) {
+		path <- system.file("terms", package="carobiner")
+		if (is.null(group) || (group == "")) {
+			f <- file.path(path, "records.csv")
+		} else {
+			f <- file.path(path, paste0("records_", group, ".csv"))		
+		}
+	}	
+	if (file.exists(f)) {
+		read.csv(f)	
+	} else {
+		if (trimws(group) == "") {
+			stop("the records file is missing")
+		}
+		NULL
+	}
+}
+
+get_dataset <- function(path, group=NULL) {
+	if (is.null(group) || (group == "")) {
+		f <- file.path(path, "terms", "dataset.csv")
+	} else {
+		f <- file.path(path, "terms", paste0("dataset_", group, ".csv"))	
+	}
+	if (!isTRUE(file.exists(f))) {
+		path <- system.file("terms", package="carobiner")
+		if (is.null(group) || (group == "")) {
+			f <- file.path(path, "dataset.csv")
+		} else {
+			f <- file.path(path, paste0("dataset_", group, ".csv"))		
+		}
+	}	
+	if (file.exists(f)) {
+		read.csv(f)	
+	} else {
+		if (trimws(group) == "") {
+			stop("the dataset file is missing")
+		}
+		NULL
+	}
+}
+
+
+get_accepted_values <- function(name, path=NULL) {
+	f <- file.path(path, "terms", paste0("voc_", name, ".csv"))
+	if (!isTRUE(file.exists(f))) {
+		path <- system.file("terms", package="carobiner")
+		f <- file.path(path, paste0("voc_", name, ".csv"))
+	}
+	if (file.exists(f)) {
+		read.csv(f)	
+	} else {
+		NULL
+	}
+}
+
+
+
 
 check_consistency <- function(x, name, answ) {
 	#e.g. if OM is used, then the type and amount should be specifiec 
@@ -91,7 +167,7 @@ check_cropyield <- function(x, path, answ) {
 				paste0("crop yield too low (tons not kg?): ", bad))
 		return(answ)
 	}
-	trms <- utils::read.csv(file.path(path, "terms", "voc_crop.csv"))
+	trms <- get_accepted_values("crop", path)
 	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
 	trms <- stats::na.omit(trms)
 	if (nrow(trms) == 0) return(answ)
@@ -205,13 +281,14 @@ check_datatypes <- function(x, trms, path, answ) {
 
 
 check_group <- function(name, path) {
-	grp <- utils::read.csv(file.path(path, "terms", "groups.csv"))
+	grp <- get_groups(path)
 	ok <- all(name %in% grp$name)
 	if (!ok) {
 		stop(paste("    invalid group:", paste(name, collapse=", ")))
 	}
 	ok
 }
+
 
 check_dataset <- function(x, trms, path, answ) {
 	if (grepl("http", x$uri)) {
@@ -274,8 +351,8 @@ check_terms <- function(dataset, records, path, group, check="all") {
 					paste("unknown variables: ", paste(xnms, collapse=", ")))
 		}
 		
-		req <- trms[trms$required == "yes" | trms$required == group, ]
-		r <- req$name[!(req$name %in% nms)]
+		req <- trms[trms$required == "yes" | trms$required == group, "name"]
+		r <- req[!(req %in% nms)]
 		if (length(r) > 0) {
 			answ[nrow(answ)+1, ] <- c("required variable missing",
 					paste("required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
@@ -288,7 +365,7 @@ check_terms <- function(dataset, records, path, group, check="all") {
 		voc <- voc[voc$name %in% nms, ]
 		if (nrow(voc) > 0) {
 			for (i in 1:nrow(voc)) {
-				accepted <- utils::read.csv(file.path(path, "terms", paste0("voc_", voc$vocabulary[i], ".csv")))[,1]
+				accepted <- get_accepted_values(voc$vocabulary[i], path)[,1]
 				provided <- unique(x[, voc$name[i]])
 				if (voc$required[i] != "yes") {
 					provided <- stats::na.omit(provided)

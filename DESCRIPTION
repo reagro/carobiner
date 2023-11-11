@@ -2,10 +2,10 @@ Package: carobiner
 Type: Package
 Title: Compiling agricultural research data 
 Description: A collection functions to support the "Carob" project. See https://github.com/reagro/carob for details.
-Version: 0.3-4
+Version: 0.3-5
 Depends: geodata, terra, readxl, writexl
 Suggests: jsonlite, revtools, httr, stringr, data.table, archive
-Date: 2023-10-29
+Date: 2023-11-11
 Encoding: UTF-8
 Authors@R: c(
 	person("Robert J.", "Hijmans", role = c("cre", "aut"),  email = "r.hijmans@gmail.com"),
