@@ -19,37 +19,6 @@ get_more_data <- function(url, dataset_id, path, group) {
 }
 
 
-get_terms <- function(type, group, path) {
-	if (type == "records") {
-		trms <- get_records(path)
-		grps <- get_groups(path)
-		include <- grps$include[grps$name == group]
-		if (include != "") {
-			include <- trimws(unlist(strsplit(include, ";")))
-			for (inc in include) {
-				add <- get_records(path, inc)
-				trms <- rbind(trms, add)
-			}
-		}
-		trms2 <- get_records(path, group)
-		if (!is.null(trms2)) {
-			trms <- rbind(trms, trms2)
-			tab <- table(trms[,1])
-			if (any(tab > 1)) {
-				print(paste("duplicated terms:", names(tab[tab>1])))
-			}
-		}
-	} else if (type=="dataset") {
-		trms <- get_dataset(path, "")
-	} else {
-		stop("invalid 'type' argument; should be 'records' or 'dataset'") 
-	}
-	names(trms)[1] <- "name" # excel seems to mess this up
-	trms
-}
-
-
-
 write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 
 	stopifnot(nrow(dataset) == 1)
