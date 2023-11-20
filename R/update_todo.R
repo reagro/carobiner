@@ -11,9 +11,9 @@ update_todo <- function(path) {
 	fdone <- list.files(file.path(path, "data", "compiled"), pattern="_metadata.csv$", full.names=TRUE)
 	done <- do.call(bindr, lapply(fdone, utils::read.csv))
 
-	i <- unique(stats::na.omit(match(done$uri, uri)))
+	i <- unique(stats::na.omit(match(tolower(done$uri), tolower(uri))))
 	if (length(i) > 0) {
-		message(paste("removed", i, "datasets from to-do"))
+#		message(paste("removed", length(i), "datasets from to-do"))
 		todo <- todo[-i,]
 		utils::write.csv(todo, ftodo, row.names=FALSE)
 	}
