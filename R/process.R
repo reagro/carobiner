@@ -101,6 +101,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 	}
 	dir.create(file.path(path, "data", "compiled"), showWarnings = FALSE, recursive = TRUE)
 	fff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", recursive=TRUE)
+
 	if (group == "") {
 		grps <- unique(sapply(strsplit(fff, "/"), function(i) ifelse(length(i) > 1, i[1], "doi")))
 	} else {
@@ -204,7 +205,7 @@ run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
 
 
 
-process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
+process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 
 	options(carobiner_check=check)
 	on.exit(options(carobiner_check=NULL))
@@ -221,10 +222,14 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 	}
 
 	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE, recursive=TRUE)
-	file.remove(ff)
-	ff <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", recursive=TRUE, full.names=TRUE)
-	file.remove(ff)
-
+	if (cache) {
+		csv_mtime <- data.frame(uri=gsub(".csv$", "", basename(ff)), csv=file.mtime(ff))
+	} else {
+		file.remove(ff)
+		ff <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", recursive=TRUE, full.names=TRUE)
+		file.remove(ff)
+	}
+	
 	base <- file.path(path, "scripts")
 	ff <- list.files(file.path(base, group), pattern="R$", full.names=TRUE, recursive=TRUE)
 	ffun <- grepl("^_", basename(ff))
@@ -232,6 +237,18 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL) {
 	ff <- ff[!grepl("/_pending/", ff)]
 	ff <- ff[!grepl("/_removed/", ff)]
 	ff <- sort(ff)
+
+	if (cache) {
+		R_mtime <- data.frame(uri=gsub(".R$", "", basename(ff)), R=file.mtime(ff), id=1:length(ff))
+		mtime <- merge(csv_mtime, R_mtime, by="uri")
+		keep <- which(!(mtime$R < mtime$csv))		
+		ff <- ff[mtime$id[keep]]
+		if (length(ff) == 0) {
+			message("no changes (cache=TRUE)")
+			invisible(TRUE)
+		}
+	}
+	
 
 	tab <- table(basename(ff))
 	if (any(tab > 1)) {

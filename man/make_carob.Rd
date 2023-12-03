@@ -24,7 +24,7 @@ Make the Carob database.
 
 \usage{
 run_carob(cleanuri, path, group="", quiet=FALSE)
-process_carob(path, group="", quiet=FALSE, check=NULL)
+process_carob(path, group="", quiet=FALSE, check=NULL, cache=TRUE)
 compile_carob(path, group="", split_license=FALSE, zip=FALSE)
 make_carob(path, group="", quiet=FALSE, check="all", ...)
 }
@@ -35,6 +35,7 @@ make_carob(path, group="", quiet=FALSE, check="all", ...)
   \item{group}{character. group name}
   \item{quiet}{logical. Be quiet?}
   \item{check}{character. "none" to do no checking; "nogeo" to not check coordinates. "all" and all other values to do all checks}
+  \item{cache}{logical. If \code{TRUE}, datasets are only recompiled if the R script has changed after the last compilation}
   \item{split_license}{logical. Make a separate aggregation for data with a CC license?}
   \item{zip}{logical. zip the aggregated data?}
   \item{...}{additional arguments passed to compile_carob}

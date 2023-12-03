@@ -5,13 +5,13 @@ update_todo <- function(path) {
 	ftodo <- file.path(path, "todo", "to-do.csv")
 	todo <- utils::read.csv(ftodo)
 	todo$uri <- trimws(todo$uri)
-	uri <- gsub("https://doi.org/", "doi:", todo$uri)
+	uri <- gsub("https://doi.org/", "doi:", tolower(todo$uri))
 	uri <- gsub("https://hdl.handle.net/", "hdl:", uri)
 
 	fdone <- list.files(file.path(path, "data", "compiled"), pattern="_metadata.csv$", full.names=TRUE)
 	done <- do.call(bindr, lapply(fdone, utils::read.csv))
 
-	i <- unique(stats::na.omit(match(tolower(done$uri), tolower(uri))))
+	i <- unique(stats::na.omit(match(tolower(done$uri), uri)))
 	if (length(i) > 0) {
 #		message(paste("removed", length(i), "datasets from to-do"))
 		todo <- todo[-i,]
