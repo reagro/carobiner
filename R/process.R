@@ -282,9 +282,9 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 }
 
 
-make_carob <- function(path, group="", quiet=FALSE, check="all", ...) {
+make_carob <- function(path, group="", quiet=FALSE, check="all", cache=TRUE, ...) {
 	get_packages(group)
-	process_carob(path, group=group, quiet=quiet, check=check)
+	process_carob(path, group=group, quiet=quiet, check=check, cache=cache)
 	message(" === compiling ===")
 	compile_carob(path, group=group, ...)
 }
