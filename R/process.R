@@ -240,8 +240,8 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 
 	if (cache) {
 		R_mtime <- data.frame(uri=gsub(".R$", "", basename(ff)), R=file.mtime(ff), id=1:length(ff))
-		mtime <- merge(csv_mtime, R_mtime, by="uri")
-		keep <- which(!(mtime$R < mtime$csv))		
+		mtime <- merge(csv_mtime, R_mtime, by="uri", all.y=TRUE)
+		keep <- which(is.na(mtime$csv) | (mtime$R > mtime$csv))
 		ff <- ff[mtime$id[keep]]
 		if (length(ff) == 0) {
 			message("no changes (cache=TRUE)")
