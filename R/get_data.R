@@ -7,7 +7,11 @@
 simple_uri <- function(uri, reverse=FALSE) {
   
 	if (reverse) {
-		return(gsub("_", "/", sub("_", ":", uri))	)
+		if (grepl(":", uri)) {
+			return(gsub("_", "/", uri))
+		} else {
+			return(gsub("_", "/", sub("_", ":", uri))	)
+		}
 	}
 	
 	ur <- .removeprotocol(uri)
