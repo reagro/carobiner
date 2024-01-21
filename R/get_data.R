@@ -31,7 +31,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 		u <- gsub("hdl.handle.net/", "", ur)
 		u <- paste0("hdl_", u)
 	} else {
-		stop(paste0("Not valid unique object identifier (DOI or HDL)"))
+		stop(paste0("Not a valid object identifier (DOI or HDL)"))
 	}
 	gsub("/", "_", u)
 }
@@ -230,6 +230,14 @@ simple_uri <- function(uri, reverse=FALSE) {
 .removeprotocol <- function(x) gsub("http://|https://|www\\.", "", x)
 
 
+http_address <- function(uri) {
+	if (grepl("^doi:", uri)) {
+		gsub("^doi:", "https://dx.doi.org/", uri)
+	} else if (grepl("^hdl:", uri)) {
+		gsub("^hdl:", "https://hdl.handle.net/", uri)
+	}
+}
+
 data_from_uri <- function(uri, path, overwrite=FALSE) {
 	
 	uripath=TRUE
@@ -257,12 +265,9 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 		zipf <- list.files(path, paste0(uname, ".*zip$"), full.names=TRUE)		
 		return(.dataverse_unzip(zipf, path, unzip))
 	}
+
+	uri <- http_address(uri)
 	
-	if (grepl("^doi:", uri)) {
-		uri <- gsub("^doi:", "https://dx.doi.org/", uri)
-	} else if (grepl("^hdl:", uri)) {
-		uri <- gsub("^hdl:", "https://hdl.handle.net/", uri)
-	}
 	dir.create(path, FALSE, TRUE)
 	if (!file.exists(path)) {
 		stop(paste("cannot create path:", path))

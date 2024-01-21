@@ -75,3 +75,12 @@ get_license <- function(x) {
 	lic
 }
 
+
+get_title <- function(x) {
+	out <- x$data$latestVersion$metadataBlocks$citation$fields$value[[1]]
+	if (is.null(out)) {
+		out <- "unknown"
+	}
+	out
+}
+

@@ -76,6 +76,14 @@ check_lonlat <- function(x, path, res, answ) {
 		answ[nrow(answ)+1, ] <- c("wrong country",
 				paste0("coordinates/country conflict: ", bad))
 	}
+	
+	locvars <- c("country", paste0("adm", 1:5), "location", "site", "longitude", "latitude")
+	i <- which(locvars %in% colnames(x))
+	locs <- unique(x[, locvars[i]])
+	xy <- unique(x[, c("longitude", "latitude")])
+	if (nrow(xy) < (0.9 * nrow(locs))) {
+		answ[nrow(answ)+1, ] <- c("duplicate coordinates", "fewer coordinates than locations")
+	}
 	return(answ)		
 }
 

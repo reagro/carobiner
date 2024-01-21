@@ -68,8 +68,11 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
 	}
 	dir.create(dirname(outf), FALSE, FALSE)
+	records <- carobiner:::sort_by_terms(records, "records", group, path)
 #	utils::write.csv(records, outf, row.names=FALSE)
 	data.table::fwrite(records, outf, row.names=FALSE)
+	
+	dataset <- carobiner:::sort_by_terms(dataset, "dataset", group, path)
 	mf <- gsub(".csv$", "_meta.csv", outf)
 #	utils::write.csv(dataset, mf, row.names=FALSE)
 	if (is.null(dataset$carob_date)) dataset$carob_date <- ""
@@ -236,10 +239,12 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	ff <- ff[!ffun]
 	ff <- ff[!grepl("/_pending/", ff)]
 	ff <- ff[!grepl("/_removed/", ff)]
-	ff <- sort(ff)
 
 	if (cache) {
-		R_mtime <- data.frame(uri=gsub(".R$", "", basename(ff)), R=file.mtime(ff), id=1:length(ff))
+		R_mtime <- data.frame(uri=tolower(gsub(".R$", "", basename(ff))), 
+								R=file.mtime(ff), id=1:length(ff))
+		csv_mtime$uri <- tolower(csv_mtime$uri)
+		
 		mtime <- merge(csv_mtime, R_mtime, by="uri", all.y=TRUE)
 		keep <- which(is.na(mtime$csv) | (mtime$R > mtime$csv))
 		ff <- ff[mtime$id[keep]]
@@ -248,6 +253,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 			invisible(TRUE)
 		}
 	}
+	ff <- sort(ff)
 	
 
 	tab <- table(basename(ff))

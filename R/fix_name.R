@@ -42,8 +42,7 @@
 
 fix_name <- function(x, case="", skip="", lowothers=TRUE) {
 	x <- trimws(x)	
-	x <- gsub("   ", " ", x)
-	x <- gsub("  ", " ", x)
+	x <- gsub("\\s+", " ", x)
 	x <- gsub("\n", "; ", x)
 	
 	x[x==""] <- NA
