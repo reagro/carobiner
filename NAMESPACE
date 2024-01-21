@@ -1,4 +1,4 @@
-importFrom(terra, extract)
+importFrom(terra, extract, crs)
 importFrom(geodata, world)
 importFrom(readxl, read_excel)
 importFrom(writexl, write_xlsx)
@@ -7,5 +7,7 @@ export(
 bindr, change_names, check_terms, compile_carob, find_outliers, fix_name,
 get_locations, get_data, get_more_data, get_function, get_metadata, get_license, get_title,
 get_references, get_terms, get_accepted_values, 
-geocode, geocode_duplicates, is_excel, make_carob, process_carob, run_carob, write_files, simple_uri, replace_values, read.excel, read.excel.hdr
+geocode, geocode_duplicates, is_excel, 
+make_carob, process_carob, run_carob, make_reports, 
+write_files, simple_uri, replace_values, read.excel, read.excel.hdr
 )
