@@ -26,6 +26,8 @@ bindr <- function( ...) {
 .binder <- function(ff) {
 	#suppress "incomplete final line found by readTableHeader"
 	x <- suppressWarnings(lapply(ff, utils::read.csv))
+	nr <- sapply(x, nrow)
+	x <- x[nr > 0]
 	nms <- unique(unlist(lapply(x, names)))
 	x <- lapply(x, function(x) data.frame(c(x, sapply(setdiff(nms, names(x)), function(y) NA))))
 	x$make.row.names <- FALSE

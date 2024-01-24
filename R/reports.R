@@ -16,16 +16,19 @@ make_reports <- function(path, group="") {
 		gpath <- file.path(path, "/data/clean/", grp)
 		ff <- list.files(gpath, pattern="meta.csv$", full=TRUE)
 		uri <- grep("^uri <- ", rmd)
-		on.exit(file.remove(file.path(path, "temp.html")))
+		igrp <- grep("^group <- ", rmd)
+		rmd[igrp] <- paste0("group <- '", grp, "'")
+		
+		on.exit(file.remove(file.path(path, "temp.Rmd")))
 		for (f in ff) {
+			outf <- gsub("_meta.csv", ".html", f)
+			print(outf)
 			m <- read.csv(f)
-			rmd[uri] <- paste0("uri	 <- '", m$uri, "'")
+			rmd[uri] <- paste0("uri <- '", m$uri, "'")
 			frmd <- file.path(path, "temp.Rmd")
 			writeLines(rmd, frmd)
-			outf <- gsub("_meta.csv", ".html", f)
 			rmarkdown::render(frmd, "html_document", "temp", envir=new.env())
 			file.rename(file.path(path, "temp.html"), outf)
-			print(outf)
 		}
 	}
 }

@@ -31,34 +31,36 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 	cleanuri <- dataset$dataset_id
 	stopifnot(all(records$dataset_id == cleanuri))
 
-	dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
+	if (nrow(records) > 0) {
+		dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
 
-	opt <- options("carobiner_check")
-	answ <- check_terms(dataset, records, path, group, check=opt)	
-	fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
-	if (nrow(answ) > 0) {
-		answ$group <- group
-		answ$dataset_id <- cleanuri
-		answ$contributor <- dataset$carob_contributor
-
-		fign <- file.path(path, "scripts", group, "ignore.csv")
-		if (file.exists(fign)) {
-			ign <- utils::read.csv(fign)
-			ign <- apply(ign, 1, \(i) paste(i, collapse="#"))
-			ans <- apply(answ, 1, \(i) paste(i, collapse="#"))
-			m <- stats::na.omit(match(ign, ans))
-			if (length(m)  > 0) {
-				answ <- answ[-m, ]
-			}
-		}
+		opt <- options("carobiner_check")
+		answ <- check_terms(dataset, records, path, group, check=opt)	
+		fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
 		if (nrow(answ) > 0) {
-			data.table::fwrite(answ, fmsg, row.names=FALSE)
-			for (i in 1:nrow(answ)) {
-				message(paste("   ", answ$msg[i]))
+			answ$group <- group
+			answ$dataset_id <- cleanuri
+			answ$contributor <- dataset$carob_contributor
+
+			fign <- file.path(path, "scripts", group, "ignore.csv")
+			if (file.exists(fign)) {
+				ign <- utils::read.csv(fign)
+				ign <- apply(ign, 1, \(i) paste(i, collapse="#"))
+				ans <- apply(answ, 1, \(i) paste(i, collapse="#"))
+				m <- stats::na.omit(match(ign, ans))
+				if (length(m)  > 0) {
+					answ <- answ[-m, ]
+				}
 			}
-			message(paste("    contributor:", dataset$carob_contributor))
-		}
-	} 
+			if (nrow(answ) > 0) {
+				data.table::fwrite(answ, fmsg, row.names=FALSE)
+				for (i in 1:nrow(answ)) {
+					message(paste("   ", answ$msg[i]))
+				}
+				message(paste("    contributor:", dataset$carob_contributor))
+			}
+		} 
+	}
 	
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
