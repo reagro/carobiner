@@ -134,3 +134,18 @@ get_authors <- function(x) {
 }
 
 
+
+extract_metadata <- function(js, uri, dataset_id, group) {
+	
+	data.frame(
+		dataset_id = dataset_id,
+		group=group,
+		uri=uri,
+		license = get_license(js),
+		title = get_title(js),
+		authors = get_authors(js),
+		description = get_description(js)
+	)
+
+}
+
