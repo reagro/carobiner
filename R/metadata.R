@@ -68,6 +68,9 @@ get_license <- function(x) {
 	}
 	if (is.list(lic)) {
 		lic <- lapply(lic, \(x) gsub(" ", "-", gsub("CC-ZERO", "CC-0", x)))
+		if ((length(lic) > 1) && ("name" %in% names(lic))) {
+			lic <- lic$name
+		}
 	} else {
 		lic <- gsub(" ", "-", gsub("CC-ZERO", "CC-0", lic))
 	}
@@ -77,13 +80,57 @@ get_license <- function(x) {
 
 
 get_title <- function(x) {
-	out <- x$data$latestVersion$metadataBlocks$citation$fields$value[[1]]
-	if (is.null(out)) {
-		out <- js$result$name
+	i <- which(x$data$latestVersion$metadataBlocks$citation$fields$typeName == "title")
+	out <- NULL
+	if (length(i) > 0) {
+		out <- x$data$latestVersion$metadataBlocks$citation$fields$value[[i]]
 	}
 	if (is.null(out)) {
-		out <- ""
+		out <- x$result$title
+	}
+	if (is.null(out)) {
+		out <- as.character(NA)
 	}
 	out
 }
+
+
+
+get_description <- function(x) {
+	i <- which(x$data$latestVersion$metadataBlocks$citation$fields$typeName == "dsDescription")
+	out <- NULL
+	if (length(i) > 0) {
+		out <- x$data$latestVersion$metadataBlocks$citation$fields$value[[i]][[1]]$value
+	}
+	if (is.null(out)) {
+		out <- x$result$notes
+	}
+	if (is.null(out)) {
+		out <- as.character(NA)
+	}
+	out <- gsub("“", "'", out)
+	out <- gsub("”", "'", out)
+	out <- gsub("‘", "'", out)
+	gsub("’", "'", out)
+}
+
+
+get_authors <- function(x) {
+
+	i <- which(x$data$latestVersion$metadataBlocks$citation$fields$typeName == "author")
+	out <- NULL
+	if (length(i) > 0) {
+		out <- x$data$latestVersion$metadataBlocks$citation$fields$value[[i]]$authorName$value
+	}
+	if (is.null(out)) {
+		r <- x$result
+		i <- grep("contributor_person$|contributor_person_*[0-9]$", names(r))
+		out <- unlist(r[i])
+	}
+	if (is.null(out)) {
+		out <- as.character(NA)
+	}
+	paste(out, collapse="; ")
+}
+
 

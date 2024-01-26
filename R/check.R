@@ -90,7 +90,9 @@ check_lonlat <- function(x, path, res, answ) {
 check_cropyield <- function(x, path, answ) {
 	if (!all(c("crop", "yield") %in% names(x))) return(answ)
 	x <- x[, c("crop", "yield")]
-	a <- stats::aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
+	a <- suppressWarnings(
+			stats::aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
+		)
 	a <- a[a$yield < 100, ]
 	if (nrow(a) > 0) {
 		crops <- unique(a$crop)
