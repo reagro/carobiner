@@ -136,7 +136,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 		i <- 1
 		zipf <- NULL
 		while(TRUE) {
-			print(paste("part", i)); utils::flush.console()
+#			print(paste("part", i)); utils::flush.console()
 			cs <- cumsum(f$originalFileSize)
 			k <- which (cs < 9000000)
 			if (length(k) == 0) k <- 1

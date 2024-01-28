@@ -246,6 +246,17 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		R_mtime <- data.frame(uri=tolower(gsub(".R$", "", basename(ff))), 
 								R=file.mtime(ff), id=1:length(ff))
 		csv_mtime$uri <- tolower(csv_mtime$uri)
+
+		# remove csv files that no longer belong to the group
+		old <- merge(csv_mtime, R_mtime, by="uri", all.x=TRUE)
+		old <- old[!grepl("_meta$", old$uri), ]
+		old <- old[is.na(old$R), ]$uri
+		if (length(old) > 0) {
+			for (fold in old) {
+				file.remove(list.files(file.path(path, "data/clean", group), 
+							pattern=fold, recursive=TRUE))
+			}
+		}
 		
 		mtime <- merge(csv_mtime, R_mtime, by="uri", all.y=TRUE)
 		keep <- which(is.na(mtime$csv) | (mtime$R > mtime$csv))
