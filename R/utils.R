@@ -15,12 +15,17 @@ change_names <- function(x, from, to, must_have=TRUE) {
 }
 
 
+
 bindr <- function( ...) {
-	x <- list(...)
-	nms <- unique(unlist(lapply(x, names)))
-	x <- lapply(x, function(x) data.frame(c(x, sapply(setdiff(nms, names(x)), function(y) NA))))
-	x$make.row.names <- FALSE
-	do.call(rbind, x)
+	d <- list(...)
+	nms <- unique(unlist(lapply(d, names)))
+	out <- lapply(d, function(x) {
+		x <- x[, colnames(x)!="", drop=FALSE]
+			data.frame(c(x, 
+				sapply(setdiff(nms, names(x)), function(y) NA)), check.names=FALSE)
+		})
+	out$make.row.names <- FALSE
+	do.call(rbind, out)
 }
 
 .binder <- function(ff) {

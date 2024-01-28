@@ -34,7 +34,7 @@ get_license <- function(x) {
 				if (length(g) > 0) {
 					return("CC-BY-NC-ND")
 				}
-				if (grepl("CIMMYT", trms)) {
+				if (grepl("CIMMYT|CSISA", trms)) {
 					return("CIMMYT license")
 				}
 			}
