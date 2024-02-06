@@ -47,7 +47,7 @@ check_date <- function(x, name) {
 }
 
 
-check_lonlat <- function(x, path, res, answ) {
+check_lonlat <- function(x, path, answ) {
 
 	if (!all(c("longitude", "latitude") %in% colnames(x))) {
 		# there is already a message for missing required variables
@@ -324,7 +324,7 @@ check_terms <- function(dataset, records, path, group, check="all") {
 			answ <- check_datatypes(x[, nms], trms, path, answ)
 
 			if (check != "nogeo") {
-				answ <- check_lonlat(x, path, check, answ)	
+				answ <- check_lonlat(x, path, answ)	
 			}
 		} else {
 			answ <- check_dataset(x, trms, path, answ)

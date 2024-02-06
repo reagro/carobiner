@@ -7,6 +7,7 @@ get_data <- function(uri, path, group) {
 	data_from_uri(uri, path)
 }
 
+
 get_more_data <- function(url, dataset_id, path, group) {
 	f <- basename(url)
 	path <- file.path(path, "data/raw", group, dataset_id, f)
@@ -227,6 +228,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	}
 
 	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE, recursive=TRUE)
+	
 	if (cache) {
 		csv_mtime <- data.frame(uri=gsub(".csv$", "", basename(ff)), csv=file.mtime(ff))
 	} else {
