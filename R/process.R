@@ -2,9 +2,9 @@
 # May 2021
 # License GPL3
 
-get_data <- function(uri, path, group) {
+get_data <- function(uri, path, group, cache=TRUE) {
 	path <- file.path(path, "data/raw", group)
-	data_from_uri(uri, path)
+	data_from_uri(uri, path, overwrite=!cache)
 }
 
 
@@ -295,6 +295,8 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 make_carob <- function(path, group="", quiet=FALSE, check="all", cache=TRUE, ...) {
 	get_packages(group)
 	process_carob(path, group=group, quiet=quiet, check=check, cache=cache)
+	message(" === reporting ===")
+	make_reports(path, group="", cache=TRUE)
 	message(" === compiling ===")
 	compile_carob(path, group=group, ...)
 }

@@ -85,8 +85,13 @@ get_title <- function(x) {
 	if (length(i) > 0) {
 		out <- x$data$latestVersion$metadataBlocks$citation$fields$value[[i]]
 	}
-	if (is.null(out)) {
+	if (is.null(out)) { 
+		#ckan
 		out <- x$result$title
+	}
+	if (is.null(out)) { 
+		# dryad
+		out <- x$title
 	}
 	if (is.null(out)) {
 		out <- as.character(NA)
@@ -103,11 +108,17 @@ get_description <- function(x) {
 		out <- x$data$latestVersion$metadataBlocks$citation$fields$value[[i]][[1]]$value
 	}
 	if (is.null(out)) {
+		#ckan
 		out <- x$result$notes
+	}
+	if (is.null(out)) {
+		#dryad
+		out <- x$abstract
 	}
 	if (is.null(out)) {
 		out <- as.character(NA)
 	}
+	
 	out <- gsub("“", "'", out)
 	out <- gsub("”", "'", out)
 	out <- gsub("‘", "'", out)
