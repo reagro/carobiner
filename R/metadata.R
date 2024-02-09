@@ -22,7 +22,7 @@ get_license <- function(x) {
 	trms <- x$data$latestVersion$termsOfUse
 	if (is.null(trms)) trms <- x$license
 	if (isTRUE(grepl("This dataset is made available without information", trms))) {
-		return("unknown")
+		return("not specified")
 	}
 	if ((is.null(lic) || (lic[1] == "NONE")) && (!is.null(trms))) {
 		trm <- strsplit(trms, '\"')[[1]]
@@ -146,12 +146,12 @@ get_authors <- function(x) {
 
 
 
-extract_metadata <- function(js, uri, dataset_id, group) {
+extract_metadata <- function(js, uri, group) {
 	
 	data.frame(
-		dataset_id = dataset_id,
-		group=group,
-		uri=uri,
+		dataset_id = simple_uri(uri),
+		group = group,
+		uri = uri,
 		license = get_license(js),
 		title = get_title(js),
 		authors = get_authors(js),
