@@ -292,7 +292,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 }
 
 
-make_carob <- function(path, group="", quiet=FALSE, check="all", cache=TRUE, report=FALSE, ...) {
+make_carob <- function(path, group="", quiet=FALSE, check="all", report=FALSE, cache=TRUE, ...) {
 	get_packages(group)
 	process_carob(path, group=group, quiet=quiet, check=check, cache=cache)
 	if (report) {
