@@ -99,7 +99,7 @@ sort_by_terms <- function(x, type, group, path) {
 }
 
 
-compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
+compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=FALSE) {
 	w <- options("warn")
 	if (w$warn < 1) {
 		on.exit(options(warn=w$warn))
@@ -127,8 +127,14 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		wgroup <- ifelse(grp == "doi", "", paste0("_", grp))
 
 		ff <- file.path(path, "data", "clean", grep(paste0("^", grp), fff, value=TRUE))
+		outft <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_terms.csv"))
+		if (file.exists(outft) && cache) {
+			ft <- file.info(outft)$mtime
+			fftime <- file.info(ff)$mtime
+			if (!any(fftime > ft)) break
+		}
+
 		mi <- grepl("_meta.csv$", ff)
-		
 		x <- sort_by_terms(.binder(ff[mi]), "dataset", grp, path)
 		x[is.na(x)] <- ""
 		x[] <- sapply(x, \(i) gsub("\n", " ", i))
@@ -142,7 +148,6 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE) {
 		gterms <- get_terms("records", grp, path)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
 
-		outft <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_terms.csv"))
 #		utils::write.csv(gterms, outft, row.names=FALSE)
 		data.table::fwrite(gterms, outft, row.names=FALSE)
 		if (split_license) {
@@ -201,7 +206,7 @@ run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
 	if (!quiet) cat(basename(f), "\n"); utils::flush.console()
 	source(f, local=TRUE)
 	if (!exists("carob_script")) {
-		stop(" ", basename(f), "does not have a `carob_script` function", call.=FALSE)
+		stop(" ", basename(f), " does not have a 'carob_script' function", call.=FALSE)
 	}
 	if (!carob_script(path)) {
 		cat(paste(" ", basename(f), " failed\n"))
@@ -273,7 +278,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		if (!quiet) cat(gsub(base, "", f), "\n"); utils::flush.console()
 		source(f, local=TRUE)
 		if (!exists("carob_script")) {
-			stop(basename(f), "does not have a `carob_script` function", call.=FALSE)
+			stop(basename(f), " does not have a 'carob_script' function", call.=FALSE)
 		}
 		ok <- FALSE
 		try(ok <- carob_script(path))
@@ -300,7 +305,8 @@ make_carob <- function(path, group="", quiet=FALSE, check="all", report=FALSE, c
 		make_reports(path, group="", cache=TRUE)
 	}
 	message(" === compiling ===")
-	compile_carob(path, group=group, ...)
+	compile_carob(path, group=group, cache=cache, ...)
+	update_todo(path)	
 }
 
 
