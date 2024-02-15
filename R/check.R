@@ -47,6 +47,25 @@ check_date <- function(x, name) {
 }
 
 
+check_start_end_dates <- function(x) {
+	if (is.null(x$planting_date) || is.null(x$harvest_date)) {
+		return(NULL)
+	}
+	i <- which((nchar(x$planting_date) == 10) & (nchar(x$harvest_date) == 10))
+	if (length(i) == 0) return(NULL)
+	s <- as.Date(x$planting_date[i])
+	e <- as.Date(x$harvest_date[i])
+	d <- as.numeric(e - s)
+	if (any(d < 45)) {
+		return(c("invalid", "harvest date within 45 days after planting"))
+	} else if (any(d > 365)) {
+		return(c("invalid", "harvest date more than 1 year after planting"))
+	} else {
+		return(NULL)
+	}
+}
+
+
 check_lonlat <- function(x, path, answ) {
 
 	if (!all(c("longitude", "latitude") %in% colnames(x))) {
@@ -161,9 +180,16 @@ check_ranges <- function(x, trms, path, answ) {
 			bad <- c(bad, dat)
 		}
 	} 
+	
 	if (!is.null(bad)) {
 		bad <- paste(bad, collapse=", ")
 		answ[nrow(answ)+1, ] <- c("invalid", paste0("invalid: ", bad))
+		bad <- NULL
+	}
+
+	bad <- check_start_end_dates(x)
+	if (!is.null(bad)) {
+		answ[nrow(answ)+1, ] <- bad
 	}
 
 #	answ <- check_consistency(x, path, answ)
@@ -249,92 +275,85 @@ check_dataset <- function(x, trms, path, answ) {
 }
 
 
-check_terms <- function(dataset, records, path, group, check="all") {
+check_d_terms <- function(answ, x, path, type, group, check) {
 
-	answ <- data.frame(check="", msg="")[0,]
-	if (check == "none") {
-		return(answ)
+	bad <- rep(FALSE, ncol(x))
+	chars <- sapply(x, is.character)
+	for (i in which(chars)) {
+		x[,i] <- trimws(x[,i])
+		bad[i] <- any(stats::na.omit(x[,i]) == "")
+	}
+	if (any(bad)) {
+		b <- paste0(colnames(x)[bad], collapse= ", ")
+		answ[nrow(answ)+1, ] <- c("whitespace", 
+				paste0("whitespace in variable: ", b))
+	}
+	nms <- names(x)
+	trms <- get_terms(type, group, path)
+
+	xnms <- nms[!(nms %in% trms$name)]
+	if (length(xnms) > 0) {
+		answ[nrow(answ)+1, ] <- c("unknown variables", 
+				paste("unknown variables: ", paste(xnms, collapse=", ")))
 	}
 	
-	for (i in 1:2) {
-		if (i == 1) {
-			type <- "dataset"
-			x <- dataset
-		} else {
-			type <- "records"
-			x <- records
-		}
+	req <- trms[trms$required == "yes" | trms$required == group, "name"]
+	r <- req[!(req %in% nms)]
+	if (length(r) > 0) {
+		answ[nrow(answ)+1, ] <- c("required variable missing",
+				paste("required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
+	}
 
-		bad <- rep(FALSE, ncol(x))
-		chars <- sapply(x, is.character)
-		for (i in which(chars)) {
-			x[,i] <- trimws(x[,i])
-			bad[i] <- any(stats::na.omit(x[,i]) == "")
-		}
-		if (any(bad)) {
-			b <- paste0(colnames(x)[bad], collapse= ", ")
-			answ[nrow(answ)+1, ] <- c("whitespace", 
-					paste0("whitespace in variable: ", b))
-		}
-		nms <- names(x)
-		trms <- get_terms(type, group, path)
+	nms <- nms[nms %in% trms$name]
+	trms <- trms[trms$name %in% nms, ]
 
-		xnms <- nms[!(nms %in% trms$name)]
-		if (length(xnms) > 0) {
-			answ[nrow(answ)+1, ] <- c("unknown variables", 
-					paste("unknown variables: ", paste(xnms, collapse=", ")))
-		}
-		
-		req <- trms[trms$required == "yes" | trms$required == group, "name"]
-		r <- req[!(req %in% nms)]
-		if (length(r) > 0) {
-			answ[nrow(answ)+1, ] <- c("required variable missing",
-					paste("required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
-		}
-
-		nms <- nms[nms %in% trms$name]
-		trms <- trms[trms$name %in% nms, ]
-
-		voc <- trms[!is.na(trms$vocabulary) & (trms$vocabulary != ""), ]
-		voc <- voc[voc$name %in% nms, ]
-		if (nrow(voc) > 0) {
-			for (i in 1:nrow(voc)) {
-				accepted <- get_accepted_values(voc$vocabulary[i], path)[,1]
-				provided <- unique(x[, voc$name[i]])
-				if (voc$required[i] != "yes") {
-					provided <- stats::na.omit(provided)
-				} 
-				if (length(provided) > 0) {
-					if (!is.null(voc$multiple_allowed)) {
-						if (voc$multiple_allowed[i] == "yes") {
-							provided <- unlist(strsplit(provided, "; "))
-						}
+	voc <- trms[!is.na(trms$vocabulary) & (trms$vocabulary != ""), ]
+	voc <- voc[voc$name %in% nms, ]
+	if (nrow(voc) > 0) {
+		for (i in 1:nrow(voc)) {
+			accepted <- get_accepted_values(voc$vocabulary[i], path)[,1]
+			provided <- unique(x[, voc$name[i]])
+			if (voc$required[i] != "yes") {
+				provided <- stats::na.omit(provided)
+			} 
+			if (length(provided) > 0) {
+				if (!is.null(voc$multiple_allowed)) {
+					if (voc$multiple_allowed[i] == "yes") {
+						provided <- unlist(strsplit(provided, "; "))
 					}
-					bad <- provided[!(provided %in% accepted)]
-					if (length(bad) > 0) {
-					answ[nrow(answ)+1, ] <- c("invalid terms",
-							paste("   ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
-					}
+				}
+				bad <- provided[!(provided %in% accepted)]
+				if (length(bad) > 0) {
+				answ[nrow(answ)+1, ] <- c("invalid terms",
+						paste("   ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
 				}
 			}
 		}
+	}
+	
+	if (type=="records") {
+		answ <- check_datatypes(x[, nms], trms, path, answ)
 
-		
-		if (type=="records") {
-			answ <- check_datatypes(x[, nms], trms, path, answ)
-
-			if (check != "nogeo") {
-				answ <- check_lonlat(x, path, answ)	
-			}
-		} else {
-			answ <- check_dataset(x, trms, path, answ)
+		if (check != "nogeo") {
+			answ <- check_lonlat(x, path, answ)	
 		}
+	} else {
+		answ <- check_dataset(x, trms, path, answ)
 	}
 	answ
 }
 
 
-#a = check_terms(x, type, path)
+check_terms <- function(dataset, records, path, group, check="all") {
+	answ <- data.frame(check="", msg="")[0,]
+	if (check == "none") {
+		return(answ)
+	}
+	answ <- check_d_terms(answ, dataset, path, "dataset", group=group, check=check)
+	check_d_terms(answ, records, path, "records", group=group, check=check)
+}
+
+
 
 find_outliers <- function(x, fields, method="iqr") {
 	method <- match.arg(tolower(method), c("iqr", "std"))
