@@ -325,7 +325,7 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 				bad <- provided[!(provided %in% accepted)]
 				if (length(bad) > 0) {
 				answ[nrow(answ)+1, ] <- c("invalid terms",
-						paste("   ", voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
+					paste(voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
 				}
 			}
 		}
