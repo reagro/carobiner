@@ -1,7 +1,7 @@
 
 
 check_consistency <- function(x, name, answ) {
-	#e.g. if OM is used, then the type and amount should be specifiec 
+	#e.g. if OM is used, then the type and amount should be specified 
 	answ
 }
 
@@ -324,8 +324,9 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 				}
 				bad <- provided[!(provided %in% accepted)]
 				if (length(bad) > 0) {
-				answ[nrow(answ)+1, ] <- c("invalid terms",
-					paste(voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
+					bad <- sort(unique(bad))
+					answ[nrow(answ)+1, ] <- c("invalid terms",
+						paste(voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
 				}
 			}
 		}
