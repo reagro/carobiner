@@ -228,6 +228,45 @@ simple_uri <- function(uri, reverse=FALSE) {
 	files
 }
 
+.download_zenodo_files <- function(u, baseu, path, uname){
+  
+  pid <- gsub("https://zenodo.org/records/", "", u)
+  uu <- paste0("zenodo.org/api/deposit/depositions/", pid, "/files")
+  y <- httr::GET(uu)
+  if (y$status_code != 200) {
+    return(NULL)
+  }
+  
+  ry <- httr::content(y, as="raw")
+  meta <- rawToChar(ry)
+  writeLines(meta, file.path(path, paste0(uname, ".json")))
+  js	<- jsonlite::fromJSON(meta)
+  d <- js$links$download
+  done <- TRUE
+  files <- ""[0]
+  
+  outz <- file.path(path, paste0(uname, ".zip"))
+  dir.create(file.path(path, uname))
+  outf <- file.path(path, uname)
+  for (link in d) {
+    ok <- try(utils::download.file(gsub("/draft", "", link), file.path(outf, basename(gsub("/content", "", link))), mode="wb", quiet=TRUE))
+    if (inherits(ok, "try-error")) {
+      print("cannot download ", uname)
+      done <- FALSE
+    } else {
+      files <- c(files, file.path(outf, basename(gsub("/content", "", link))))
+    }
+  }
+  utils::zip(outz, list.files(outf, full.names = TRUE), flags = "-q")
+  utils::unzip(outz, junkpaths = TRUE, exdir = file.path(path))
+  unlink(file.path(path, uname), recursive = TRUE, force = TRUE)
+  
+  writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+  files <- list.files(file.path(path), full.names = TRUE)
+  files
+}
+
+
 
 .getdomain <- function(x) strsplit(gsub("http://|https://|www\\.", "", x), "/")[[c(1, 1)]]
 .getprotocol <- function(x) paste0(strsplit(x, "/")[[c(1, 1)]], "//")
@@ -299,6 +338,8 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 		.download_dryad_files(u, baseu, path, uname)
 	} else if (grepl("/dataset/", u)) {	
 		.download_ckan_files(u, baseu, path, uname)
+	} else if (grepl("zenodo", u)) {
+	  .download_zenodo_files(u, baseu, path, uname)
 	} else {
 		.download_dataverse_files(u, baseu, path, uname, domain, protocol, unzip, zipf1)
 	}
@@ -308,4 +349,3 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 
 # uri <- "https://doi.org/10.5061/dryad.pj76g30"
 # ff <- data_from_uri(uri, ".")
-
