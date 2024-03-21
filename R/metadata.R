@@ -38,6 +38,9 @@ get_license <- function(x) {
 					return("CIMMYT license")
 				}
 			}
+			if (grepl("/by/4.0/", trms)) {
+				return("CC-BY-4.0")
+			}
   			gg <- regmatches(g, gregexpr('Creative (.+?) license', g, ignore.case=TRUE)) |> unlist()
 			if (any(tolower(gg) == "creative commons attribution 4.0 international license")) {
 				gg <- "CC-BY-4.0"
@@ -148,11 +151,17 @@ get_authors <- function(x) {
 
 extract_metadata <- function(js, uri, group) {
 	
+	lic <- get_license(js)
+	if (is.null(lic)) {
+		warning("no license found")
+		lic <- as.character(NA)
+	}
+	
 	data.frame(
 		dataset_id = simple_uri(uri),
 		group = group,
 		uri = uri,
-		license = get_license(js),
+		license = lic,
 		title = get_title(js),
 		authors = get_authors(js),
 		description = get_description(js)

@@ -319,7 +319,9 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 			if (length(provided) > 0) {
 				if (!is.null(voc$multiple_allowed)) {
 					if (voc$multiple_allowed[i] == "yes") {
-						provided <- unlist(strsplit(provided, "; "))
+						provided <- unlist(strsplit(provided, ";"))
+#						provided <- unlist(strsplit(provided, ";| ;"))
+
 					}
 				}
 				bad <- provided[!(provided %in% accepted)]
