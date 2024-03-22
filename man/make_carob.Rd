@@ -18,7 +18,7 @@ Make the Carob database.
 
 \code{compile_carob} reads all the clean data and combines them into two files, one for the dataset descriptions, one for all records, and saves these to "carob/data")
 
-\code{make_carob} is a convenience function that first runs \code{process_carob} and then runs \code{clean_carob} 
+\code{make_carob} is a convenience function that first runs \code{process_carob} and then runs \code{compile_carob} 
 }
 
 

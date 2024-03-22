@@ -18,9 +18,13 @@ make_reports <- function(path, group="", cache=TRUE) {
 		ff <- list.files(gpath, pattern="meta.csv$", full=TRUE)
 		outf <- gsub("_meta.csv", ".html", ff)
 		if (cache) {
-			i <- !file.exists(outf)
-			ff <- ff[i]
-			outf <- outf[i]
+			i <- file.exists(outf)
+			j <- which(i)
+			ptm <- file.info(ff[j])$mtime
+			ftm <- file.info(outf[j])$mtime
+			i[j[ptm > ftm]] <- FALSE
+			ff <- ff[!i]
+			outf <- outf[!i]
 			if (length(ff) == 0) next
 		}
 		uri <- grep("^uri <- ", rmd)
