@@ -71,11 +71,11 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
 	}
 	dir.create(dirname(outf), FALSE, FALSE)
-	records <- carobiner:::sort_by_terms(records, "records", group, path)
+	records <- sort_by_terms(records, "records", group, path)
 #	utils::write.csv(records, outf, row.names=FALSE)
 	data.table::fwrite(records, outf, row.names=FALSE)
 	
-	dataset <- carobiner:::sort_by_terms(dataset, "dataset", group, path)
+	dataset <- sort_by_terms(dataset, "dataset", group, path)
 	mf <- gsub(".csv$", "_meta.csv", outf)
 #	utils::write.csv(dataset, mf, row.names=FALSE)
 	if (is.null(dataset$carob_date)) dataset$carob_date <- ""

@@ -15,7 +15,7 @@ make_reports <- function(path, group="", cache=TRUE) {
 		rmd <- readLines(rmd, warn=FALSE)
 
 		gpath <- file.path(path, "/data/clean/", grp)
-		ff <- list.files(gpath, pattern="meta.csv$", full=TRUE)
+		ff <- list.files(gpath, pattern="meta.csv$", full.names=TRUE)
 		outf <- gsub("_meta.csv", ".html", ff)
 		if (cache) {
 			i <- file.exists(outf)
@@ -34,7 +34,7 @@ make_reports <- function(path, group="", cache=TRUE) {
 		on.exit(file.remove(file.path(path, "temp.Rmd")))
 		for (i in 1:length(ff)) {
 			print(outf[i])
-			m <- read.csv(ff[i])
+			m <- utils::read.csv(ff[i])
 			rmd[uri] <- paste0("uri <- '", m$uri, "'")
 			frmd <- file.path(path, "temp.Rmd")
 			writeLines(rmd, frmd)

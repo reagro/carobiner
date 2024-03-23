@@ -25,7 +25,7 @@ Make the Carob database.
 \usage{
 run_carob(cleanuri, path, group="", quiet=FALSE)
 process_carob(path, group="", quiet=FALSE, check=NULL, cache=TRUE)
-compile_carob(path, group="", split_license=FALSE, zip=FALSE)
+compile_carob(path, group="", split_license=FALSE, zip=FALSE, cache=FALSE)
 make_carob(path, group="", quiet=FALSE, check="all", report=FALSE, cache=TRUE, ...)
 }
  
