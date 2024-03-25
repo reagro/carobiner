@@ -262,7 +262,7 @@ check_dataset <- function(x, trms, path, answ) {
 	
 	if (isTRUE(nchar(x$publication) > 0 )) {
 		allpubs <- list.files(file.path(path, "references"))
-		pubs <- unlist(strsplit(x$publication, ";| ;"))
+		pubs <- unlist(strsplit(x$publication, ";|; "))
 		pubs <- simple_uri(pubs)
 		for (pub in pubs) {
 			where <- grep(pub, allpubs)
@@ -320,7 +320,7 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 				if (!is.null(voc$multiple_allowed)) {
 					if (voc$multiple_allowed[i] == "yes") {
 #						provided <- unlist(strsplit(provided, ";"))
-						provided <- unlist(strsplit(provided, ";| ;"))
+						provided <- unlist(strsplit(provided, ";|; "))
 
 					}
 				}

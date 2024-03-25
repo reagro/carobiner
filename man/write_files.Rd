@@ -17,7 +17,7 @@ write_files(path, dataset, records, timerecs=NULL, id=NULL)
  
 \arguments{
   \item{path}{character. Local path to the Carob repo}
-  \item{dataset}{data.frame. One row with dataset level variables}
+  \item{dataset}{data.frame. One row with dataset level variables (metadata)}
   \item{records}{data.frame. Dataset records}
   \item{timerecs}{data.frame. Dataset with temporal records}
   \item{id}{character. Optional identifies if a dataset has multiple subdatasets}

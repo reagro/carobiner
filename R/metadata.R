@@ -160,10 +160,10 @@ extract_metadata <- function(js, uri, group) {
 	auth <- paste(authors, collapse="; ")
 	titl <- gsub("\\.\\.$", ".", paste0(get_title(js), "."))
 
-	pubdate <- c(js$data$publicationDate, js$result$creation_date)
+	pubdate <- c(js$data$publicationDate, js$result$creation_date, js$publicationDate)
 	year <- substr(pubdate, 1, 4)
 
-	v <- js$data$latestVersion$versionNumber
+	v <- c(js$data$latestVersion$versionNumber, js$versionNumber)
 	if (!is.null(v)) {
 		v <- paste0("Version ", v, ".", js$data$latestVersion$versionMinorNumber, ". ")
 	} 
