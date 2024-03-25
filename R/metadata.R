@@ -148,7 +148,6 @@ get_authors <- function(x) {
 }
 
 
-
 extract_metadata <- function(js, uri, group) {
 	
 	lic <- get_license(js)
@@ -156,16 +155,30 @@ extract_metadata <- function(js, uri, group) {
 		warning("no license found")
 		lic <- as.character(NA)
 	}
-	
+
+	authors <- get_authors(js)
+	auth <- paste(authors, collapse="; ")
+	titl <- gsub("\\.\\.$", ".", paste0(get_title(js), "."))
+
+	pubdate <- c(js$data$publicationDate, js$result$creation_date)
+	year <- substr(pubdate, 1, 4)
+
+	v <- js$data$latestVersion$versionNumber
+	if (!is.null(v)) {
+		v <- paste0("Version ", v, ".", js$data$latestVersion$versionMinorNumber, ". ")
+	} 
+	pub <- c(js$data$publisher, js$result$publisher) 
+	cit <- paste0(auth, " (", year, "). ", titl, " ", pub, ". ", v, uri)
+
 	data.frame(
 		dataset_id = simple_uri(uri),
 		group = group,
 		uri = uri,
 		license = lic,
-		title = get_title(js),
-		authors = get_authors(js),
-		description = get_description(js)
+		title = titl,
+		authors = authors,
+		data_published = pubdate,
+		description = get_description(js),
+		data_citation = cit
 	)
-
 }
-
