@@ -54,7 +54,16 @@ simple_uri <- function(uri, reverse=FALSE) {
 			there <- (zf %in% ff)
 			if (!all(there)) {
 				utils::unzip(z, zf[!there], exdir = path)
-			}	
+				## zipfiles in zipfile...
+				zipzip <- grep("\\.zip$", zf[!there], ignore.case=TRUE, value=TRUE)
+				if (length(zipzip) > 0) {
+					zipzip <- file.path(path, zipzip)
+					for (zz in zipzip) {
+						utils::unzip(zz, exdir = path)
+					}
+					zf <- c(zf, zipzip) 
+				}
+			}
 		}
 	}
 	zf <- grep("\\.pdf$", allf, value=TRUE, invert=TRUE)

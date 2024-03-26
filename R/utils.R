@@ -30,11 +30,14 @@ change_names <- function(x, from, to, must_have=TRUE) {
 bindr <- function( ...) {
 	d <- list(...)
 	nms <- unique(unlist(lapply(d, names)))
-	out <- lapply(d, function(x) {
-		x <- x[, colnames(x)!="", drop=FALSE]
-			data.frame(c(x, 
-				sapply(setdiff(nms, names(x)), function(y) NA)), check.names=FALSE)
-		})
+	out <- lapply(d, 
+			function(x) {
+				x <- x[, colnames(x)!="", drop=FALSE]
+					data.frame(c(x, 
+						sapply(setdiff(nms, names(x)), function(y) NA)), check.names=FALSE)
+				}
+			)
+				
 	out$make.row.names <- FALSE
 	do.call(rbind, out)
 }
