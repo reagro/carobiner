@@ -264,7 +264,6 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	}
 	ff <- sort(ff)
 	
-
 	tab <- table(basename(ff))
 	if (any(tab > 1)) {
 		dups <- names(tab[tab>1])
