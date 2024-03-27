@@ -34,7 +34,7 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 
 	if (nrow(records) > 0) {
 		dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
-
+		records$dataset_id <- dataset$dataset_id
 		opt <- options("carobiner_check")
 		answ <- check_terms(dataset, records, path, group, check=opt)	
 		fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
