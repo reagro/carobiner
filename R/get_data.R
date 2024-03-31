@@ -291,6 +291,10 @@ http_address <- function(uri) {
 }
 
 data_from_uri <- function(uri, path, overwrite=FALSE) {
+
+	if (is.null(path)) {
+		path <- file.path(tempdir(), "carob")
+	}
 	
 	uripath=TRUE
 	unzip=TRUE

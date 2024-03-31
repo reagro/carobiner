@@ -1,5 +1,10 @@
 
 get_metadata <- function(cleanuri, path, group="", major=1, minor=0) {
+
+	if (is.null(path)) {
+		path <- file.path(tempdir(), "carob")
+	}
+
 	jf <- file.path(path, "data", "raw", group, cleanuri, paste0(cleanuri, ".json"))
 	x <- jsonlite::fromJSON(readLines(jf))
 	jmajor <- x$data$latestVersion$versionNumber 

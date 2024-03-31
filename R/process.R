@@ -3,6 +3,9 @@
 # License GPL3
 
 get_data <- function(uri, path, group, cache=TRUE) {
+	if (is.null(path)) {
+		path <- file.path(tempdir(), "carob")
+	}
 	path <- file.path(path, "data/raw", group)
 	data_from_uri(uri, path, overwrite=!cache)
 }
@@ -23,6 +26,12 @@ get_more_data <- function(url, dataset_id, path, group) {
 write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 
 	stopifnot(nrow(dataset) == 1)
+
+	to_mem <- FALSE
+	if (is.null(path)) {
+		path <- file.path(tempdir(), "carob")
+		to_mem <- TRUE
+	}
 
 	group <- dataset$group
 	if (!check_group(group, path)) {
@@ -63,6 +72,13 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 		} 
 	}
 	
+	records <- sort_by_terms(records, "records", group, path)
+	dataset <- sort_by_terms(dataset, "dataset", group, path)
+
+	if (to_mem) {
+		return(list(data=records, meta=dataset))
+	}
+	
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
 	if (!is.null(id)) {
@@ -71,14 +87,11 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
 	}
 	dir.create(dirname(outf), FALSE, FALSE)
-	records <- sort_by_terms(records, "records", group, path)
 #	utils::write.csv(records, outf, row.names=FALSE)
 	data.table::fwrite(records, outf, row.names=FALSE)
 	
-	dataset <- sort_by_terms(dataset, "dataset", group, path)
 	mf <- gsub(".csv$", "_meta.csv", outf)
 #	utils::write.csv(dataset, mf, row.names=FALSE)
-	if (is.null(dataset$carob_date)) dataset$carob_date <- ""
 	data.table::fwrite(dataset, mf, row.names=FALSE)
 
 	TRUE
