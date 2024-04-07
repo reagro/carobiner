@@ -80,7 +80,7 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL) {
 	}
 	
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
-	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
+#?	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
 	if (!is.null(id)) {
 		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, "-", id, ".csv"))
 	} else {

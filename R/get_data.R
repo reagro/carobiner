@@ -239,40 +239,40 @@ simple_uri <- function(uri, reverse=FALSE) {
 
 .download_zenodo_files <- function(u, baseu, path, uname){
   
-  pid <- gsub("https://zenodo.org/records/", "", u)
-  uu <- paste0("zenodo.org/api/deposit/depositions/", pid, "/files")
-  y <- httr::GET(uu)
-  if (y$status_code != 200) {
-    return(NULL)
-  }
-  
-  ry <- httr::content(y, as="raw")
-  meta <- rawToChar(ry)
-  writeLines(meta, file.path(path, paste0(uname, ".json")))
-  js	<- jsonlite::fromJSON(meta)
-  d <- js$links$download
-  done <- TRUE
-  files <- ""[0]
-  
-  outz <- file.path(path, paste0(uname, ".zip"))
-  dir.create(file.path(path, uname))
-  outf <- file.path(path, uname)
-  for (link in d) {
-    ok <- try(utils::download.file(gsub("/draft", "", link), file.path(outf, basename(gsub("/content", "", link))), mode="wb", quiet=TRUE))
-    if (inherits(ok, "try-error")) {
-      print("cannot download ", uname)
-      done <- FALSE
-    } else {
-      files <- c(files, file.path(outf, basename(gsub("/content", "", link))))
-    }
-  }
-  utils::zip(outz, list.files(outf, full.names = TRUE), flags = "-q")
-  utils::unzip(outz, junkpaths = TRUE, exdir = file.path(path))
-  unlink(file.path(path, uname), recursive = TRUE, force = TRUE)
-  
-  writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
-  files <- list.files(file.path(path), full.names = TRUE)
-  files
+	pid <- gsub("https://zenodo.org/records/", "", u)
+	uu <- paste0("zenodo.org/api/deposit/depositions/", pid, "/files")
+	y <- httr::GET(uu)
+	if (y$status_code != 200) {
+		return(NULL)
+	}
+	
+	ry <- httr::content(y, as="raw")
+	meta <- rawToChar(ry)
+	writeLines(meta, file.path(path, paste0(uname, ".json")))
+	js	<- jsonlite::fromJSON(meta)
+	d <- js$links$download
+	done <- TRUE
+	files <- ""[0]
+	
+	outz <- file.path(path, paste0(uname, ".zip"))
+	dir.create(file.path(path, uname))
+	outf <- file.path(path, uname)
+	for (link in d) {
+		ok <- try(utils::download.file(gsub("/draft", "", link), file.path(outf, basename(gsub("/content", "", link))), mode="wb", quiet=TRUE))
+		if (inherits(ok, "try-error")) {
+			print("cannot download ", uname)
+			done <- FALSE
+		} else {
+			files <- c(files, file.path(outf, basename(gsub("/content", "", link))))
+		}
+	}
+	utils::zip(outz, list.files(outf, full.names = TRUE), flags = "-q")
+	utils::unzip(outz, junkpaths = TRUE, exdir = file.path(path))
+	unlink(file.path(path, uname), recursive = TRUE, force = TRUE)
+	
+	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+	files <- list.files(file.path(path), full.names = TRUE)
+	files
 }
 
 
@@ -289,6 +289,7 @@ http_address <- function(uri) {
 		gsub("^hdl:", "https://hdl.handle.net/", uri)
 	}
 }
+
 
 data_from_uri <- function(uri, path, overwrite=FALSE) {
 
@@ -334,9 +335,9 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 
 	# For CIRAD dataverse
 	if (grepl("18167", uri)) {
-	  x <- httr::GET(uri, httr::add_headers("user-agent" = "Mozilla/5.0", "Cache-Control" = "no-cache"))
+		x <- httr::GET(uri, httr::add_headers("user-agent" = "Mozilla/5.0", "Cache-Control" = "no-cache"))
 	} else {
-	  x <- httr::GET(uri)
+		x <- httr::GET(uri)
 	}
 
 	if (x$status_code != 200) {
@@ -352,13 +353,11 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 	} else if (grepl("/dataset/", u)) {	
 		.download_ckan_files(u, baseu, path, uname)
 	} else if (grepl("zenodo", u)) {
-	  .download_zenodo_files(u, baseu, path, uname)
+		.download_zenodo_files(u, baseu, path, uname)
 	} else {
 		.download_dataverse_files(u, baseu, path, uname, domain, protocol, unzip, zipf1)
 	}
 }
-
-
 
 # uri <- "https://doi.org/10.5061/dryad.pj76g30"
 # ff <- data_from_uri(uri, ".")

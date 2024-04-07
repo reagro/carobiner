@@ -10,12 +10,12 @@ get_metadata <- function(cleanuri, path, group="", major=1, minor=0) {
 	jmajor <- x$data$latestVersion$versionNumber 
 	if (!is.null(jmajor)) {
 		jminor <- x$data$latestVersion$versionMinorNumber 
-		if (jmajor != major) stop(paste("new major version", jmajor, "for", cleanuri), call.=FALSE)
-		if (jminor != minor) warning(paste("new minor version", jminor, "for", cleanuri), call.=FALSE)
+		if (jmajor != major) stop(paste("different major version", jmajor, "for", cleanuri), call.=FALSE)
+		if (jminor != minor) warning(paste("different minor version", jminor, "for", cleanuri), call.=FALSE)
 	} else { # ckan
 		v <- x$result$version
 		if (!is.null(v)) {
-			if (v != major) stop(paste("new version", v, "for", cleanuri), call.=FALSE)
+			if (v != major) stop(paste("different version", v, "for", cleanuri), call.=FALSE)
 		}
 	}
 	x
@@ -31,13 +31,17 @@ get_license <- function(x) {
 	}
 	if ((is.null(lic) || (lic[1] == "NONE")) && (!is.null(trms))) {
 		trm <- strsplit(trms, '\"')[[1]]
-		g <- grep("/creativecommons.org/", tolower(trm), value=TRUE)
+		g <- grep("/creativecommons.org/|/licensebuttons.net", tolower(trm), value=TRUE)
 		if (length(g) == 0) {
 			g <- grep("Creative Commons", trm, value=TRUE, ignore.case=TRUE)
 			if (length(g) == 0) {
 				g <- grep("by-nc-nd", trm, value=TRUE, ignore.case=TRUE)
 				if (length(g) > 0) {
 					return("CC-BY-NC-ND")
+				}
+				g <- grep("by-nc-sa", trm, value=TRUE, ignore.case=TRUE)
+				if (length(g) > 0) {
+					return("CC-BY-NC-SA")
 				}
 				if (grepl("CIMMYT|CSISA", trms)) {
 					return("CIMMYT license")
