@@ -6,7 +6,6 @@ importFrom(writexl, write_xlsx)
 export(
 bindr, change_names, check_terms, compile_carob, find_outliers, fix_name,
 get_locations, get_data, get_more_data, get_function, 
-get_metadata, get_license, get_title, get_description, get_authors,
 get_references, get_terms, get_accepted_values, extract_metadata,
 geocode, geocode_duplicates, is_excel, 
 make_carob, process_carob, run_carob, make_reports, 

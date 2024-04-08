@@ -72,6 +72,9 @@ check_lonlat <- function(x, path, answ) {
 		# there is already a message for missing required variables
 		return(answ)
 	}
+	if (is.null(path)) {
+		path <- tempdir()
+	}
 
 #	wres <- ifelse(res=="high", 1, 5)
 	wres <- 1
@@ -347,13 +350,18 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 }
 
 
-check_terms <- function(dataset, records, path, group, check="all") {
+check_terms <- function(dataset, records, path=NULL, group="", check="all") {
 	answ <- data.frame(check="", msg="")[0,]
 	if (check == "none") {
 		return(answ)
 	}
-	answ <- check_d_terms(answ, dataset, path, "dataset", group=group, check=check)
-	check_d_terms(answ, records, path, "records", group=group, check=check)
+	if (!missing(dataset)) {
+		answ <- check_d_terms(answ, dataset, path, "dataset", group=group, check=check)
+	}
+	if (!missing(records)) {
+		answ <- check_d_terms(answ, records, path, "records", group=group, check=check)
+	}
+	answ
 }
 
 

@@ -34,6 +34,9 @@ get_terms <- function(type, group, path) {
 		trms <- get_variables(path, "all")
 		grps <- get_groups(path)
 		include <- grps$include[grps$name == group]
+		if (length(include) == 0) {
+			include <- c("crop;soil")
+		} 
 		if (include != "") {
 			include <- trimws(unlist(strsplit(include, ";")))
 			for (inc in include) {
@@ -41,12 +44,14 @@ get_terms <- function(type, group, path) {
 				trms <- rbind(trms, add)
 			}
 		}
-		trms2 <- get_variables(path, group)
-		if (!is.null(trms2)) {
-			trms <- rbind(trms, trms2)
-			tab <- table(trms[,1])
-			if (any(tab > 1)) {
-				print(paste("duplicated terms:", names(tab[tab>1])))
+		if (group != "") {
+			trms2 <- get_variables(path, group)
+			if (!is.null(trms2)) {
+				trms <- rbind(trms, trms2)
+				tab <- table(trms[,1])
+				if (any(tab > 1)) {
+					print(paste("duplicated terms:", names(tab[tab>1])))
+				}
 			}
 		}
 	} else if (type=="dataset") {
@@ -54,7 +59,6 @@ get_terms <- function(type, group, path) {
 	} else {
 		stop("invalid 'type' argument; should be 'records' or 'dataset'") 
 	}
-	#names(trms)[1] <- "name" # excel seems to mess this up
 	trms
 }
 

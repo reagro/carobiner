@@ -12,7 +12,7 @@ Check the terms used in a dataset. A warning is given if bad or missing terms or
 
 
 \usage{
-check_terms(dataset, records, path, group, check = "all")
+check_terms(dataset, records, path=NULL, group="", check = "all")
 }
  
 \arguments{
