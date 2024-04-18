@@ -1,7 +1,16 @@
 
 
-check_consistency <- function(x, name, answ) {
+check_consistency <- function(x, answ) {
 	#e.g. if OM is used, then the type and amount should be specified 
+	if (!is.null(x$crop_price)) {
+		if (is.null(x$currency)) {
+			answ[nrow(answ)+1, ] <- c("no currency", "crop_price variable used, but currency variable missing")
+		} else {
+			if (any(is.na(x$currency) & !is.na(x$crop_price))) {
+				answ[nrow(answ)+1, ] <- c("currency missing", "crop_price values without currency values found")
+			}
+		}
+	}
 	answ
 }
 
@@ -165,7 +174,7 @@ check_ranges <- function(x, trms, path, answ) {
 	for (i in 1:nrow(trms)) {
 		rng <- unlist(trms[i,c("valid_min", "valid_max")])
 		v <- stats::na.omit(x[[trms$name[i]]])
-		if ( any((v < rng[[1]]) | (v > rng[2])) ) {
+ 		if ( any((v < rng[[1]]) | (v > rng[2])) ) {
 			ok <- FALSE
 			vrng <- round(range(v, na.rm=TRUE),3)
 			msg  <- paste0(trms$name[i], " (", vrng[1], ", ", vrng[2], ")")
@@ -195,7 +204,7 @@ check_ranges <- function(x, trms, path, answ) {
 		answ[nrow(answ)+1, ] <- bad
 	}
 
-#	answ <- check_consistency(x, path, answ)
+	answ <- check_consistency(x, answ)
 	check_cropyield(x, path, answ)
 }
 
