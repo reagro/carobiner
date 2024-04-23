@@ -266,7 +266,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 		}
 	}
 	utils::zip(outz, list.files(outf, full.names = TRUE), flags = "-q")
-	utils::unzip(outz, junkpaths = TRUE, exdir = file.path(path))
+	utils::unzip(outz, junkpaths = TRUE, exdir=path)
 	unlink(file.path(path, uname), recursive = TRUE, force = TRUE)
 	
 	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
@@ -281,18 +281,17 @@ simple_uri <- function(uri, reverse=FALSE) {
 	uu <- gsub("01-", "", uu)
 	uu <- paste0(uu, "/", bn, ".zip")
 	
-	dpath <- file.path(path, uname)
-	zipf <- file.path(dpath, basename(uu))
-	dir.create(dpath, showWarnings=FALSE)
+	zipf <- file.path(path, basename(uu))
+	dir.create(path, showWarnings=FALSE)
 	ok <- try(utils::download.file(uu, zipf, mode="wb", quiet=TRUE))
 	if (inherits(ok, "try-error")) {
 		print("cannot download ", uname)
 		done <- FALSE
 	}
-	utils::unzip(zipf, junkpaths = TRUE, exdir = dpath)
+	utils::unzip(zipf, junkpaths=TRUE, exdir=path)
 
 	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
-	list.files(file.path(path), full.names = TRUE)
+	list.files(path, full.names = TRUE)
 }
 
 
@@ -368,14 +367,15 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 	domain <- .getdomain(u)
 	protocol <- .getprotocol(u)
 	baseu <- paste0(protocol, domain)
+
 	if (grepl("/stash/", u)) {	
 		.download_dryad_files(u, baseu, path, uname)
+	} else if (grepl("rothamsted", u)) {
+		.download_rothamsted_files(u, path, uname)
 	} else if (grepl("/dataset/", u)) {	
 		.download_ckan_files(u, baseu, path, uname)
 	} else if (grepl("zenodo", u)) {
 		.download_zenodo_files(u, path, uname)
-	} else if (grepl("rothamsted", u)) {
-		.download_rothamsted_files_files(u, path, uname)
 	} else {
 		.download_dataverse_files(u, baseu, path, uname, domain, protocol, unzip, zipf1)
 	}

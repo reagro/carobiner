@@ -4,9 +4,14 @@ get_metadata <- function(cleanuri, path, group="", major=1, minor=0) {
 	if (is.null(path)) {
 		path <- file.path(tempdir(), "carob")
 	}
-
 	jf <- file.path(path, "data", "raw", group, cleanuri, paste0(cleanuri, ".json"))
-	x <- jsonlite::fromJSON(readLines(jf, warn=FALSE))
+	if (file.exists(jf)) {
+		x <- jsonlite::fromJSON(readLines(jf))
+	} else {
+		jf <- file.path(path, "data", "raw", group, cleanuri, "datapackage.json")
+		x <- jsonlite::fromJSON(readLines(jf, warn=FALSE))
+	}
+	
 	jmajor <- x$data$latestVersion$versionNumber 
 	if (!is.null(jmajor)) {
 		jminor <- x$data$latestVersion$versionMinorNumber 
@@ -23,6 +28,11 @@ get_metadata <- function(cleanuri, path, group="", major=1, minor=0) {
 
 
 get_license <- function(x) {
+
+	if (!is.null(x$licenses$name)) { # Rothamsted
+		return(x$licenses$name)
+	}
+
 	lic <- x$data$latestVersion$license
 	trms <- x$data$latestVersion$termsOfUse
 	if (is.null(trms)) trms <- x$license
@@ -77,8 +87,6 @@ get_license <- function(x) {
 		lic <- x$result$license_id 	
 		if (is.null(lic)) lic <- "?"
 		lic <- toupper(lic)
-	} else if (!is.null(x$licenses$name)) { # Rothamsted
-		return(x$licenses$name)
 	}
 	
 	if (is.list(lic)) {
@@ -180,6 +188,7 @@ extract_metadata <- function(js, uri, group) {
 	titl <- gsub("\\.\\.$", ".", paste0(get_title(js), "."))
 
 	pubdate <- c(js$data$publicationDate, js$result$creation_date, js$publicationDate)
+	if (is.null(pubdate)) pubdate <- "????-??-??"
 	year <- substr(pubdate, 1, 4)
 
 	v <- c(js$data$latestVersion$versionNumber, js$versionNumber)
