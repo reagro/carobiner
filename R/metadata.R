@@ -6,7 +6,7 @@ get_metadata <- function(cleanuri, path, group="", major=1, minor=0) {
 	}
 
 	jf <- file.path(path, "data", "raw", group, cleanuri, paste0(cleanuri, ".json"))
-	x <- jsonlite::fromJSON(readLines(jf))
+	x <- jsonlite::fromJSON(readLines(jf, warn=FALSE))
 	jmajor <- x$data$latestVersion$versionNumber 
 	if (!is.null(jmajor)) {
 		jminor <- x$data$latestVersion$versionMinorNumber 
@@ -77,7 +77,10 @@ get_license <- function(x) {
 		lic <- x$result$license_id 	
 		if (is.null(lic)) lic <- "?"
 		lic <- toupper(lic)
+	} else if (!is.null(x$licenses$name)) { # Rothamsted
+		return(x$licenses$name)
 	}
+	
 	if (is.list(lic)) {
 		lic <- lapply(lic, \(x) gsub(" ", "-", gsub("CC-ZERO", "CC-0", x)))
 		if ((length(lic) > 1) && ("name" %in% names(lic))) {
@@ -102,7 +105,7 @@ get_title <- function(x) {
 		out <- x$result$title
 	}
 	if (is.null(out)) { 
-		# dryad
+		# dryad; Rothamsted
 		out <- x$title
 	}
 	if (is.null(out)) {
@@ -128,6 +131,10 @@ get_description <- function(x) {
 		out <- x$abstract
 	}
 	if (is.null(out)) {
+		#rothamsted
+		out <- x$description
+	}
+	if (is.null(out)) {
 		out <- as.character(NA)
 	}
 	
@@ -149,6 +156,9 @@ get_authors <- function(x) {
 		r <- x$result
 		i <- grep("contributor_person$|contributor_person_*[0-9]$", names(r))
 		out <- unlist(r[i])
+	}
+	if (is.null(out)) { #Rothamsted
+		out <- x$contributors$title
 	}
 	if (is.null(out)) {
 		out <- as.character(NA)

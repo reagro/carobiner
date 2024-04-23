@@ -233,11 +233,10 @@ simple_uri <- function(uri, reverse=FALSE) {
 	}
 	utils::unzip(outf, exdir = file.path(path))
 	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
-	files <- list.files(file.path(path), full.names = TRUE)
-	files
+	list.files(file.path(path), full.names = TRUE)
 }
 
-.download_zenodo_files <- function(u, baseu, path, uname){
+.download_zenodo_files <- function(u, path, uname){
   
 	pid <- gsub("https://zenodo.org/records/", "", u)
 	uu <- paste0("zenodo.org/api/deposit/depositions/", pid, "/files")
@@ -271,8 +270,29 @@ simple_uri <- function(uri, reverse=FALSE) {
 	unlink(file.path(path, uname), recursive = TRUE, force = TRUE)
 	
 	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
-	files <- list.files(file.path(path), full.names = TRUE)
-	files
+	list.files(file.path(path), full.names = TRUE)
+}
+
+
+.download_rothamsted_files <- function(u, path, uname) {
+
+	uu <- gsub("dataset", "metadata", u)
+	bn <- basename(u)
+	uu <- gsub("01-", "", uu)
+	uu <- paste0(uu, "/", bn, ".zip")
+	
+	dpath <- file.path(path, uname)
+	zipf <- file.path(dpath, basename(uu))
+	dir.create(dpath, showWarnings=FALSE)
+	ok <- try(utils::download.file(uu, zipf, mode="wb", quiet=TRUE))
+	if (inherits(ok, "try-error")) {
+		print("cannot download ", uname)
+		done <- FALSE
+	}
+	utils::unzip(zipf, junkpaths = TRUE, exdir = dpath)
+
+	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+	list.files(file.path(path), full.names = TRUE)
 }
 
 
@@ -316,9 +336,9 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 		ff <- ff[basename(ff) != "ok.txt"]
 		return(ff)
 	}
-	zipf0 <- file.path(path, paste0(uname, ".zip"))
-	zipf1 <- file.path(path, paste0(uname, "_1.zip"))
-	if ((!overwrite) & ((file.exists(zipf0) || file.exists(zipf1)))) {
+	
+	zipf <- file.path(path, paste0(uname, ".zip"))
+	if ((!overwrite) & file.exists(zipf)) {
 		zipf <- list.files(path, paste0(uname, ".*zip$"), full.names=TRUE)		
 		return(.dataverse_unzip(zipf, path, unzip))
 	}
@@ -353,7 +373,9 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 	} else if (grepl("/dataset/", u)) {	
 		.download_ckan_files(u, baseu, path, uname)
 	} else if (grepl("zenodo", u)) {
-		.download_zenodo_files(u, baseu, path, uname)
+		.download_zenodo_files(u, path, uname)
+	} else if (grepl("rothamsted", u)) {
+		.download_rothamsted_files_files(u, path, uname)
 	} else {
 		.download_dataverse_files(u, baseu, path, uname, domain, protocol, unzip, zipf1)
 	}
