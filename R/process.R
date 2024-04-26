@@ -2,14 +2,6 @@
 # May 2021
 # License GPL3
 
-get_data <- function(uri, path, group, cache=TRUE) {
-	if (is.null(path)) {
-		path <- file.path(tempdir(), "carob")
-	}
-	path <- file.path(path, "data/raw", group)
-	data_from_uri(uri, path, overwrite=!cache)
-}
-
 
 get_more_data <- function(url, dataset_id, path, group) {
 	f <- basename(url)

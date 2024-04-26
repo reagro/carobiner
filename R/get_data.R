@@ -164,7 +164,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 			i <- i + 1
 		}
 	}	
-	ff <- .dataverse_unzip(zipf, path, unzip)
+	ff <- carobiner:::.dataverse_unzip(zipf, path, unzip)
 	f7 <- list.files(path, pattern="\\.7z$", full.names=TRUE)
 	if (length(f7) > 0) {
 		for (f in f7) {
@@ -310,23 +310,25 @@ http_address <- function(uri) {
 }
 
 
-data_from_uri <- function(uri, path, overwrite=FALSE) {
+
+get_data <- function(uri, path, group, cache=TRUE) {
 
 	if (is.null(path)) {
 		path <- file.path(tempdir(), "carob")
 	}
-	
+	path <- file.path(path, "data/raw", group)
+
 	uripath=TRUE
 	unzip=TRUE
 	
-	uname <- simple_uri(uri)
+	uname <- carobiner:::simple_uri(uri)
 	if (uripath) path <- file.path(path, uname)
 	
 	if (!file.exists(file.path(path, "ok.txt"))) {
-		overwrite <- TRUE
+		cache <- FALSE
 	}
 
-	if ((!overwrite) && file.exists(file.path(path, "ok.txt"))) {
+	if (cache && file.exists(file.path(path, "ok.txt"))) {
 		ff <- list.files(path, full.names=TRUE, recursive=TRUE)
 		ff <- ff[!grepl(".json$", ff)]
 		ff <- ff[!grepl(".pdf$", ff)]
@@ -337,12 +339,12 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 	}
 	
 	zipf <- file.path(path, paste0(uname, ".zip"))
-	if ((!overwrite) & file.exists(zipf)) {
+	if (cache & file.exists(zipf)) {
 		zipf <- list.files(path, paste0(uname, ".*zip$"), full.names=TRUE)		
 		return(.dataverse_unzip(zipf, path, unzip))
 	}
 
-	uri <- http_address(uri)
+	uri <- carobiner:::http_address(uri)
 	
 	dir.create(path, FALSE, TRUE)
 	if (!file.exists(path)) {
@@ -364,8 +366,8 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 		return()
 	}
 	u <- x$url
-	domain <- .getdomain(u)
-	protocol <- .getprotocol(u)
+	domain <- carobiner:::.getdomain(u)
+	protocol <- carobiner:::.getprotocol(u)
 	baseu <- paste0(protocol, domain)
 
 	if (grepl("/stash/", u)) {	
@@ -377,7 +379,7 @@ data_from_uri <- function(uri, path, overwrite=FALSE) {
 	} else if (grepl("zenodo", u)) {
 		.download_zenodo_files(u, path, uname)
 	} else {
-		.download_dataverse_files(u, baseu, path, uname, domain, protocol, unzip, zipf1)
+		.download_dataverse_files(u, baseu, path, uname, domain, protocol, unzip, zipf)
 	}
 }
 
