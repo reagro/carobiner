@@ -176,7 +176,8 @@ check_ranges <- function(x, trms, path, answ) {
 		v <- stats::na.omit(x[[trms$name[i]]])
  		if ( any((v < rng[[1]]) | (v > rng[2])) ) {
 			ok <- FALSE
-			vrng <- round(range(v, na.rm=TRUE),3)
+			vrng <- range(v, na.rm=TRUE)
+			if (is.numeric(vrng)) vrng <- round(vrng, 3)
 			msg  <- paste0(trms$name[i], " (", vrng[1], ", ", vrng[2], ")")
 			bad  <- c(bad, msg)
 		}
@@ -227,7 +228,8 @@ check_datatypes <- function(x, trms, path, answ) {
 		bad <- paste(cls[i,3], collapse=", ")
 		answ[nrow(answ)+1, ] <- c("bad datatype", paste("bad datatype:", bad))
 	} else {
-		answ <- check_ranges(x[, nms], trms, path, answ)
+	#	answ <- check_ranges(x[, nms], trms, path, answ)
+		answ <- check_ranges(x, trms, path, answ)
 	}
 	
 	answ
