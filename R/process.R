@@ -15,7 +15,7 @@ get_more_data <- function(url, dataset_id, path, group) {
 }
 
 
-write_files <- function(path, dataset, records, timerecs=NULL, id=NULL, options=NULL) {
+write_files <- function(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL, options=NULL) {
 
 	stopifnot(nrow(dataset) == 1)
 
