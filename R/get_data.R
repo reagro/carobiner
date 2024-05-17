@@ -1,7 +1,7 @@
 # Author: Robert J. Hijmans
 # Sept 2019
 # version 1
-# license GPL3
+# license 	
 
 
 simple_uri <- function(uri, reverse=FALSE) {

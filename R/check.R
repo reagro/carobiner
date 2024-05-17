@@ -363,7 +363,7 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 
 check_exp <- function(answ, treatment, data_type, vars) {
 	if (is.na(treatment)) {
-		if (grepl("experiment", data_type)) {
+		if (grepl("experiment|trial", data_type)) {
 			answ[nrow(answ)+1, ] <- c("exp_treatment", 
 				"dataset exp_treatment cannot be missing for experiments")
 		}
