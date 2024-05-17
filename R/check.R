@@ -361,6 +361,24 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 }
 
 
+check_exp <- function(answ, treatment, data_type, vars) {
+	if (is.na(treatment)) {
+		if (grepl("experiment", data_type)) {
+			answ[nrow(answ)+1, ] <- c("exp_treatment", 
+				"dataset exp_treatment cannot be missing for experiments")
+		}
+		return(answ)
+	}
+	treat <- trimws(unlist(strsplit(treatment, ";")))
+	i <- !(treat %in% vars)
+	if (any(i)) {
+		answ[nrow(answ)+1, ] <- c("exp_treatment", 
+			paste("exp_treatment is not a variable:",  paste(treat[i], collapse=", ")))
+	}
+	answ
+}
+
+
 check_terms <- function(dataset, records, path=NULL, group="", check="all") {
 	answ <- data.frame(check="", msg="")[0,]
 	if (check == "none") {
@@ -368,6 +386,11 @@ check_terms <- function(dataset, records, path=NULL, group="", check="all") {
 	}
 	if (!missing(dataset)) {
 		answ <- check_d_terms(answ, dataset, path, "dataset", group=group, check=check)
+		if (!missing(records)) {
+			if (!is.null(dataset$exp_treatment)) {
+				answ <- check_exp(answ, dataset$exp_treatment, dataset$data_type, names(records))
+			}
+		}
 	}
 	if (!missing(records)) {
 		answ <- check_d_terms(answ, records, path, "records", group=group, check=check)
