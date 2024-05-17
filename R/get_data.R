@@ -325,12 +325,12 @@ http_address <- function(uri) {
 
 	for (i in 1:length(files)) {
 		if (oks[i] == 1) {
-			oks[i] <- download.file(files[i], outf[i], mode="wb", silent=TRUE)
+			oks[i] <- utils::download.file(files[i], outf[i], mode="wb", silent=TRUE)
 		}
 	}
 	
 	if (all(oks == 0)) {
-		writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+		writeLines(c(utils::timestamp(quiet=TRUE), files), file.path(path, "ok.txt"))
 	}
 	outf
 } 
@@ -350,7 +350,7 @@ http_address <- function(uri) {
 	}
 	
 	if (all(ok)) {
-		writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+		writeLines(c(utils::timestamp(quiet=TRUE), files), file.path(path, "ok.txt"))
 	}
 	outf
 }
