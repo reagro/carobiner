@@ -363,13 +363,20 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 
 check_exp <- function(answ, treatment, data_type, vars) {
 	if (is.na(treatment)) {
+		answ[nrow(answ)+1, ] <- c("exp_treatment", 
+			"dataset exp_treatment cannot be NA")
+		return(answ)
+	}
+	
+	treat <- trimws(unlist(strsplit(treatment, ";")))
+	if ((length(treat) == 1) && (treat == "none")) {
 		if (grepl("experiment|trial", data_type)) {
 			answ[nrow(answ)+1, ] <- c("exp_treatment", 
-				"dataset exp_treatment cannot be missing for experiments")
+				"dataset exp_treatment cannot be 'none' for experiments")
 		}
 		return(answ)
 	}
-	treat <- trimws(unlist(strsplit(treatment, ";")))
+	
 	i <- !(treat %in% vars)
 	if (any(i)) {
 		answ[nrow(answ)+1, ] <- c("exp_treatment", 
@@ -387,8 +394,8 @@ check_terms <- function(dataset, records, path=NULL, group="", check="all") {
 	if (!missing(dataset)) {
 		answ <- check_d_terms(answ, dataset, path, "dataset", group=group, check=check)
 		if (!missing(records)) {
-			if (!is.null(dataset$exp_treatment)) {
-				answ <- check_exp(answ, dataset$exp_treatment, dataset$data_type, names(records))
+			if (!is.null(dataset$exp_treatments)) {
+				answ <- check_exp(answ, dataset$exp_treatments, dataset$data_type, names(records))
 			}
 		}
 	}
