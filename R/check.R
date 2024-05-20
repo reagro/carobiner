@@ -374,16 +374,16 @@ check_exp <- function(answ, treatment, data_type, vars) {
 	treat <- trimws(unlist(strsplit(treatment, ";")))
 	if ((length(treat) == 1) && (treat == "none")) {
 		if (grepl("experiment|trial", data_type)) {
-			answ[nrow(answ)+1, ] <- c("exp_treatment", 
-				"dataset exp_treatment cannot be 'none' for experiments")
+			answ[nrow(answ)+1, ] <- c("treatment_vars", 
+				"dataset treatment_vars cannot be 'none' for experiments")
 		}
 		return(answ)
 	}
 	
 	i <- !(treat %in% vars)
 	if (any(i)) {
-		answ[nrow(answ)+1, ] <- c("exp_treatment", 
-			paste("exp_treatment is not a variable:",  paste(treat[i], collapse=", ")))
+		answ[nrow(answ)+1, ] <- c("treatment_vars", 
+			paste("treatment_vars is not a variable:",  paste(treat[i], collapse=", ")))
 	}
 	answ
 }
@@ -397,8 +397,8 @@ check_terms <- function(dataset, records, path=NULL, group="", check="all") {
 	if (!missing(dataset)) {
 		answ <- check_d_terms(answ, dataset, path, "dataset", group=group, check=check)
 		if (!missing(records)) {
-			if (!is.null(dataset$exp_treatments)) {
-				answ <- check_exp(answ, dataset$exp_treatments, dataset$data_type, names(records))
+			if (!is.null(dataset$treatment_vars)) {
+				answ <- check_exp(answ, dataset$treatment_vars, dataset$data_type, names(records))
 			}
 		}
 	}
