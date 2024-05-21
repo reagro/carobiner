@@ -1,7 +1,7 @@
 # Author: Robert J. Hijmans
 # Sept 2019
 # version 1
-# license GPL3
+# license 	
 
 
 simple_uri <- function(uri, reverse=FALSE) {
@@ -312,8 +312,54 @@ http_address <- function(uri) {
 }
 
 
+.download_files <- function(path, files, cache) {
 
-get_data <- function(uri, path, group, cache=TRUE) {
+	outf <- file.path(path, basename(files))
+	oks <- rep(1, length(outf))
+
+	if (cache && file.exists(file.path(path, "ok.txt"))) {
+		have <- file.exists(outf)
+		if (all(have)) {
+			return(outf)
+		}
+		oks[have] <- 0
+	} 
+
+	for (i in 1:length(files)) {
+		if (oks[i] == 1) {
+			oks[i] <- utils::download.file(files[i], outf[i], mode="wb", silent=TRUE)
+		}
+	}
+	
+	if (all(oks == 0)) {
+		writeLines(c(utils::timestamp(quiet=TRUE), files), file.path(path, "ok.txt"))
+	}
+	outf
+} 
+
+.copy_files <- function(path, files, cache) {
+
+	outf <- file.path(path, basename(files))
+
+	if (cache && file.exists(file.path(path, "ok.txt"))) {
+		have <- file.exists(outf)
+		if (all(have)) {
+			return(outf)
+		}
+		ok <- file.copy(files[!have], outf[!have])
+	} else {
+		ok <- file.copy(files, outf)
+	}
+	
+	if (all(ok)) {
+		writeLines(c(utils::timestamp(quiet=TRUE), files), file.path(path, "ok.txt"))
+	}
+	outf
+}
+
+
+
+get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 
 	if (is.null(path)) {
 		path <- file.path(tempdir(), "carob")
@@ -330,12 +376,24 @@ get_data <- function(uri, path, group, cache=TRUE) {
 		cache <- FALSE
 	}
 
+	dir.create(path, FALSE, TRUE)
+
+	if (!is.null(files)) {
+		if (all(grepl("^http", files))) {
+			return(.download_files(path, files, cache))
+		} else {
+			return(.copy_files(path, files, cache))
+		}
+	}
+
+
 	if (cache && file.exists(file.path(path, "ok.txt"))) {
 		ff <- list.files(path, full.names=TRUE, recursive=TRUE)
 		ff <- ff[!grepl(".json$", ff)]
 		ff <- ff[!grepl(".pdf$", ff)]
 		ff <- ff[!grepl(".doc$", ff)]
 		ff <- ff[!grepl(".docx$", ff)]
+		ff <- ff[!grepl(".zip$", ff)]
 		ff <- ff[basename(ff) != "ok.txt"]
 		return(ff)
 	}
@@ -348,7 +406,6 @@ get_data <- function(uri, path, group, cache=TRUE) {
 
 	uri <- carobiner:::http_address(uri)
 	
-	dir.create(path, FALSE, TRUE)
 	if (!file.exists(path)) {
 		stop(paste("cannot create path:", path))
 	}
