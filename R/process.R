@@ -140,7 +140,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 		if (file.exists(outft) && cache) {
 			ft <- file.info(outft)$mtime
 			fftime <- file.info(ff)$mtime
-			if (!any(fftime > ft)) break
+			if (all(fftime < ft)) break
 		}
 
 		mi <- grepl("_meta.csv$", ff)
@@ -226,6 +226,10 @@ run_carob <- function(cleanuri, path, group="", quiet=FALSE) {
 
 
 process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
+
+	if (!file.exists(path)) {
+		stop("path does not exist")
+	}
 
 	options(carobiner_check=check)
 	on.exit(options(carobiner_check=NULL))
