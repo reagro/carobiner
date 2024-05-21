@@ -1,10 +1,24 @@
 
+update_terms <- function() {
+	req <- httr::GET("https://api.github.com/repos/reagro/terminag/git/trees/main?recursive=1")
+	httr::stop_for_status(req)
+	ff <- sapply(httr::content(req)$tree, \(i) i$path)
+	ff <- grep("\\.csv$", ff, value = TRUE)
+	p <- system.file("terms", package="carobiner")
+	ff <- file.path("https://github.com/reagro/terminag/blob/main", ff)
+	for (f in ff) {
+		download.file(f, file.path(p, basename(f)), quiet=TRUE)
+	}
+	invisible()
+}
+
+
 get_groups <- function(path) {
-	f <- file.path(path, "terms", "groups.csv")
-	if (!isTRUE(file.exists(f))) {
+#	f <- file.path(path, "terms", "groups.csv")
+#	if (!isTRUE(file.exists(f))) {
 		path <- system.file("terms", package="carobiner")
 		f <- file.path(path, "groups.csv")
-	}
+#	}
 	if (!file.exists(f)) {
 		stop("the groups file is missing")
 	}
@@ -13,11 +27,11 @@ get_groups <- function(path) {
 
 
 get_variables <- function(path, group) {
-	f <- file.path(path, "terms", paste0("variables_", group, ".csv"))	
-	if (!isTRUE(file.exists(f))) {
+	#f <- file.path(path, "terms", paste0("variables_", group, ".csv"))	
+	#if (!isTRUE(file.exists(f))) {
 		path <- system.file("terms", package="carobiner")
 		f <- file.path(path, paste0("variables_", group, ".csv"))		
-	}	
+	#}	
 	if (file.exists(f)) {
 		utils::read.csv(f)	
 	} else {
@@ -65,11 +79,11 @@ get_terms <- function(type, group, path) {
 
 
 get_accepted_values <- function(name, path=NULL) {
-	f <- file.path(path, "terms", paste0("values_", name, ".csv"))
-	if (!isTRUE(file.exists(f))) {
+#	f <- file.path(path, "terms", paste0("values_", name, ".csv"))
+#	if (!isTRUE(file.exists(f))) {
 		path <- system.file("terms", package="carobiner")
 		f <- file.path(path, paste0("values_", name, ".csv"))
-	}
+#	}
 	if (file.exists(f)) {
 		utils::read.csv(f)	
 	} else {
