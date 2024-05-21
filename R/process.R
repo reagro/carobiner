@@ -85,6 +85,9 @@ write_files <- function(path, dataset, records, timerecs=NULL, id=NULL, options=
 	mf <- gsub(".csv$", "_meta.csv", outf)
 #	utils::write.csv(dataset, mf, row.names=FALSE)
 	data.table::fwrite(dataset, mf, row.names=FALSE)
+	
+# Update todo/to-do.csv list
+	update_todo(path)
 
 	TRUE
 }
