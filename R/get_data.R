@@ -209,31 +209,33 @@ simple_uri <- function(uri, reverse=FALSE) {
 }
 
 .download_dryad_files <- function(u, baseu, path, uname){
-	pid <- gsub(":", "%3A", gsub("/", "%2F", unlist(strsplit(u, "dataset/"))[2]))
-	uu <- paste0(baseu, "/api/v2/datasets/", pid)
-	y <- httr::GET(uu)
-	if (y$status_code != 200) {
-		return(NULL)
-	}
-	
-	ry <- httr::content(y, as="raw")
-	meta <- rawToChar(ry)
-	writeLines(meta, file.path(path, paste0(uname, ".json")))
-	js	<- jsonlite::fromJSON(meta)
-	d <- js$id
-	done <- TRUE
-	files <- ""[0]
-	outf <- file.path(path, paste0(uname, ".zip"))
-	ok <- try(utils::download.file(file.path(uu,"download"), outf, mode="wb", quiet=TRUE) )
-	if (inherits(ok, "try-error")) {
-		print("cannot download ", uname)
-		done <- FALSE
-	} else {
-		files <- c(files, outf)
-	}
-	utils::unzip(outf, exdir = file.path(path))
-	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
-	list.files(file.path(path), full.names = TRUE)
+  
+  pid <- gsub(":", "%253A", gsub("/", "%252F", unlist(strsplit(u, "dataset/"))[2]))
+  uu <- paste0(baseu, "/api/v2/datasets/", pid)
+  y <- httr::GET(uu)
+  if (y$status_code != 200) {
+    return(NULL)
+  }
+  
+  ry <- httr::content(y, as="raw")
+  meta <- rawToChar(ry)
+  writeLines(meta, file.path(path, paste0(uname, ".json")))
+  js	<- jsonlite::fromJSON(meta)
+  d <- js$id
+  done <- TRUE
+  files <- ""[0]
+  outf <- file.path(path, paste0(uname, ".zip"))
+  ok <- try(utils::download.file(file.path(uu,"download"), outf, headers = c("User-Agent" = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)"), mode="wb", quiet=TRUE) )
+  if (inherits(ok, "try-error")) {
+    print("cannot download ", uname)
+    done <- FALSE
+  } else {
+    files <- c(files, outf)
+  }
+  utils::unzip(outf, exdir = file.path(path))
+  writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+  files <- list.files(file.path(path), full.names = TRUE)
+  files
 }
 
 .download_zenodo_files <- function(u, path, uname){
@@ -440,5 +442,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	}
 }
 
-# uri <- "https://doi.org/10.5061/dryad.pj76g30"
-# ff <- data_from_uri(uri, ".")
+# uri <- "doi:10.5061/dryad.pj76g30"
+# path <- getwd()
+# group <- "fertilizer"
+# ff <- get_data(uri, path, group)
