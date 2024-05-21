@@ -268,9 +268,6 @@ check_dataset <- function(x, trms, path, answ) {
 	if (grepl("http", x$uri)) {
 		answ[nrow(answ)+1, ] <- c("uri", "http in uri")
 	}
-	if (grepl("http", x$reference)) {
-		answ[nrow(answ)+1, ] <- c("uri", "http in reference")
-	}
 	nms <- trms$name[trms$NAok == "no"]
 	j <- is.na(x[,nms])
 	if (any(j)) {
@@ -278,6 +275,11 @@ check_dataset <- function(x, trms, path, answ) {
 	}
 
 	if (isTRUE(nchar(x$publication) > 0 )) {
+
+		if (grepl("http", x$publication)) {
+			answ[nrow(answ)+1, ] <- c("publication", "http in publication")
+		}
+
 		allpubs <- list.files(file.path(path, "references"))
 		pubs <- unlist(strsplit(x$publication, ";|; "))
 		pubs <- simple_uri(pubs)
