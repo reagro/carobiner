@@ -87,7 +87,8 @@ write_files <- function(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL
 	data.table::fwrite(dataset, mf, row.names=FALSE)
 	
 # Update todo/to-do.csv list
-	update_todo(path)
+# RH: perhaps too much to run this for each dataset 
+#	update_todo(path)
 
 	TRUE
 }
@@ -299,7 +300,8 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	msg <- lapply(ff, utils::read.csv)
 	msg <- do.call(rbind, msg)
 	utils::write.csv(msg, file.path(path, "data", "messages.csv"), row.names=FALSE)
-	
+
+	update_todo(path)
 	invisible(TRUE)
 }
 
@@ -313,7 +315,6 @@ make_carob <- function(path, group="", quiet=FALSE, check="all", report=FALSE, c
 	}
 	message(" === compiling ===")
 	compile_carob(path, group=group, cache=cache, ...)
-	update_todo(path)	
 }
 
 
