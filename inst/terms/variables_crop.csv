@@ -84,6 +84,8 @@ ear_height,numeric,cm,no,,no,10,210,yes,height of first ear (maize female inflor
 pathogen,character,,no,pathogen,yes,,,yes,Name of the pathogen studied,,
 AUDPC,numeric,,no,,no,0,150,yes,Area under the disease progress curve,,
 rAUDPC,numeric,,no,,no,0,1,yes,Area under the disease progress curve divided by the non-diseased season length,,
+root_infection,numeric,%,no,,no,0,100,yes,Roots that are disease infected,,
+root_AMF,numeric,%,no,,no,0,100,yes,Root colonization by arbuscular micorrhizal fungi,,
 nodule_weight,numeric,?,no,,no,0,,yes,Fresh weight or root nodules,,TO_0000899
 leaf_N,numeric,mg/kg,no,,no,0,1000,yes,nitrogen content in leaf,,TO_0000543
 leaf_K,numeric,mg/kg,no,,no,0,100,yes,potassium content in leaf,,
@@ -147,6 +149,7 @@ residue_prevcrop,numeric,kg/ha,no,,no,,,yes,how much residue of the previous cro
 mulch,numeric,kg/ha,no,,no,,,yes,how much mulch is on the field?,,AGRO_00010013
 seed_source,character,,no,,no,,,yes,source of the seed used,,
 seed_amount,numeric,kg/ha,no,,no,0,1000,yes,amount of seed used (seeding rate),,AGRO_00000202
+seed_treament,character,,no,,no,,,yes,chemical or biological products applied to the seed,,
 crop_cut,logical,,no,,no,,,yes,was the yield (in a survey) determined with a crop cut?,,
 previous_crop_residue_weight,numeric,kg/ha,no,,no,0,10000,yes,weight of residue of previous crop that stayed on the field,,
 previous_crop_residue_perc,numeric,%,no,,no,0,100,yes,percentage of residue of previous crop that stayed on the field,,
