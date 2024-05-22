@@ -162,7 +162,7 @@ get_authors <- function(x) {
 	}
 	if (is.null(out)) {
 		r <- x$result
-		i <- grep("contributor_person$|contributor_person_*[0-9]$", names(r))
+		i <- grep("contributor_person$|contributor_person_*.[0-9]$", names(r))	
 		out <- unlist(r[i])
 	}
 	if (is.null(out)) { #Rothamsted
