@@ -27,17 +27,11 @@ get_groups <- function(path) {
 
 
 get_variables <- function(path, group) {
-	#f <- file.path(path, "terms", paste0("variables_", group, ".csv"))	
-	#if (!isTRUE(file.exists(f))) {
-		path <- system.file("terms", package="carobiner")
-		f <- file.path(path, paste0("variables_", group, ".csv"))		
-	#}	
+	path <- system.file("terms", package="carobiner")
+	f <- file.path(path, paste0("variables_", group, ".csv"))		
 	if (file.exists(f)) {
 		utils::read.csv(f)	
 	} else {
-		if (trimws(group) == "") {
-			stop("the records file is missing")
-		}
 		NULL
 	}
 }
@@ -46,6 +40,9 @@ get_variables <- function(path, group) {
 get_terms <- function(type, group, path) {
 	if (type == "records") {
 		trms <- get_variables(path, "all")
+		if (is.null(trms)) {
+			stop("Please first install the standard terms with 'carobiner::update_terms()'", call. = FALSE)
+		}
 		grps <- get_groups(path)
 		include <- grps$include[grps$name == group]
 		if (length(include) == 0) {
@@ -70,6 +67,10 @@ get_terms <- function(type, group, path) {
 		}
 	} else if (type=="dataset") {
 		trms <- get_variables(path, "dataset")
+		if (is.null(trms)) {
+			stop("Please first install the standard terms with 'carobiner::update_terms()'", call. = FALSE)
+		}
+
 	} else {
 		stop("invalid 'type' argument; should be 'records' or 'dataset'") 
 	}
@@ -79,11 +80,8 @@ get_terms <- function(type, group, path) {
 
 
 get_accepted_values <- function(name, path=NULL) {
-#	f <- file.path(path, "terms", paste0("values_", name, ".csv"))
-#	if (!isTRUE(file.exists(f))) {
-		path <- system.file("terms", package="carobiner")
-		f <- file.path(path, paste0("values_", name, ".csv"))
-#	}
+	path <- system.file("terms", package="carobiner")
+	f <- file.path(path, paste0("values_", name, ".csv"))
 	if (file.exists(f)) {
 		utils::read.csv(f)	
 	} else {
