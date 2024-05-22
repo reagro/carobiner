@@ -5,7 +5,7 @@ update_terms <- function() {
 	ff <- sapply(httr::content(req)$tree, \(i) i$path)
 	ff <- grep("\\.csv$", ff, value = TRUE)
 	p <- system.file("terms", package="carobiner")
-	ff <- file.path("https://raw.githubusercontent.com/reagro/terminag/blob/main", ff)
+	ff <- file.path("https://raw.githubusercontent.com/reagro/terminag/main", ff)
 	for (f in ff) {
 		download.file(f, file.path(p, basename(f)), quiet=TRUE)
 	}
