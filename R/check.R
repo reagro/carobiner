@@ -308,7 +308,7 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 				paste0("whitespace in variable: ", b))
 	}
 	nms <- names(x)
-	trms <- get_terms(type, group, path)
+	trms <- carobiner:::get_terms(type, group, path)
 
 	xnms <- nms[!(nms %in% trms$name)]
 	if (length(xnms) > 0) {
@@ -330,7 +330,7 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 	voc <- voc[voc$name %in% nms, ]
 	if (nrow(voc) > 0) {
 		for (i in 1:nrow(voc)) {
-			accepted <- get_accepted_values(voc$vocabulary[i], path)[,1]
+			accepted <- carobiner:::get_accepted_values(voc$vocabulary[i], path)[,1]
 			provided <- unique(x[, voc$name[i]])
 			if (voc$required[i] != "yes") {
 				provided <- stats::na.omit(provided)
@@ -338,24 +338,28 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 			if (length(provided) > 0) {
 				if (!is.null(voc$multiple_allowed)) {
 					if (voc$multiple_allowed[i] == "yes") {
-#						provided <- unlist(strsplit(provided, ";"))
-						provided <- unlist(strsplit(provided, ";|; "))
-
+						if (!is.na(provided)) {
+							provided <- unlist(strsplit(provided, ";|; "))
+						}
 					}
 				}
-				bad <- provided[!(provided %in% accepted)]
-				if (length(bad) > 0) {
-					bad <- sort(unique(bad))
-					answ[nrow(answ)+1, ] <- c("invalid terms",
-						paste(voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
+				if (voc$NAok[i]=="yes") {
+					provided <- na.omit(provided)
+				}
+				if (length(provided) > 0) {
+					bad <- provided[!(provided %in% accepted)]
+					if (length(bad) > 0) {
+						bad <- sort(unique(bad))
+						answ[nrow(answ)+1, ] <- c("invalid terms",
+							paste(voc$name[i], "contains invalid terms: ", paste(bad, collapse=", ")))
+					}
 				}
 			}
 		}
 	}
 	
 	if (type=="records") {
-		answ <- check_datatypes(x[, nms], trms, path, answ)
-
+		answ <- carobiner:::check_datatypes(x[, nms], trms, path, answ)
 		if (check != "nogeo") {
 			answ <- check_lonlat(x, path, answ)	
 		}
