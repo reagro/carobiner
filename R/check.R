@@ -406,6 +406,9 @@ check_terms <- function(dataset, records, path=NULL, group="", check="all") {
 			if (!is.null(dataset$treatment_vars)) {
 				answ <- check_exp(answ, dataset$treatment_vars, dataset$data_type, names(records))
 			}
+		  else {
+		    stop("treatment_vars is required in the metadata")
+		  }
 		}
 	}
 	if (!missing(records)) {
