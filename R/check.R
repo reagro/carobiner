@@ -338,9 +338,9 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 			if (length(provided) > 0) {
 				if (!is.null(voc$multiple_allowed)) {
 					if (voc$multiple_allowed[i] == "yes") {
-						if (!is.na(provided)) {
+						# if (!is.na(provided)) {
 							provided <- unlist(strsplit(provided, ";|; "))
-						}
+						# }
 					}
 				}
 				if (voc$NAok[i]=="yes") {
