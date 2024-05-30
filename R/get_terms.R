@@ -7,7 +7,7 @@ update_terms <- function() {
 	p <- system.file("terms", package="carobiner")
 	ff <- file.path("https://raw.githubusercontent.com/reagro/terminag/main", ff)
 	for (f in ff) {
-		download.file(f, file.path(p, basename(f)), quiet=TRUE)
+		utils::download.file(f, file.path(p, basename(f)), quiet=TRUE)
 	}
 	invisible()
 }
