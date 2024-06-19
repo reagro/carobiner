@@ -66,7 +66,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 			}
 		}
 	}
-	zf <- grep("\\.pdf$", allf, value=TRUE, invert=TRUE)
+	zf <- grep("\\.pdf$|_files.txt$", allf, value=TRUE, invert=TRUE)
 	file.path(path, zf)
 }
 
@@ -173,6 +173,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 		}
 	}
 	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+
 	ff
 }
 
@@ -389,13 +390,10 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 
 	if (cache && file.exists(file.path(path, "ok.txt"))) {
 		ff <- list.files(path, full.names=TRUE, recursive=TRUE)
-		ff <- ff[!grepl(".json$", ff)]
-		ff <- ff[!grepl(".pdf$", ff)]
-		ff <- ff[!grepl(".doc$", ff)]
-		ff <- ff[!grepl(".docx$", ff)]
-		ff <- ff[!grepl(".zip$", ff)]
+		ff <- ff[grep("\\.json$|\\.pdf$|\\.doc$|\\.docx$|\\.zip$", ff, invert=TRUE)]
 		ff <- ff[basename(ff) != "ok.txt"]
-		return(ff)
+		# remove opened excel files
+		ff[grep("/~$", ff, fixed=TRUE, invert=TRUE)]
 	}
 	
 	zipf <- file.path(path, paste0(uname, ".zip"))
@@ -430,16 +428,20 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	baseu <- paste0(protocol, domain)
 
 	if (grepl("/stash/", u)) {	
-		.download_dryad_files(u, baseu, path, uname)
+		ff <- .download_dryad_files(u, baseu, path, uname)
 	} else if (grepl("rothamsted", u)) {
-		.download_rothamsted_files(u, path, uname)
+		ff <- .download_rothamsted_files(u, path, uname)
 	} else if (grepl("/dataset/", u)) {	
-		.download_ckan_files(u, baseu, path, uname)
+		ff <- .download_ckan_files(u, baseu, path, uname)
 	} else if (grepl("zenodo", u)) {
-		.download_zenodo_files(u, path, uname)
+		ff <- .download_zenodo_files(u, path, uname)
 	} else {
-		.download_dataverse_files(u, baseu, path, uname, domain, protocol, unzip, zipf)
+		ff <- .download_dataverse_files(u, baseu, path, uname, domain, protocol, unzip, zipf)
 	}
+	
+	# remove opened excel files
+	i <- grep("/~$", ff, fixed=TRUE, invert=TRUE)
+	ff[i]
 }
 
 # uri <- "doi:10.5061/dryad.pj76g30"
