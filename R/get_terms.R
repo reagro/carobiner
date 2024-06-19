@@ -1,14 +1,38 @@
 
-update_terms <- function() {
+update_terms <- function(quiet=FALSE) {
+
+	p <- system.file("terms", package="carobiner")
+
+	v <- readLines("https://api.github.com/repos/reagro/terminag/commits/main")
+	gsha <- jsonlite::fromJSON(v)$sha
+
+	f <- file.path(p, "sha.txt")
+	if (file.exists(f)) {
+		rsha <- readLines(f)
+		if (gsha == rsha) {
+			if (!quiet) message("terms were up to date")
+			return(invisible())
+		}
+	}
+	writeLines(gsha, file.path(p, "sha.txt"))
+
 	req <- httr::GET("https://api.github.com/repos/reagro/terminag/git/trees/main?recursive=1")
 	httr::stop_for_status(req)
 	ff <- sapply(httr::content(req)$tree, \(i) i$path)
 	ff <- grep("\\.csv$", ff, value = TRUE)
-	p <- system.file("terms", package="carobiner")
 	ff <- file.path("https://raw.githubusercontent.com/reagro/terminag/main", ff)
 	for (f in ff) {
 		utils::download.file(f, file.path(p, basename(f)), quiet=TRUE)
 	}
+
+	#gv <- readLines("https://raw.githubusercontent.com/reagro/terminag/main/version.txt", warn = FALSE)
+	#gv <- trimws(unlist(strsplit(gv[grep("version", gv)], "="))[2])
+	#f <- system.file("terms/version.txt", package="carobiner")
+	#if (!file.exist(f)) return(TRUE)
+	#rv <- readLines(f)
+	#rv <- trimws(unlist(strsplit(rv[grep("version", rv)], "="))[2])
+
+	if (!quiet) message("terms were updated")
 	invisible()
 }
 
