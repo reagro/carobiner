@@ -205,38 +205,36 @@ simple_uri <- function(uri, reverse=FALSE) {
 			files <- c(files, outf)
 		}
 	}
-	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+	if (done) writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
 	files
 }
 
-.download_dryad_files <- function(u, baseu, path, uname){
+.download_dryad_files <- function(u, baseu, path, uname){ 
+	pid <- gsub(":", "%253A", gsub("/", "%252F", unlist(strsplit(u, "dataset/"))[2]))
+	uu <- paste0(baseu, "/api/v2/datasets/", pid)
+	y <- httr::GET(uu)
+	if (y$status_code != 200) {
+		return(NULL)
+	}
   
-  pid <- gsub(":", "%253A", gsub("/", "%252F", unlist(strsplit(u, "dataset/"))[2]))
-  uu <- paste0(baseu, "/api/v2/datasets/", pid)
-  y <- httr::GET(uu)
-  if (y$status_code != 200) {
-    return(NULL)
-  }
-  
-  ry <- httr::content(y, as="raw")
-  meta <- rawToChar(ry)
-  writeLines(meta, file.path(path, paste0(uname, ".json")))
-  js	<- jsonlite::fromJSON(meta)
-  d <- js$id
-  done <- TRUE
-  files <- ""[0]
-  outf <- file.path(path, paste0(uname, ".zip"))
-  ok <- try(utils::download.file(file.path(uu,"download"), outf, headers = c("User-Agent" = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)"), mode="wb", quiet=TRUE) )
-  if (inherits(ok, "try-error")) {
-    print("cannot download ", uname)
-    done <- FALSE
-  } else {
-    files <- c(files, outf)
-  }
-  utils::unzip(outf, exdir = file.path(path))
-  writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
-  files <- list.files(file.path(path), full.names = TRUE)
-  files
+	ry <- httr::content(y, as="raw")
+	meta <- rawToChar(ry)
+	writeLines(meta, file.path(path, paste0(uname, ".json")))
+	js <- jsonlite::fromJSON(meta)
+	d <- js$id
+	done <- TRUE
+	files <- ""[0]
+	outf <- file.path(path, paste0(uname, ".zip"))
+	ok <- try(utils::download.file(file.path(uu,"download"), outf, headers = c("User-Agent" = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)"), mode="wb", quiet=TRUE) )
+	if (inherits(ok, "try-error")) {
+		print("cannot download ", uname)
+		done <- FALSE
+	} else {
+		files <- c(files, outf)
+	}
+	utils::unzip(outf, exdir = file.path(path))
+	if (done) writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+	list.files(file.path(path), full.names = TRUE)
 }
 
 .download_zenodo_files <- function(u, path, uname){
@@ -253,26 +251,30 @@ simple_uri <- function(uri, reverse=FALSE) {
 	writeLines(meta, file.path(path, paste0(uname, ".json")))
 	js	<- jsonlite::fromJSON(meta)
 	d <- js$links$download
+	d <- gsub("/draft", "", d)
 	done <- TRUE
 	files <- ""[0]
 	
 	outz <- file.path(path, paste0(uname, ".zip"))
-	dir.create(file.path(path, uname))
-	outf <- file.path(path, uname)
+	#dir.create(file.path(path, uname))
+	#outf <- file.path(path, uname)
 	for (link in d) {
-		ok <- try(utils::download.file(gsub("/draft", "", link), file.path(outf, basename(gsub("/content", "", link))), mode="wb", quiet=TRUE))
+		outf <- file.path(path, basename(gsub("/content", "", link)))
+		ok <- try(utils::download.file(link, outf, mode="wb", quiet=TRUE))
 		if (inherits(ok, "try-error")) {
-			print("cannot download ", uname)
+			message(paste("cannot download", uname))
 			done <- FALSE
 		} else {
-			files <- c(files, file.path(outf, basename(gsub("/content", "", link))))
+			files <- c(files, outf)
 		}
 	}
-	utils::zip(outz, list.files(outf, full.names = TRUE), flags = "-q")
-	utils::unzip(outz, junkpaths = TRUE, exdir=path)
-	unlink(file.path(path, uname), recursive = TRUE, force = TRUE)
+	## utils::zip can fail if Sys.getenv("R_ZIPCMD", "zip") returns an empty string
+	#utils::zip(outz, list.files(outf, full.names = TRUE), flags = "-q")
+	#utils::unzip(outz, junkpaths = TRUE, exdir=path)
+	#unlink(file.path(path, uname), recursive = TRUE, force = TRUE)
 	
-	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+	if (done) writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
+
 	list.files(file.path(path), full.names = TRUE)
 }
 
