@@ -29,6 +29,10 @@ get_metadata <- function(cleanuri, path, group="", major=1, minor=0) {
 
 get_license <- function(x) {
 
+	if (!is.null(x$metadata$license$id)) { # Zenodo
+		return(toupper(x$metadata$license$id))
+	}
+
 	if (!is.null(x$licenses$name)) { # Rothamsted
 		return(x$licenses$name)
 	}
@@ -112,6 +116,10 @@ get_title <- function(x) {
 		#ckan
 		out <- x$result$title
 	}
+	if (is.null(out)) {
+		#zenodo
+		out <- x$metadata$title
+	}
 	if (is.null(out)) { 
 		# dryad; Rothamsted
 		out <- x$title
@@ -137,6 +145,10 @@ get_description <- function(x) {
 	if (is.null(out)) {
 		#dryad
 		out <- x$abstract
+	}
+	if (is.null(out)) {
+		#zenodo
+		out <- x$metadata$description
 	}
 	if (is.null(out)) {
 		#rothamsted
@@ -165,6 +177,10 @@ get_authors <- function(x) {
 		i <- grep("contributor_person$|contributor_person_*.[0-9]$", names(r))	
 		out <- unlist(r[i])
 	}
+	#zenodo
+	if (is.null(out)) {
+		out <- x$metadata$creators$name
+	}
 	if (is.null(out)) { #Rothamsted
 		out <- x$contributors$title
 	}
@@ -187,15 +203,21 @@ extract_metadata <- function(js, uri, group) {
 	auth <- paste(authors, collapse="; ")
 	titl <- gsub("\\.\\.$", ".", paste0(get_title(js), "."))
 
-	pubdate <- c(js$data$publicationDate, js$result$creation_date, js$publicationDate)
+	pubdate <- c(js$data$publicationDate, js$result$creation_date, js$publicationDate, js$metadata$publication_date)
 	if (is.null(pubdate)) pubdate <- "????-??-??"
 	year <- substr(pubdate, 1, 4)
 
-	v <- c(js$data$latestVersion$versionNumber, js$versionNumber)
+	v <- c(js$data$latestVersion$versionNumber, js$versionNumber, js$revision)
 	if (!is.null(v)) {
-		v <- paste0("Version ", v, ".", js$data$latestVersion$versionMinorNumber, ". ")
+		v <- paste0("Version ", v, ".")
+		if (!is.null(js$data$latestVersion$versionMinorNumber)) {
+			v <- paste0(v, js$data$latestVersion$versionMinorNumber, ". ")
+		}
 	} 
 	pub <- c(js$data$publisher, js$result$publisher) 
+	if (is.null(pub)) {
+		if (grepl("zenodo", uri)) pub <- "Zenodo"
+	}
 	cit <- paste0(auth, " (", year, "). ", titl, " ", pub, ". ", v, uri)
 
 	data.frame(

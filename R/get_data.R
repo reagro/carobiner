@@ -239,18 +239,20 @@ simple_uri <- function(uri, reverse=FALSE) {
 
 .download_zenodo_files <- function(u, path, uname){
   
-	pid <- gsub("https://zenodo.org/records/", "", u)
-	uu <- paste0("zenodo.org/api/deposit/depositions/", pid, "/files")
+#	pid <- gsub("https://zenodo.org/records/", "", u)
+#	uu <- paste0("zenodo.org/api/deposit/depositions/", pid, "/files")
+	pid <- basename(u)
+	uu <- paste0("https://zenodo.org/api/records/", pid)
 	y <- httr::GET(uu)
 	if (y$status_code != 200) {
 		return(NULL)
 	}
-	
 	ry <- httr::content(y, as="raw")
 	meta <- rawToChar(ry)
 	writeLines(meta, file.path(path, paste0(uname, ".json")))
-	js	<- jsonlite::fromJSON(meta)
-	d <- js$links$download
+	js <- jsonlite::fromJSON(meta)
+	# d <- js$links$download
+	d <- js$files$links |> unlist()
 	d <- gsub("/draft", "", d)
 	done <- TRUE
 	files <- ""[0]
@@ -368,12 +370,13 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 		path <- file.path(tempdir(), "carob")
 	}
 	path <- file.path(path, "data/raw", group)
-
-	uripath=TRUE
 	unzip=TRUE
 	
 	uname <- carobiner:::simple_uri(uri)
-	if (uripath) path <- file.path(path, uname)
+
+	#uripath=TRUE
+	#if (uripath) 
+	path <- file.path(path, uname)
 	
 	if (!file.exists(file.path(path, "ok.txt"))) {
 		cache <- FALSE
@@ -396,6 +399,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 		ff <- ff[basename(ff) != "ok.txt"]
 		# remove opened excel files
 		ff[grep("/~$", ff, fixed=TRUE, invert=TRUE)]
+		return(ff)
 	}
 	
 	zipf <- file.path(path, paste0(uname, ".zip"))
