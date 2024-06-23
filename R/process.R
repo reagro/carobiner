@@ -133,6 +133,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 		zipflags <- "-jq9"		
 	}
 	for (grp in grps) {
+
 		wgroup <- ifelse(grp == "doi", "", paste0("_", grp))
 
 		ff <- file.path(path, "data", "clean", grep(paste0("^", grp), fff, value=TRUE))
@@ -140,15 +141,15 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 		if (file.exists(outft) && cache) {
 			ft <- file.info(outft)$mtime
 			fftime <- file.info(ff)$mtime
-			if (all(fftime < ft)) break
+			if (all(fftime < ft)) next
 		}
 
 		mi <- grepl("_meta.csv$", ff)
-		x <- sort_by_terms(.binder(ff[mi]), "dataset", grp, path)
+		x <- carobiner:::sort_by_terms(carobiner:::.binder(ff[mi]), "dataset", grp, path)
 		x[is.na(x)] <- ""
 		x[] <- sapply(x, \(i) gsub("\n", " ", i))
 		x[] <- sapply(x, \(i) gsub("\t", " ", i))
-		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
+		y <- carobiner:::sort_by_terms(carobiner:::.binder(ff[!mi]), "records", grp, path)
 		if ("reference" %in% colnames(y)) {
 			y$reference <- gsub("\n", " ", y$reference)
 			y$reference <- gsub("\t", " ", y$reference)
