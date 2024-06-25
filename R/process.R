@@ -246,16 +246,6 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		check_group(group, path)
 	}
 
-	ff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE, recursive=TRUE)
-	
-	if (cache) {
-		csv_mtime <- data.frame(uri=gsub(".csv$", "", basename(ff)), csv=file.mtime(ff))
-	} else {
-		file.remove(ff)
-		ff <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", recursive=TRUE, full.names=TRUE)
-		file.remove(ff)
-	}
-	
 	base <- file.path(path, "scripts")
 	ff <- list.files(file.path(base, group), pattern="R$", full.names=TRUE, recursive=TRUE)
 	ffun <- grepl("^_", basename(ff))
@@ -263,8 +253,33 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	ff <- ff[!grepl("/_pending/", ff)]
 	ff <- ff[!grepl("/_removed/", ff)]
 
+	
 	if (cache) {
-		R_mtime <- data.frame(uri=tolower(gsub(".R$", "", basename(ff))), 
+	
+		### remove compiled data that is no longer in the group
+		fcsv <- list.files(file.path(path, "data", "clean", group), pattern="_meta.csv$", full.names=TRUE, recursive=TRUE)
+		have_csv = do.call(rbind, sapply(strsplit(gsub("_meta.csv$", "", fcsv, ignore.case = TRUE), 
+				paste0(file.path(path, "data", "clean"), "/")), 
+				\(i) strsplit(i[2], "/"))) |> data.frame()
+		colnames(have_csv) <- c("group", "URI")
+		have_R = do.call(rbind, sapply(strsplit(gsub("\\.R$", "", ff, ignore.case = TRUE),  
+				paste0(file.path(base), "/")), 
+				\(i) strsplit(tolower(i[2]), "/"))) |> data.frame()
+		colnames(have_R) <- c("group", "uri")
+		have_R$script <- TRUE
+		have_csv$uri <- tolower(have_csv$URI)
+		have <- merge(have_csv, have_R, by=c("group", "uri"), all.x=TRUE)
+		have <- have[is.na(have$script), ]
+		if (nrow(have) > 0) {
+			fr <- file.path(path, "data", "clean", have$group, have$URI)
+			fr <- c(paste0(fr, ".csv"), paste0(fr, "_meta.csv"))
+			file.remove(fr)
+		}
+
+		csv_mtime <- data.frame(uri=gsub("_meta.csv$", "", basename(fcsv)), csv=file.mtime(fcsv))
+
+	
+		R_mtime <- data.frame(uri=tolower(gsub(".R$|.r$", "", basename(ff))), 
 								R=file.mtime(ff), id=1:length(ff))
 		csv_mtime$uri <- tolower(csv_mtime$uri)
 
@@ -273,9 +288,15 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		ff <- ff[mtime$id[keep]]
 		if (length(ff) == 0) {
 			message("no changes (cache=TRUE)")
-			invisible(TRUE)
+			return(invisible(TRUE))
 		}
+	} else {
+		file.remove(ff)
+		ff <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", recursive=TRUE, full.names=TRUE)
+		file.remove(ff)
 	}
+
+
 	ff <- sort(ff)
 	
 	tab <- table(basename(ff))
