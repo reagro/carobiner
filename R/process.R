@@ -253,11 +253,11 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	ff <- ff[!grepl("/_pending/", ff)]
 	ff <- ff[!grepl("/_removed/", ff)]
 
+	fcsv <- list.files(file.path(path, "data", "clean", group), pattern="_meta.csv$", full.names=TRUE, recursive=TRUE)
+	if (length(fcsv) == 0) cache = FALSE
 	
 	if (cache) {
-	
 		### remove compiled data that is no longer in the group
-		fcsv <- list.files(file.path(path, "data", "clean", group), pattern="_meta.csv$", full.names=TRUE, recursive=TRUE)
 		have_csv = do.call(rbind, sapply(strsplit(gsub("_meta.csv$", "", fcsv, ignore.case = TRUE), 
 				paste0(file.path(path, "data", "clean"), "/")), 
 				\(i) strsplit(i[2], "/"))) |> data.frame()
@@ -291,9 +291,10 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 			return(invisible(TRUE))
 		}
 	} else {
-		file.remove(ff)
-		ff <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", recursive=TRUE, full.names=TRUE)
-		file.remove(ff)
+		fcsv <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE, recursive=TRUE)
+		file.remove(fcsv)
+		fmsg <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", recursive=TRUE, full.names=TRUE)
+		file.remove(fmsg)
 	}
 
 

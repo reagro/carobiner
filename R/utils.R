@@ -14,7 +14,7 @@ eng_months_to_nr <- function(x) {
 
 change_names <- function(x, from, to, must_have=TRUE) {
 
-	warning("this function will be removed. Please do not use it")
+#	warning("this function will be removed. Please do not use it")
 
 	stopifnot(length(from) == length(to))
 	for (i in 1:length(from)) {
