@@ -57,7 +57,7 @@ make_reports <- function(path, group="", cache=TRUE) {
 		fhtml <- file.path(path, "temp.html")
 		on.exit(unlink(fRmd))
 		for (i in 1:length(ff)) {
-			print(outf[i]); flush.console()
+			print(outf[i]); utils::flush.console()
 			unlink(outf[i])
 			m <- utils::read.csv(ff[i])
 			rmd[uri] <- paste0("uri <- '", m$uri, "'")

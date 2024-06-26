@@ -158,10 +158,10 @@ get_description <- function(x) {
 		out <- as.character(NA)
 	}
 	
-	out <- gsub("“", "'", out)
-	out <- gsub("”", "'", out)
-	out <- gsub("‘", "'", out)
-	gsub("’", "'", out)
+	out <- gsub("\u201C", "'", out)
+	out <- gsub("\u201D", "'", out)
+	out <- gsub("\u2018", "'", out)
+	gsub("\u2019", "'", out)
 }
 
 

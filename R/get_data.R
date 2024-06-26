@@ -164,7 +164,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 			i <- i + 1
 		}
 	}	
-	ff <- carobiner:::.dataverse_unzip(zipf, path, unzip)
+	ff <- .dataverse_unzip(zipf, path, unzip)
 	f7 <- list.files(path, pattern="\\.7z$", full.names=TRUE)
 	if (length(f7) > 0) {
 		for (f in f7) {
@@ -372,7 +372,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	path <- file.path(path, "data/raw", group)
 	unzip=TRUE
 	
-	uname <- carobiner:::simple_uri(uri)
+	uname <- simple_uri(uri)
 
 	#uripath=TRUE
 	#if (uripath) 
@@ -408,7 +408,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 		return(.dataverse_unzip(zipf, path, unzip))
 	}
 
-	uri <- carobiner:::http_address(uri)
+	uri <- http_address(uri)
 	
 	if (!file.exists(path)) {
 		stop(paste("cannot create path:", path))
@@ -429,8 +429,8 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 		return()
 	}
 	u <- x$url
-	domain <- carobiner:::.getdomain(u)
-	protocol <- carobiner:::.getprotocol(u)
+	domain <- .getdomain(u)
+	protocol <- .getprotocol(u)
 	baseu <- paste0(protocol, domain)
 
 	if (grepl("/stash/", u)) {	

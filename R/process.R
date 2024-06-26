@@ -145,11 +145,11 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 		}
 
 		mi <- grepl("_meta.csv$", ff)
-		x <- carobiner:::sort_by_terms(carobiner:::.binder(ff[mi]), "dataset", grp, path)
+		x <- sort_by_terms(.binder(ff[mi]), "dataset", grp, path)
 		x[is.na(x)] <- ""
 		x[] <- sapply(x, \(i) gsub("\n", " ", i))
 		x[] <- sapply(x, \(i) gsub("\t", " ", i))
-		y <- carobiner:::sort_by_terms(carobiner:::.binder(ff[!mi]), "records", grp, path)
+		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
 		if ("reference" %in% colnames(y)) {
 			y$reference <- gsub("\n", " ", y$reference)
 			y$reference <- gsub("\t", " ", y$reference)
@@ -247,11 +247,11 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	}
 
 	base <- file.path(path, "scripts")
-	ff <- list.files(file.path(base, group), pattern="R$", full.names=TRUE, recursive=TRUE)
-	ffun <- grepl("^_", basename(ff))
-	ff <- ff[!ffun]
-	ff <- ff[!grepl("/_pending/", ff)]
-	ff <- ff[!grepl("/_removed/", ff)]
+	ffR <- list.files(file.path(base, group), pattern="R$", full.names=TRUE, recursive=TRUE)
+	ff_un <- grepl("^_", basename(ffR))
+	ffR <- ffR[!ff_un]
+	ffR <- ffR[!grepl("/_pending/", ffR)]
+	ffR <- ffR[!grepl("/_removed/", ffR)]
 
 	fcsv <- list.files(file.path(path, "data", "clean", group), pattern="_meta.csv$", full.names=TRUE, recursive=TRUE)
 	if (length(fcsv) == 0) cache = FALSE
@@ -262,7 +262,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 				paste0(file.path(path, "data", "clean"), "/")), 
 				\(i) strsplit(i[2], "/"))) |> data.frame()
 		colnames(have_csv) <- c("group", "URI")
-		have_R = do.call(rbind, sapply(strsplit(gsub("\\.R$", "", ff, ignore.case = TRUE),  
+		have_R = do.call(rbind, sapply(strsplit(gsub("\\.R$", "", ffR, ignore.case = TRUE),  
 				paste0(file.path(base), "/")), 
 				\(i) strsplit(tolower(i[2]), "/"))) |> data.frame()
 		colnames(have_R) <- c("group", "uri")
@@ -279,15 +279,14 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		csv_mtime <- data.frame(uri=gsub("_meta.csv$", "", basename(fcsv)), csv=file.mtime(fcsv))
 
 	
-		R_mtime <- data.frame(uri=tolower(gsub(".R$|.r$", "", basename(ff))), 
-								R=file.mtime(ff), id=1:length(ff))
+		R_mtime <- data.frame(uri=tolower(gsub(".R$|.r$", "", basename(ffR))), 
+								R=file.mtime(ffR), id=1:length(ffR))
 		csv_mtime$uri <- tolower(csv_mtime$uri)
 
 		mtime <- merge(csv_mtime, R_mtime, by="uri", all.y=TRUE)
 		keep <- which(is.na(mtime$csv) | (mtime$R > mtime$csv))
-		ff <- ff[mtime$id[keep]]
-		if (length(ff) == 0) {
-			message("no changes (cache=TRUE)")
+		ffR <- ffR[mtime$id[keep]]
+		if (length(ffR) == 0) {
 			return(invisible(TRUE))
 		}
 	} else {
@@ -298,9 +297,9 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	}
 
 
-	ff <- sort(ff)
+	ffR <- sort(ffR)
 	
-	tab <- table(basename(ff))
+	tab <- table(basename(ffR))
 	if (any(tab > 1)) {
 		dups <- names(tab[tab>1])
 		message(paste("duplicate files: ", paste(dups, collapse=", ")))
@@ -308,7 +307,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 
 	carob_script <- function() {FALSE}
 	#rm(list=ls(globalenv()))
-	for (f in ff) {
+	for (f in ffR) {
 		rm(carob_script)
 		if (!quiet) cat(gsub(base, "", f), "\n"); utils::flush.console()
 		source(f, local=TRUE)
@@ -323,8 +322,8 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		utils::flush.console()
 	}
 	
-	ff <- list.files(file.path(path, "data", "messages"), pattern=".csv$", full.names=TRUE, recursive=TRUE)
-	msg <- lapply(ff, utils::read.csv)
+	ffm <- list.files(file.path(path, "data", "messages"), pattern=".csv$", full.names=TRUE, recursive=TRUE)
+	msg <- lapply(ffm, utils::read.csv)
 	msg <- do.call(rbind, msg)
 	utils::write.csv(msg, file.path(path, "data", "messages.csv"), row.names=FALSE)
 
