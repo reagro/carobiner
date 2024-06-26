@@ -11,7 +11,9 @@ make_reports <- function(path, group="", cache=TRUE) {
 		} else {
 			rmd <- file.path(path, "reports", paste0(grp, ".Rmd"))
 		}
-		if (!file.exists(rmd)) next
+		if (!file.exists(rmd)) {
+			rmd <- file.path(path, "reports", "general.Rmd")
+		} 
 		rmd <- readLines(rmd, warn=FALSE)
 
 		gpath <- file.path(path, "/data/clean/", grp)
@@ -38,7 +40,7 @@ make_reports <- function(path, group="", cache=TRUE) {
 			rmd[uri] <- paste0("uri <- '", m$uri, "'")
 			frmd <- file.path(path, "temp.Rmd")
 			writeLines(rmd, frmd)
-			rmarkdown::render(frmd, "html_document", "temp", envir=new.env(), quiet=TRUE)
+			try(rmarkdown::render(frmd, "html_document", "temp", envir=new.env(), quiet=TRUE))
 			file.rename(file.path(path, "temp.html"), outf[i])
 		}
 	}
