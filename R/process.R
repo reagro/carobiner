@@ -39,6 +39,7 @@ write_files <- function(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL
 		opt <- options("carobiner_check")
 		answ <- check_terms(dataset, records, path, group, check=opt)	
 		fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
+
 		if (nrow(answ) > 0) {
 			answ$group <- group
 			answ$dataset_id <- cleanuri
@@ -66,6 +67,7 @@ write_files <- function(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL
 	
 	records <- sort_by_terms(records, "records", group, path)
 	dataset <- sort_by_terms(dataset, "dataset", group, path)
+
 
 	if (to_mem) {
 		return(list(data=records, meta=dataset))

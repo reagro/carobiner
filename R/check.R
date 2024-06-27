@@ -363,6 +363,10 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 		if (check != "nogeo") {
 			answ <- check_lonlat(x, path, answ)	
 		}
+		if (nrow(x) != nrow(unique(x))) {
+			answ[nrow(answ)+1, ] <- c("duplicates", "duplicate records detected")
+		}
+
 	} else {
 		answ <- check_dataset(x, trms, path, answ)
 	}
