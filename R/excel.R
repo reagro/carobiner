@@ -40,3 +40,21 @@ read.excel.hdr <- function(f, skip, hdr=1, fix_names=TRUE, lower=FALSE, ...) {
 }
 
 
+
+excel.textbox <- function(filename) {
+	if (!grepl("\\.xlsx$", filename)) {
+		stop("this only works for xlsx files")
+	}
+	xpath <- file.path(tempdir(), "texel", basename(filename))
+	dir.create(xpath, FALSE, TRUE)
+	unzip(filename, exdir=xpath)
+	fdraw <- list.files(file.path(xpath, "xl", "drawings"), pattern = "\\.xml$", full.names=TRUE)
+	out <- sapply(fdraw, function(f) {
+		xml <- xml2::read_xml(f)
+		txt <- xml2::xml_text(xml, trim = TRUE)
+		gsub("\\d{12,200}", "", txt)
+	})
+	unlink(xpath)
+	out
+}
+

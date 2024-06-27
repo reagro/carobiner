@@ -9,5 +9,5 @@ get_locations, get_data, get_more_data, get_function,
 get_references, get_terms, get_accepted_values,
 geocode, geocode_duplicates, is_excel, make_carob, process_carob, run_carob,  
 write_files, simple_uri, replace_values, read.excel, read.excel.hdr,
-eng_months_to_nr, on_github, read_metadata, update_terms
+eng_months_to_nr, on_github, read_metadata, update_terms, excel.textbox 
 )
