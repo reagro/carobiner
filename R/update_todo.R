@@ -3,6 +3,8 @@
 update_todo <- function(path) {
 
 	ftodo <- file.path(path, "todo", "to-do.csv")
+	if (!file.exists(ftodo)) return(invisible(FALSE))
+	
 	todo <- utils::read.csv(ftodo)
 	todo$uri <- trimws(todo$uri)
 	uri <- gsub("https://doi.org/", "doi:", tolower(todo$uri))
@@ -21,6 +23,7 @@ update_todo <- function(path) {
 		todo <- todo[-i,]
 		utils::write.csv(todo, ftodo, row.names=FALSE)
 	}
+	invisible(TRUE)
 }
 
 
