@@ -181,7 +181,13 @@ get_authors <- function(x) {
 	if (is.null(out)) {
 		out <- x$metadata$creators$name
 	}
-	if (is.null(out)) { #Rothamsted
+	#dryad 
+	if (is.null(out)) {
+		out <- x$authors
+		out <- paste0(out$lastName, ", ", out$firstName)
+	}
+	#Rothamsted
+	if (is.null(out)) {
 		out <- x$contributors$title
 	}
 	if (is.null(out)) {

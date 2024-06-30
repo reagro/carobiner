@@ -256,6 +256,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	ffR <- ffR[!ff_un]
 	ffR <- ffR[!grepl("/_pending/", ffR)]
 	ffR <- ffR[!grepl("/_removed/", ffR)]
+	ffR <- ffR[basename(ffR) != "template.R"]
 
 	fcsv <- list.files(file.path(path, "data", "clean", group), pattern="_meta.csv$", full.names=TRUE, recursive=TRUE)
 	if (length(fcsv) == 0) cache = FALSE
@@ -338,13 +339,14 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 
 make_carob <- function(path, group="", quiet=FALSE, check="all", report=FALSE, cache=TRUE, ...) {
 	get_packages(group)
+	message(" === process ===")
 	process_carob(path, group=group, quiet=quiet, check=check, cache=cache)
+	message(" === compile ===")
+	compile_carob(path, group=group, cache=cache, ...)
 	if (report) {
-		message(" === reporting ===")
+		message(" === report ===")
 		make_reports(path, group="", cache=TRUE)
 	}
-	message(" === aggregating ===")
-	compile_carob(path, group=group, cache=cache, ...)
 }
 
 
