@@ -2,7 +2,7 @@
 
 update_todo <- function(path) {
 
-	ftodo <- file.path(path, "todo", "to-do.csv")
+	ftodo <- file.path(path, "misc", "todo", "to-do.csv")
 	if (!file.exists(ftodo)) return(invisible(FALSE))
 	
 	todo <- utils::read.csv(ftodo)

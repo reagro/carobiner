@@ -17,6 +17,8 @@ get_more_data <- function(url, dataset_id, path, group) {
 
 write_files <- function(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL, options=NULL) {
 
+	if (path=="ignore" & missing(dataset)) return(TRUE)
+
 	stopifnot(nrow(dataset) == 1)
 
 	to_mem <- FALSE
@@ -341,7 +343,7 @@ make_carob <- function(path, group="", quiet=FALSE, check="all", report=FALSE, c
 		message(" === reporting ===")
 		make_reports(path, group="", cache=TRUE)
 	}
-	message(" === compiling ===")
+	message(" === aggregating ===")
 	compile_carob(path, group=group, cache=cache, ...)
 }
 
