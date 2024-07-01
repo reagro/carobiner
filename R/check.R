@@ -75,19 +75,17 @@ check_start_end_dates <- function(x) {
 }
 
 
-check_lonlat <- function(x, path, answ) {
+check_lonlat <- function(x, answ) {
 
 	if (!all(c("longitude", "latitude") %in% colnames(x))) {
 		# there is already a message for missing required variables
 		return(answ)
 	}
-	if (is.null(path)) {
-		path <- tempdir()
-	}
+	path <- system.file(package="carobiner")
 
 #	wres <- ifelse(res=="high", 1, 5)
 	wres <- 1
-	w <- geodata::world(path=file.path(path, "data"), res=wres)
+	w <- geodata::world(path=path, res=wres)
 	x <- unique(stats::na.omit(x[, c("country", "longitude", "latitude")]))
 	e <- terra::extract(w, x[, c("longitude", "latitude")])
 	e$country <- x$country
@@ -118,7 +116,7 @@ check_lonlat <- function(x, path, answ) {
 	return(answ)		
 }
 
-check_cropyield <- function(x, path, answ) {
+check_cropyield <- function(x, answ) {
 	if (!all(c("crop", "yield") %in% names(x))) return(answ)
 	x <- x[, c("crop", "yield")]
 	a <- suppressWarnings(
@@ -132,7 +130,7 @@ check_cropyield <- function(x, path, answ) {
 				paste0("crop yield too low (tons not kg?): ", bad))
 		return(answ)
 	}
-	trms <- get_accepted_values("crop", path)
+	trms <- get_accepted_values("crop")
 	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
 	trms <- stats::na.omit(trms)
 	if (nrow(trms) == 0) return(answ)
@@ -150,7 +148,7 @@ check_cropyield <- function(x, path, answ) {
 }
 
 
-check_ranges <- function(x, trms, path, answ) {
+check_ranges <- function(x, trms, answ) {
 	nms <- colnames(x)
 	trms <- trms[match(nms, trms[,1]), ]
 
@@ -206,11 +204,11 @@ check_ranges <- function(x, trms, path, answ) {
 	}
 
 	answ <- check_consistency(x, answ)
-	check_cropyield(x, path, answ)
+	check_cropyield(x, answ)
 }
 
 
-check_datatypes <- function(x, trms, path, answ) {
+check_datatypes <- function(x, trms, answ) {
 	nms <- colnames(x)
 	trs <- trms[match(nms, trms[,1]), ]
 	cls <- sapply(x, class)
@@ -228,8 +226,7 @@ check_datatypes <- function(x, trms, path, answ) {
 		bad <- paste(cls[i,3], collapse=", ")
 		answ[nrow(answ)+1, ] <- c("bad datatype", paste("bad datatype:", bad))
 	} else {
-	#	answ <- check_ranges(x[, nms], trms, path, answ)
-		answ <- check_ranges(x, trms, path, answ)
+		answ <- check_ranges(x, trms, answ)
 	}
 	
 	answ
@@ -254,8 +251,8 @@ check_datatypes <- function(x, trms, path, answ) {
 #x = check_empty(d)
 
 
-check_group <- function(name, path) {
-	grp <- get_groups(path)
+check_group <- function(name) {
+	grp <- get_groups()
 	ok <- all(name %in% grp$name)
 	if (!ok) {
 		stop(paste("    invalid group:", paste(name, collapse=", ")))
@@ -264,7 +261,7 @@ check_group <- function(name, path) {
 }
 
 
-check_dataset <- function(x, trms, path, answ) {
+check_metadata <- function(x, trms, answ) {
 	if (grepl("http", x$uri)) {
 		answ[nrow(answ)+1, ] <- c("uri", "http in uri")
 	}
@@ -273,7 +270,11 @@ check_dataset <- function(x, trms, path, answ) {
 	if (any(j)) {
 		answ[nrow(answ)+1, ] <- c("NA values", paste0("NA in ", paste(nms[j], collapse=", ")))
 	}
+	answ
+}
 
+
+check_pubs <- function(x, path, answ) {
 	if (isTRUE(nchar(x$publication) > 0 )) {
 
 		if (grepl("http", x$publication)) {
@@ -294,7 +295,8 @@ check_dataset <- function(x, trms, path, answ) {
 }
 
 
-check_d_terms <- function(answ, x, path, type, group, check) {
+
+check_d_terms <- function(answ, x, type, group, check) {
 
 	bad <- rep(FALSE, ncol(x))
 	chars <- sapply(x, is.character)
@@ -308,7 +310,7 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 				paste0("whitespace in variable: ", b))
 	}
 	nms <- names(x)
-	trms <- get_terms(type, group, path)
+	trms <- get_terms(type, group)
 
 	xnms <- nms[!(nms %in% trms$name)]
 	if (length(xnms) > 0) {
@@ -330,7 +332,7 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 	voc <- voc[voc$name %in% nms, ]
 	if (nrow(voc) > 0) {
 		for (i in 1:nrow(voc)) {
-			accepted <- get_accepted_values(voc$vocabulary[i], path)[,1]
+			accepted <- get_accepted_values(voc$vocabulary[i])[,1]
 			provided <- unique(x[, voc$name[i]])
 			if (voc$required[i] != "yes") {
 				provided <- stats::na.omit(provided)
@@ -359,17 +361,17 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 	}
 	
 	if (type=="records") {
-		answ <- check_datatypes(x[, nms], trms, path, answ)
+		answ <- check_datatypes(x[, nms], trms, answ)
 		if (check != "nogeo") {
-			answ <- check_lonlat(x, path, answ)	
+			answ <- check_lonlat(x, answ)	
 		}
 		if (nrow(x) != nrow(unique(x))) {
 			answ[nrow(answ)+1, ] <- c("duplicates", "duplicate records detected")
 		}
-
 	} else {
-		answ <- check_dataset(x, trms, path, answ)
+		answ <- check_metadata(x, trms, answ)
 	}
+	
 	answ
 }
 
@@ -377,7 +379,7 @@ check_d_terms <- function(answ, x, path, type, group, check) {
 check_exp <- function(answ, treatment, data_type, vars) {
 	if (is.na(treatment)) {
 		answ[nrow(answ)+1, ] <- c("exp_treatment", 
-			"dataset exp_treatment cannot be NA")
+			"metadata variable exp_treatment cannot be NA")
 		return(answ)
 	}
 	
@@ -385,7 +387,7 @@ check_exp <- function(answ, treatment, data_type, vars) {
 	if ((length(treat) == 1) && (treat == "none")) {
 		if (grepl("experiment|trial", data_type)) {
 			answ[nrow(answ)+1, ] <- c("treatment_vars", 
-				"dataset treatment_vars cannot be 'none' for experiments")
+				"metadata variable treatment_vars cannot be 'none' for experiments")
 		}
 		return(answ)
 	}
@@ -399,21 +401,21 @@ check_exp <- function(answ, treatment, data_type, vars) {
 }
 
 
-check_terms <- function(dataset, records, path=NULL, group="", check="all") {
+check_terms <- function(metadata, records, group="", check="all") {
 	answ <- data.frame(check="", msg="")[0,]
 	if (check == "none") {
 		return(answ)
 	}
-	if (!missing(dataset)) {
-		answ <- check_d_terms(answ, dataset, path, "dataset", group=group, check=check)
+	if (!missing(metadata)) {
+		answ <- check_d_terms(answ, metadata, "metadata", group=group, check=check)
 		if (!missing(records)) {
-			if (!is.null(dataset$treatment_vars)) {
-				answ <- check_exp(answ, dataset$treatment_vars, dataset$data_type, names(records))
+			if (!is.null(metadata$treatment_vars)) {
+				answ <- check_exp(answ, metadata$treatment_vars, metadata$data_type, names(records))
 			}
 		}
 	}
 	if (!missing(records)) {
-		answ <- check_d_terms(answ, records, path, "records", group=group, check=check)
+		answ <- check_d_terms(answ, records, "records", group=group, check=check)
 	}
 	answ
 }

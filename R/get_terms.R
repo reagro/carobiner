@@ -21,8 +21,10 @@ update_terms <- function(quiet=FALSE) {
 	ff <- sapply(httr::content(req)$tree, \(i) i$path)
 	ff <- grep("\\.csv$", ff, value = TRUE)
 	ff <- file.path("https://raw.githubusercontent.com/reagro/terminag/main", ff)
-	for (f in ff) {
-		utils::download.file(f, file.path(p, basename(f)), quiet=TRUE)
+	i <- grepl("variables_", ff)
+	pva <- c("values", "variables")[i+1]
+	for (i in 1:length(ff)) {
+		utils::download.file(ff[i], file.path(p, pva[i], basename(ff[i])), quiet=TRUE)
 	}
 
 	#gv <- readLines("https://raw.githubusercontent.com/reagro/terminag/main/version.txt", warn = FALSE)
@@ -37,11 +39,12 @@ update_terms <- function(quiet=FALSE) {
 }
 
 
-get_groups <- function(path) {
+#get_groups <- function(path) {
+get_groups <- function() {
 #	f <- file.path(path, "terms", "groups.csv")
 #	if (!isTRUE(file.exists(f))) {
-		path <- system.file("terms", package="carobiner")
-		f <- file.path(path, "groups.csv")
+	path <- system.file("terms", package="carobiner")
+	f <- file.path(path, "groups.csv")
 #	}
 	if (!file.exists(f)) {
 		stop("the groups file is missing")
@@ -50,9 +53,9 @@ get_groups <- function(path) {
 }
 
 
-get_variables <- function(path, group) {
+get_variables <- function(group) {
 	path <- system.file("terms", package="carobiner")
-	f <- file.path(path, paste0("variables_", group, ".csv"))		
+	f <- file.path(path, "variables", paste0("variables_", group, ".csv"))		
 	if (file.exists(f)) {
 		utils::read.csv(f)	
 	} else {
@@ -61,26 +64,27 @@ get_variables <- function(path, group) {
 }
 
 
-get_terms <- function(type, group, path) {
+#get_terms <- function(type, group, path) {
+get_terms <- function(type, group) {
 	if (type == "records") {
-		trms <- get_variables(path, "all")
+		trms <- get_variables("all")
 		if (is.null(trms)) {
 			stop("Please first install the standard terms with 'carobiner::update_terms()'", call. = FALSE)
 		}
-		grps <- get_groups(path)
+		grps <- get_groups()
 		include <- grps$include[grps$name == group]
-		if (length(include) == 0) {
-			include <- c("crop;soil")
-		} 
+		#if (length(include) == 0) {
+		#	include <- c("crop;soil")
+		#} 
 		if (include != "") {
 			include <- trimws(unlist(strsplit(include, ";")))
 			for (inc in include) {
-				add <- get_variables(path, inc)
+				add <- get_variables(inc)
 				trms <- rbind(trms, add)
 			}
 		}
 		if (group != "") {
-			trms2 <- get_variables(path, group)
+			trms2 <- get_variables(group)
 			if (!is.null(trms2)) {
 				trms <- rbind(trms, trms2)
 				tab <- table(trms[,1])
@@ -89,23 +93,23 @@ get_terms <- function(type, group, path) {
 				}
 			}
 		}
-	} else if (type=="dataset") {
-		trms <- get_variables(path, "dataset")
+	} else if (type=="metadata") {
+		trms <- get_variables("metadata")
 		if (is.null(trms)) {
 			stop("Please first install the standard terms with 'carobiner::update_terms()'", call. = FALSE)
 		}
 
 	} else {
-		stop("invalid 'type' argument; should be 'records' or 'dataset'") 
+		stop("invalid 'type' argument; should be 'records' or 'metadata'") 
 	}
 	trms
 }
 
 
 
-get_accepted_values <- function(name, path=NULL) {
+get_accepted_values <- function(name) {
 	path <- system.file("terms", package="carobiner")
-	f <- file.path(path, paste0("values_", name, ".csv"))
+	f <- file.path(path, "values", paste0("values_", name, ".csv"))
 	if (file.exists(f)) {
 		utils::read.csv(f)	
 	} else {

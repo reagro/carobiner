@@ -1,6 +1,6 @@
 
 aggregated_data <- function(path, group, cc=FALSE) {
-	g <- get_groups(path)
+	g <- get_groups()
 	if (!(group %in% g$name)) {
 		stop("this group does not exist")
 	}

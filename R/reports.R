@@ -18,7 +18,7 @@ clean_up <- function(fin, fout) {
 make_reports <- function(path, group="", cache=TRUE) {
 
 	if (group[1] == "") {
-		group <- get_groups(path)$name
+		group <- get_groups()$name
 	} 
 
 	rmd <- file.path(path, "misc", "reports", "dataset.Rmd")

@@ -12,12 +12,11 @@ Get the accepted values for a variable.
 
 
 \usage{
-get_accepted_values(name, path=NULL)
+get_accepted_values(name)
 }
  
 \arguments{
   \item{name}{character. The variable name. For example, "country", "crop", or "fertilizer_type"}
-  \item{path}{character. The path to the Carob repo. If \code{NULL} the values stored in this package are used}
 }
 
 \value{

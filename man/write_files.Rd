@@ -12,12 +12,12 @@ Write Carob dataset files. This calls \code{\link{check_terms}}
 
 
 \usage{
-write_files(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL, options=NULL)
+write_files(path, metadata, records, timerecs=NULL, wth=NULL, id=NULL, options=NULL)
 }
  
 \arguments{
   \item{path}{character. Local path to the Carob repo}
-  \item{dataset}{data.frame. One row with dataset level variables (metadata)}
+  \item{metadata}{data.frame. One row with dataset level descriptive variables}
   \item{records}{data.frame. Dataset records}
   \item{timerecs}{data.frame. Dataset with temporal records}
   \item{wth}{data.frame with weather data}
@@ -26,6 +26,6 @@ write_files(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL, options=NU
 }
 
 \value{
-none. Used for the side-effect of writing to disk.
+logical value indicating success
 }
 

@@ -47,7 +47,7 @@ excel.textbox <- function(filename) {
 	}
 	xpath <- file.path(tempdir(), "texel", basename(filename))
 	dir.create(xpath, FALSE, TRUE)
-	unzip(filename, exdir=xpath)
+	utils::unzip(filename, exdir=xpath)
 	fdraw <- list.files(file.path(xpath, "xl", "drawings"), pattern = "\\.xml$", full.names=TRUE)
 	out <- sapply(fdraw, function(f) {
 		xml <- xml2::read_xml(f)

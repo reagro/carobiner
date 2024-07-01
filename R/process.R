@@ -15,11 +15,11 @@ get_more_data <- function(url, dataset_id, path, group) {
 }
 
 
-write_files <- function(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL, options=NULL) {
+write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NULL, options=NULL) {
 
-	if (path=="ignore" & missing(dataset)) return(TRUE)
+	if (path=="ignore" & missing(metadata)) return(TRUE)
 
-	stopifnot(nrow(dataset) == 1)
+	stopifnot(nrow(metadata) == 1)
 
 	to_mem <- FALSE
 	if (is.null(path)) {
@@ -27,25 +27,29 @@ write_files <- function(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL
 		to_mem <- TRUE
 	}
 
-	group <- dataset$group
-	if (!check_group(group, path)) {
+	group <- metadata$group
+	if (!check_group(group)) {
 		stop(paste(group, "is not a known group"))
 	}
 
-	cleanuri <- dataset$dataset_id
+	cleanuri <- metadata$dataset_id
 	stopifnot(all(records$dataset_id == cleanuri))
 
 	if (nrow(records) > 0) {
 		dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
-		records$dataset_id <- dataset$dataset_id
+		records$dataset_id <- metadata$dataset_id
 		opt <- options("carobiner_check")
-		answ <- check_terms(dataset, records, path, group, check=opt)	
+		answ <- carobiner:::check_terms(metadata, records, group, check=opt)	
 		fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
+
+		if (!to_mem) {
+			asnw <- check_pubs(metadata, path, answ)
+		}
 
 		if (nrow(answ) > 0) {
 			answ$group <- group
 			answ$dataset_id <- cleanuri
-			answ$contributor <- dataset$carob_contributor
+			answ$contributor <- metadata$carob_contributor
 
 			fign <- file.path(path, "scripts", group, "ignore.csv")
 			if (file.exists(fign)) {
@@ -62,17 +66,17 @@ write_files <- function(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL
 				for (i in 1:nrow(answ)) {
 					message(paste("   ", answ$msg[i]))
 				}
-				message(paste("    contributor:", dataset$carob_contributor))
+				message(paste("    contributor:", metadata$carob_contributor))
 			}
 		} 
 	}
 	
-	records <- sort_by_terms(records, "records", group, path)
-	dataset <- sort_by_terms(dataset, "dataset", group, path)
+	records <- sort_by_terms(records, "records", group)
+	metadata <- sort_by_terms(metadata, "metadata", group)
 
 
 	if (to_mem) {
-		return(list(data=records, meta=dataset))
+		return(list(data=records, meta=metadata))
 	}
 	
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
@@ -87,8 +91,8 @@ write_files <- function(path, dataset, records, timerecs=NULL, wth=NULL, id=NULL
 	data.table::fwrite(records, outf, row.names=FALSE)
 	
 	mf <- gsub(".csv$", "_meta.csv", outf)
-#	utils::write.csv(dataset, mf, row.names=FALSE)
-	data.table::fwrite(dataset, mf, row.names=FALSE)
+#	utils::write.csv(metadata, mf, row.names=FALSE)
+	data.table::fwrite(metadata, mf, row.names=FALSE)
 	
 # Update todo/to-do.csv list
 # RH: perhaps too much to run this for each dataset 
@@ -105,8 +109,8 @@ get_function <- function(name, path, group="") {
 }
 
 
-sort_by_terms <- function(x, type, group, path) {
-	trms <- get_terms(type, ifelse(group == "doi", "", group), path)
+sort_by_terms <- function(x, type, group) {
+	trms <- get_terms(type, ifelse(group == "doi", "", group))
 	trms <- trms$name[trms$name %in% names(x)]
 	x[, trms]
 }
@@ -149,17 +153,17 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 		}
 
 		mi <- grepl("_meta.csv$", ff)
-		x <- sort_by_terms(.binder(ff[mi]), "dataset", grp, path)
+		x <- sort_by_terms(.binder(ff[mi]), "metadata", grp)
 		x[is.na(x)] <- ""
 		x[] <- sapply(x, \(i) gsub("\n", " ", i))
 		x[] <- sapply(x, \(i) gsub("\t", " ", i))
-		y <- sort_by_terms(.binder(ff[!mi]), "records", grp, path)
+		y <- sort_by_terms(.binder(ff[!mi]), "records", grp)
 		if ("reference" %in% colnames(y)) {
 			y$reference <- gsub("\n", " ", y$reference)
 			y$reference <- gsub("\t", " ", y$reference)
 		}
 		
-		gterms <- get_terms("records", grp, path)
+		gterms <- get_terms("records", grp)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
 
 #		utils::write.csv(gterms, outft, row.names=FALSE)
@@ -247,7 +251,7 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 
 
 	if (group != "") {
-		check_group(group, path)
+		check_group(group)
 	}
 
 	base <- file.path(path, "scripts")

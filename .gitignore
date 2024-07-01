@@ -20,5 +20,5 @@ vignettes/*.pdf
 *.knit.md
 rsconnect/
 update_terms.bat
-inst/terms/values_*
-inst/terms/variables_*
+inst/terms/values/
+inst/terms/variables/
