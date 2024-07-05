@@ -71,7 +71,7 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NUL
 		} 
 	}
 
-	if (is.null(records$record_id)) {
+	if (is.null(records$record_id) && (nrow(records) > 0)) {
 		records$record_id <- 1:nrow(records)
 	}
 	
