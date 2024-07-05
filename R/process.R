@@ -70,6 +70,10 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NUL
 			}
 		} 
 	}
+
+	if (is.null(records$record_id)) {
+		records$record_id <- 1:nrow(records)
+	}
 	
 	records <- sort_by_terms(records, "records", group)
 	metadata <- sort_by_terms(metadata, "metadata", group)
@@ -78,6 +82,7 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NUL
 	if (to_mem) {
 		return(list(data=records, meta=metadata))
 	}
+
 	
 	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 #?	dir.create(file.path(path, "data", "other"), FALSE, FALSE)

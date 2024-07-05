@@ -25,6 +25,9 @@ check_date <- function(x, name) {
 	ok <- TRUE
 	today <- as.Date(Sys.time())
 	ymd <- x[n==10]
+	if (any(is.na(ymd))) {
+		return(FALSE)
+	}
 	if (length(ymd) > 0) {
 		d <- as.Date(ymd)
 		if (any((ymd < as.Date("1960-01-01")) | (ymd > today))) {
@@ -73,6 +76,25 @@ check_start_end_dates <- function(x) {
 		return(NULL)
 	}
 }
+
+
+check_location_names <- function(x, answ) {
+	locvars <- c(paste0("adm_", 1:5), "site", "location")	
+	locvars <- locvars[locvars %in% names(x)]
+	for (v in locvars) {
+		m <- na.omit(x[v])[,1]
+		if (sum(toupper(m) == m) > (0.25 * length(m))) {
+			answ[nrow(answ)+1, ] <- c("all uppercase",
+				paste0("names in uppercase: ", v))
+		}
+	}
+	if (("site" %in% locvars) & (!("location" %in% locvars))) {
+		answ[nrow(answ)+1, ] <- c("location/site",
+			"variable 'site' is not allowed if variable 'location' is absent")
+	}
+	answ
+}
+
 
 
 check_lonlat <- function(x, answ) {
@@ -227,8 +249,7 @@ check_datatypes <- function(x, trms, answ) {
 		answ[nrow(answ)+1, ] <- c("bad datatype", paste("bad datatype:", bad))
 	} else {
 		answ <- check_ranges(x, trms, answ)
-	}
-	
+	}	
 	answ
 }
 
@@ -368,6 +389,12 @@ check_d_terms <- function(answ, x, type, group, check) {
 		if (nrow(x) != nrow(unique(x))) {
 			answ[nrow(answ)+1, ] <- c("duplicates", "duplicate records detected")
 		}
+		if (!is.null(x$record_id)) {
+			if (nrow(x) != length(unique(x$record_id))) {
+				answ[nrow(answ)+1, ] <- c("duplicates", "duplicates in record_id")
+			}		
+		}
+		answ <- check_location_names(x, answ) 
 	} else {
 		answ <- check_metadata(x, trms, answ)
 	}
@@ -376,7 +403,7 @@ check_d_terms <- function(answ, x, type, group, check) {
 }
 
 
-check_exp <- function(answ, treatment, data_type, vars) {
+check_treatment <- function(answ, treatment, data_type, vars) {
 	if (is.na(treatment)) {
 		answ[nrow(answ)+1, ] <- c("exp_treatment", 
 			"metadata variable exp_treatment cannot be NA")
@@ -410,7 +437,7 @@ check_terms <- function(metadata, records, group="", check="all") {
 		answ <- check_d_terms(answ, metadata, "metadata", group=group, check=check)
 		if (!missing(records)) {
 			if (!is.null(metadata$treatment_vars)) {
-				answ <- check_exp(answ, metadata$treatment_vars, metadata$data_type, names(records))
+				answ <- check_treatment(answ, metadata$treatment_vars, metadata$data_type, names(records))
 			}
 		}
 	}

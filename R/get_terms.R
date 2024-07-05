@@ -1,13 +1,15 @@
 
-update_terms <- function(quiet=FALSE) {
+update_terms <- function(quiet=FALSE, force=FALSE) {
 
 	p <- system.file("terms", package="carobiner")
+	dir.create(file.path(p, "terms", "variables"), FALSE, TRUE)
+	dir.create(file.path(p, "terms", "values"), FALSE, TRUE)
 
 	v <- readLines("https://api.github.com/repos/reagro/terminag/commits/main")
 	gsha <- jsonlite::fromJSON(v)$sha
 
 	f <- file.path(p, "sha.txt")
-	if (file.exists(f)) {
+	if (!force && file.exists(f)) {
 		rsha <- readLines(f)
 		if (gsha == rsha) {
 			if (!quiet) message("terms were up to date")
@@ -76,7 +78,7 @@ get_terms <- function(type, group) {
 		#if (length(include) == 0) {
 		#	include <- c("crop;soil")
 		#} 
-		if (include != "") {
+		if (!all(include == "")) {
 			include <- trimws(unlist(strsplit(include, ";")))
 			for (inc in include) {
 				add <- get_variables(inc)

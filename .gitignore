@@ -19,6 +19,5 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 rsconnect/
-update_terms.bat
 inst/terms/values/
 inst/terms/variables/
