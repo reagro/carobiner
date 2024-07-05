@@ -2,8 +2,8 @@
 update_terms <- function(quiet=FALSE, force=FALSE) {
 
 	p <- system.file("terms", package="carobiner")
-	dir.create(file.path(p, "terms", "variables"), FALSE, TRUE)
-	dir.create(file.path(p, "terms", "values"), FALSE, TRUE)
+	dir.create(file.path(p, "variables"), FALSE, TRUE)
+	dir.create(file.path(p, "values"), FALSE, TRUE)
 
 	v <- readLines("https://api.github.com/repos/reagro/terminag/commits/main")
 	gsha <- jsonlite::fromJSON(v)$sha
