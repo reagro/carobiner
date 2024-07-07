@@ -356,6 +356,7 @@ make_carob <- function(path, group="", quiet=FALSE, check="all", report=FALSE, c
 		message(" === report ===")
 		make_reports(path, group="", cache=TRUE)
 	}
+	message(" === done ===")
 }
 
 

@@ -395,8 +395,9 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 
 	if (cache && file.exists(file.path(path, "ok.txt"))) {
 		ff <- list.files(path, full.names=TRUE, recursive=TRUE)
-		ff <- ff[grep("\\.json$|\\.pdf$|\\.doc$|\\.docx$|\\.zip$", ff, invert=TRUE)]
+		ff <- ff[grep("_files.txt$|\\.json$|\\.pdf$|\\.doc$|\\.docx$|\\.zip$", ff, invert=TRUE)]
 		ff <- ff[basename(ff) != "ok.txt"]
+
 		# remove opened excel files
 		ff[grep("/~$", ff, fixed=TRUE, invert=TRUE)]
 		return(ff)
