@@ -28,9 +28,7 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NUL
 	}
 
 	group <- metadata$group
-	if (!check_group(group)) {
-		stop(paste(group, "is not a known group"))
-	}
+	check_group(group)
 
 	cleanuri <- metadata$dataset_id
 	stopifnot(all(records$dataset_id == cleanuri))
