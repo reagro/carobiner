@@ -43,6 +43,9 @@ get_license <- function(x) {
 	if (isTRUE(grepl("This dataset is made available without information", trms))) {
 		return("not specified")
 	}
+	
+#Creative Commons Attribution 4.0 
+	
 	if ((is.null(lic) || (lic[1] == "NONE")) && (!is.null(trms))) {
 		trm <- strsplit(trms, '\"')[[1]]
 		g <- grep("/creativecommons.org/|/licensebuttons.net", tolower(trm), value=TRUE)
@@ -74,7 +77,9 @@ get_license <- function(x) {
 			trm <- gsub("http://", "", trm)
 			trm <- gsub("https://", "", trm)
 			trm <- gsub("creativecommons.org/licenses", "CC", trm)
-			trm <- gsub("creativecommons.org/publicdomain/zero", "CC0", trm)		
+			trm <- gsub("licensebuttons.net/l", "CC", trm)
+			trm <- gsub("creativecommons.org/publicdomain/zero", "CC0", trm)	
+			trm <- gsub("/88x31.png", "", trm)
 			trm <- gsub("/", "-", trm)
 			trm <- toupper(gsub("-$", "", trm))
 			trm <- toupper(trm)

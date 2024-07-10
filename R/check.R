@@ -14,48 +14,76 @@ check_consistency <- function(x, answ) {
 	answ
 }
 
-check_date <- function(x, name) {
+check_date <- function(x, name, answ, voc) {
 
 	x <- stats::na.omit(x[[name]])
 	if (length(x) == 0) return(TRUE)
-	n <- nchar(x)
-	if (any(!(n %in% c(4, 7, 10)))) {
-		return(FALSE)
-	}
-	ok <- TRUE
-	today <- as.Date(Sys.time())
-	ymd <- x[n==10]
-	if (any(is.na(ymd))) {
-		return(FALSE)
-	}
-	if (length(ymd) > 0) {
-		d <- as.Date(ymd)
-		if (any((ymd < as.Date("1960-01-01")) | (ymd > today))) {
-			ok <- FALSE
+	if (any(grepl(";", x))) {
+		i <- match(name, voc$name)
+		if (length(i) == 1) {
+			if (isTRUE(voc$multiple_allowed[i] != "yes")) {
+				answ[nrow(answ)+1, ] <- c("date", paste0("multiple dates in: ", name))
+			}
+			x <- unlist(strsplit(x, ";|; "))
 		}
 	}
+	
+	n <- nchar(x)
+	if (any(!(n %in% c(4, 7, 10)))) {
+		answ[nrow(answ)+1, ] <- c("date", paste0("invalid date format(s) in: ", name))
+	}
+	today <- as.Date(Sys.time())
+	ymd <- x[n==10]
+#	if (any(is.na(ymd))) {
+#		return(FALSE)
+#	}
+	if (length(ymd) > 0) {
+		d <- as.Date(ymd)
+		if (any(ymd < as.Date("1960-01-01"))) {
+			answ[nrow(answ)+1, ] <- c("date", paste0("date(s) before 1960 in: ", name))
+		}
+		if (any(ymd > today)) {
+			answ[nrow(answ)+1, ] <- c("date", paste0("future date(s) in: ", name))
+		}
+		m <- as.numeric(substr(ymd, 6, 7))
+		if (any((m < 1) | (m > 12))) {
+			answ[nrow(answ)+1, ] <- c("date", paste0("months not between 1 and 12): ", name))
+		} 
+	}
+	
 	thisyear <- as.numeric(format(today, "%Y"))
 	today <- as.character(today)
 	ym <- x[n==7]
 	if (length(ym) > 0) {
-		if (any((ym < "1960-01") | (ym > substr(today, 1, 7)))) ok <- FALSE
 		d <- substr(ym, 5, 5)
-		if (any(d != "-")) ok <- FALSE
+		if (any(d != "-")) {
+			answ[nrow(answ)+1, ] <- c("date", paste0("bad date(s) in: ", name))
+		}
 		y <- as.numeric(substr(ym, 1, 4))
-		if (any((y < 1960) | (y > thisyear))) ok <- FALSE
+		if (any(y < 1960)) {
+			answ[nrow(answ)+1, ] <- c("date", paste0("date(s) before 1960 in: ", name))
+		} 
+		if (any(y > thisyear)) {
+			answ[nrow(answ)+1, ] <- c("date", paste0("date(s) after ", thisyear, " in: ", name))
+		}
+
 		m <- as.numeric(substr(ym, 6, 7))
-		if (any((m < 1) | (m > 12))) ok <- FALSE
-		
+		if (any((m < 1) | (m > 12))) {
+			answ[nrow(answ)+1, ] <- c("date", paste0("months not between 1 and 12): ", name))
+		} 
 	}
 
 	y <- x[n==4]
 	if (length(y) > 0) {
 		y <- as.numeric(y)
-		if (any((y < 1960) | (y > thisyear))) {
-			ok <- FALSE
+		if (any(y < 1960)) {
+			answ[nrow(answ)+1, ] <- c("date", paste0("date(s) before 1960 in: ", name))
+		} 
+		if (any(y > thisyear)) {
+			answ[nrow(answ)+1, ] <- c("date", paste0("date(s) after ", thisyear, " in: ", name))
 		}
 	}
-	ok
+	answ
 }
 
 
@@ -206,13 +234,6 @@ check_ranges <- function(x, trms, answ) {
 		answ[nrow(answ)+1, ] <- c("bounds", paste("out of bounds:", paste(bad, collapse=", ")))
 		bad <- NULL
 	}
-	
-	dats <- grep("_date", nms, value=TRUE)
-	for (dat in dats) {
-		if (!check_date(x, dat)) {
-			bad <- c(bad, dat)
-		}
-	} 
 	
 	if (!is.null(bad)) {
 		bad <- paste(bad, collapse=", ")
@@ -379,6 +400,11 @@ check_d_terms <- function(answ, x, type, group, check) {
 				}
 			}
 		}
+
+		dats <- grep("_date", nms, value=TRUE)
+		for (dat in dats) {
+			answ <- check_date(x, dat, answ, voc)
+		} 
 	}
 	
 	if (type=="records") {

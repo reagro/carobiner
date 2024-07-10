@@ -85,16 +85,16 @@ get_terms <- function(type, group) {
 				trms <- rbind(trms, add)
 			}
 		}
-		if (group != "") {
-			trms2 <- get_variables(group)
-			if (!is.null(trms2)) {
-				trms <- rbind(trms, trms2)
-				tab <- table(trms[,1])
-				if (any(tab > 1)) {
-					print(paste("duplicated terms:", names(tab[tab>1])))
-				}
-			}
-		}
+#		if (group != "") {
+#			trms2 <- get_variables(group)
+#			if (!is.null(trms2)) {
+#				trms <- rbind(trms, trms2)
+#				tab <- table(trms[,1])
+#				if (any(tab > 1)) {
+#					print(paste("duplicated terms:", names(tab[tab>1])))
+#				}
+#			}
+#		}
 	} else if (type=="metadata") {
 		trms <- get_variables("metadata")
 		if (is.null(trms)) {
