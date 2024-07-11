@@ -17,7 +17,7 @@ check_consistency <- function(x, answ) {
 check_date <- function(x, name, answ, voc) {
 
 	x <- stats::na.omit(x[[name]])
-	if (length(x) == 0) return(TRUE)
+	if (length(x) == 0) return(answ)
 	if (any(grepl(";", x))) {
 		i <- match(name, voc$name)
 		if (length(i) == 1) {
@@ -400,11 +400,11 @@ check_d_terms <- function(answ, x, type, group, check) {
 				}
 			}
 		}
-
 		dats <- grep("_date", nms, value=TRUE)
 		for (dat in dats) {
-			answ <- check_date(x, dat, answ, voc)
+			answ <- carobiner:::check_date(x, dat, answ, voc)
 		} 
+		
 	}
 	
 	if (type=="records") {

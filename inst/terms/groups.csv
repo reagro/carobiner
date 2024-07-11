@@ -12,5 +12,5 @@ biofortification,crop; soil,agronomic biofortification experiments
 maize_trials,crop; soil;maize,maize variety trials
 wheat_trials,crop; soil;wheat,wheat variety trials
 potato_trials,crop; soil;wheat,potato variety trials
-disease,crop; soil,potato lateblight trials
+disease,crop; soil,crop disease trials
 variety_trials,crop; soil,"crop variety trials (not wheat, maize or potato)"
