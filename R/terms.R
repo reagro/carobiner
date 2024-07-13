@@ -67,7 +67,7 @@ get_variables <- function(group) {
 
 
 #get_terms <- function(type, group, path) {
-get_terms <- function(type, group) {
+accepted_variables <- function(type, group) {
 	if (type == "records") {
 		trms <- get_variables("all")
 		if (is.null(trms)) {
@@ -108,8 +108,7 @@ get_terms <- function(type, group) {
 }
 
 
-
-get_accepted_values <- function(name) {
+accepted_values <- function(name) {
 	path <- system.file("terms", package="carobiner")
 	f <- file.path(path, "values", paste0("values_", name, ".csv"))
 	if (file.exists(f)) {

@@ -1,6 +1,6 @@
-\name{get_accepted_values}
+\name{accepted_values}
 
-\alias{get_accepted_values}
+\alias{accepted_values}
 
 \title{
 Get accepted values for a variable
@@ -12,7 +12,7 @@ Get the accepted values for a variable.
 
 
 \usage{
-get_accepted_values(name)
+accepted_values(name)
 }
  
 \arguments{
@@ -24,6 +24,6 @@ character
 }
 
 \examples{
-v <- get_accepted_values("fertilizer_type")
+v <- accepted_values("fertilizer_type")
 head(v)
 }

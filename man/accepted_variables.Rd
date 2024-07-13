@@ -1,6 +1,6 @@
-\name{get_terms}
+\name{accepted_values}
 
-\alias{get_terms}
+\alias{accepted_values}
 
 \title{
 Get accepted terms
@@ -11,7 +11,7 @@ Get a data.frame with accepted terms (variable names)
 }
 
 \usage{
-get_terms(type, group)
+accepted_values(type, group)
 }
  
 \arguments{

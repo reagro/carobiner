@@ -3,17 +3,6 @@
 # License GPL3
 
 
-get_more_data <- function(url, dataset_id, path, group) {
-	f <- basename(url)
-	path <- file.path(path, "data/raw", group, dataset_id, f)
-	for (i in seq_along(f)) {
-		if (!file.exists(path[i])) {
-			utils::download.file(path[i], f[i], mode="wb")
-		}
-	}
-	f
-}
-
 
 write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NULL, options=NULL) {
 
@@ -113,7 +102,7 @@ get_function <- function(name, path, group="") {
 
 
 sort_by_terms <- function(x, type, group) {
-	trms <- get_terms(type, ifelse(group == "doi", "", group))
+	trms <- accepted_variables(type, ifelse(group == "doi", "", group))
 	trms <- trms$name[trms$name %in% names(x)]
 	x[, trms]
 }
@@ -143,11 +132,14 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 		}
 		zipflags <- "-jq9"		
 	}
+	
+	fgrp <- dirname(fff)
+
 	for (grp in grps) {
 
 		wgroup <- ifelse(grp == "doi", "", paste0("_", grp))
 
-		ff <- file.path(path, "data", "clean", grep(paste0("^", grp), fff, value=TRUE))
+		ff <- file.path(path, "data", "clean", fff[fgrp == grp])
 		outft <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_terms.csv"))
 		if (file.exists(outft) && cache) {
 			ft <- file.info(outft)$mtime
@@ -166,7 +158,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 			y$reference <- gsub("\t", " ", y$reference)
 		}
 		
-		gterms <- get_terms("records", grp)
+		gterms <- accepted_variables("records", grp)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
 
 #		utils::write.csv(gterms, outft, row.names=FALSE)

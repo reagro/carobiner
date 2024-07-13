@@ -180,7 +180,7 @@ check_cropyield <- function(x, answ) {
 				paste0("crop yield too low (tons not kg?): ", bad))
 		return(answ)
 	}
-	trms <- get_accepted_values("crop")
+	trms <- accepted_values("crop")
 	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
 	trms <- stats::na.omit(trms)
 	if (nrow(trms) == 0) return(answ)
@@ -352,7 +352,7 @@ check_d_terms <- function(answ, x, type, group, check) {
 				paste0("whitespace in variable: ", b))
 	}
 	nms <- names(x)
-	trms <- get_terms(type, group)
+	trms <- accepted_variables(type, group)
 
 	xnms <- nms[!(nms %in% trms$name)]
 	if (length(xnms) > 0) {
@@ -374,7 +374,7 @@ check_d_terms <- function(answ, x, type, group, check) {
 	voc <- voc[voc$name %in% nms, ]
 	if (nrow(voc) > 0) {
 		for (i in 1:nrow(voc)) {
-			accepted <- get_accepted_values(voc$vocabulary[i])[,1]
+			accepted <- accepted_values(voc$vocabulary[i])[,1]
 			provided <- unique(x[, voc$name[i]])
 			if (voc$required[i] != "yes") {
 				provided <- stats::na.omit(provided)
