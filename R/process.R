@@ -277,7 +277,8 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		if (nrow(have) > 0) {
 			fr <- file.path(path, "data", "clean", have$group, have$URI)
 			fr <- c(paste0(fr, ".csv"), paste0(fr, "_meta.csv"))
-			file.remove(fr)
+			fr <- fr[file.exists(fr)]
+			if (length(fr) > 0) file.remove(fr)
 		}
 
 		csv_mtime <- data.frame(uri=gsub("_meta.csv$", "", basename(fcsv)), csv=file.mtime(fcsv))
