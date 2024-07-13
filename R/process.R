@@ -269,10 +269,10 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		have_R = do.call(rbind, sapply(strsplit(gsub("\\.R$", "", ffR, ignore.case = TRUE),  
 				paste0(file.path(base), "/")), 
 				\(i) strsplit(tolower(i[2]), "/"))) |> data.frame()
-		colnames(have_R) <- c("group", "uri")
+		colnames(have_R) <- c("group", "URI")
 		have_R$script <- TRUE
-		have_csv$uri <- tolower(have_csv$URI)
-		have <- merge(have_csv, have_R, by=c("group", "uri"), all.x=TRUE)
+		have_csv$URI <- tolower(have_csv$URI)
+		have <- merge(have_csv, have_R, by=c("group", "URI"), all.x=TRUE)
 		have <- have[is.na(have$script), ]
 		if (nrow(have) > 0) {
 			fr <- file.path(path, "data", "clean", have$group, have$URI)

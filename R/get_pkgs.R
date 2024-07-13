@@ -1,7 +1,7 @@
 
 
 get_packages <- function(path, group="") {
-	libfun1 <- function(x) {
+	notused_libfun1 <- function(x) {
 		d <- readLines(x, warn=FALSE)
 		i <- grep('^library\\(', d)
 		pkgs <- d[unique(i)]
@@ -47,10 +47,10 @@ get_packages <- function(path, group="") {
 	}
 
 	ff <- list.files(file.path(path, "scripts", group), pattern='\\.R$', full.names=TRUE, ignore.case=TRUE)
-	pkgs1 <- unique(unlist(sapply(ff, libfun1)))
+	#pkgs1 <- unique(unlist(sapply(ff, libfun1)))
 	pkgs2 <- unique(unlist(sapply(ff, libfun2)))
 	
-	pkgs <- unique(c(pkgs1, pkgs2, "terra", "geodata", "data.table", "writexl", "readxl", "jsonlite", "httr", "stringr", "kableExtra", "leaflet", "summarytools"))	
+	pkgs <- unique(c(pkgs2, "terra", "geodata", "data.table", "writexl", "readxl", "jsonlite", "httr", "stringr"))	
 	ipkgs <- rownames(utils::installed.packages())
 	for (pk in pkgs) {
 	  if (!(pk %in% ipkgs)) {
