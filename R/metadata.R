@@ -64,7 +64,7 @@ get_license <- function(x) {
 					return("CIMMYT license")
 				}
 			}
-			if (grepl("/by/4.0/", trms)) {
+			if (grepl("by.4.0", trms)) {
 				return("CC-BY-4.0")
 			}
   			gg <- regmatches(g, gregexpr('Creative (.+?) license', g, ignore.case=TRUE)) |> unlist()

@@ -260,6 +260,8 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	fcsv <- list.files(file.path(path, "data", "clean", group), pattern="_meta.csv$", full.names=TRUE, recursive=TRUE)
 	if (length(fcsv) == 0) cache = FALSE
 	
+	## should loop over groups to avoid mixing in removed groups 
+	
 	if (cache) {
 		### remove compiled data that is no longer in the group
 		have_csv = do.call(rbind, sapply(strsplit(gsub("_meta.csv$", "", fcsv, ignore.case = TRUE), 

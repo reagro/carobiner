@@ -10,3 +10,4 @@ varieties_maize,crop;soil;maize,maize variety trials
 varieties_wheat,crop;soil;wheat,wheat variety trials
 weather,weather,weather data
 weeds,crop;soil,weed management experiments
+long_term,crop;soil,long term experiments
