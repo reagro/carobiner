@@ -1,7 +1,5 @@
 name,include,description
 agronomy,crop;soil,"agronomy experiments (conservation ag, intercropping)"
-fertilizer,crop;soil,crop response to fertilizer exeriments and survey data
-growth_analysis,crop;soil,crop growth analysis (measurements of biomass and LAI over time during the experiment); useful for similation models
 pest_disease,crop;soil,"crop pest, disease or weed management trials"
 soil_samples,soil,soil sampling data
 survey,crop;soil;survey,"household, agronomic and crop-cut surveys"
@@ -9,5 +7,3 @@ varieties,crop;soil,crop variety trials (not wheat or maize)
 varieties_maize,crop;soil;maize,maize variety trials
 varieties_wheat,crop;soil;wheat,wheat variety trials
 weather,weather,weather data
-weeds,crop;soil,weed management experiments
-long_term,crop;soil,long term experiments
