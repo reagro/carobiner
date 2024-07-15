@@ -320,27 +320,38 @@ http_address <- function(uri) {
 
 .download_files <- function(path, files, cache) {
 
-	outf <- file.path(path, basename(files))
+	outf <- gsub("%20", "_", basename(files))
+	outf <- file.path(path, outf)
 	oks <- rep(1, length(outf))
 
 	if (cache && file.exists(file.path(path, "ok.txt"))) {
 		have <- file.exists(outf)
 		if (all(have)) {
-			return(outf)
+			outf <- list.files(path, full.names=TRUE)
+			return(grep("ok.txt|\\.zip$|\\.pdf", outf, value=TRUE, invert=TRUE))
 		}
 		oks[have] <- 0
 	} 
 
 	for (i in 1:length(files)) {
 		if (oks[i] == 1) {
-			oks[i] <- utils::download.file(files[i], outf[i], mode="wb", silent=TRUE)
+			oks[i] <- utils::download.file(files[i], outf[i], mode="wb", quiet=TRUE)
 		}
+	}
+	
+	zf <- grep("\\.zip$", outf, value=TRUE)
+	if (length(zf) > 0) {
+		for (z in zf) {
+			.dataverse_unzip(z, path, TRUE)
+		}
+		outf <- list.files(path, full.names=TRUE)
 	}
 	
 	if (all(oks == 0)) {
 		writeLines(c(utils::timestamp(quiet=TRUE), files), file.path(path, "ok.txt"))
 	}
-	outf
+
+	return(grep("ok.txt|\\.zip$|\\.pdf", outf, value=TRUE, invert=TRUE))
 } 
 
 .copy_files <- function(path, files, cache) {
@@ -373,8 +384,11 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	path <- file.path(path, "data/raw", group)
 	unzip=TRUE
 	
-	uname <- simple_uri(uri)
-
+	if (is.null(files)) {	
+		uname <- simple_uri(uri)
+	} else {
+		uname <- gsub("/|:", "_", uri)
+	}
 	#uripath=TRUE
 	#if (uripath) 
 	path <- file.path(path, uname)
@@ -386,10 +400,13 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	dir.create(path, FALSE, TRUE)
 
 	if (!is.null(files)) {
-		if (all(grepl("^http", files))) {
+		http <- grepl("^http", files)
+		if (all(http)) {
 			return(.download_files(path, files, cache))
-		} else {
+		} else if (all(!http)) {
 			return(.copy_files(path, files, cache))
+		} else {
+			stop("Either all files, or no files should start with 'http'" )
 		}
 	}
 
