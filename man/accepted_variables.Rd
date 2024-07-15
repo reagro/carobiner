@@ -1,17 +1,17 @@
-\name{accepted_values}
+\name{accepted_variables}
 
-\alias{accepted_values}
+\alias{accepted_variables}
 
 \title{
-Get accepted terms
+Get accepted variables
 }
 
 \description{
-Get a data.frame with accepted terms (variable names)
+Get a data.frame with accepted variable names
 }
 
 \usage{
-accepted_values(type, group)
+accepted_variables(type, group)
 }
  
 \arguments{

@@ -61,12 +61,12 @@ simple_uri <- function(uri, reverse=FALSE) {
 					for (zz in zipzip) {
 						utils::unzip(zz, exdir = path)
 					}
-					zf <- c(zf, zipzip) 
+					allf <- c(allf, utils::unzip(zz, list=TRUE))
 				}
 			}
 		}
 	}
-	zf <- grep("\\.pdf$|_files.txt$", allf, value=TRUE, invert=TRUE)
+	zf <- grep("\\.pdf$|_files.txt$|\\.zip$", allf, value=TRUE, invert=TRUE)
 	file.path(path, zf)
 }
 
@@ -171,6 +171,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 			fext <- archive::archive_extract(f, path)
 			ff <- c(ff, file.path(path, fext))
 		}
+		ff <- ff[!(ff %in% f7)]
 	}
 	writeLines(c(utils::timestamp(quiet=TRUE), uu), file.path(path, "ok.txt"))
 

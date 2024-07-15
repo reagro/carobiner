@@ -164,7 +164,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 #		utils::write.csv(gterms, outft, row.names=FALSE)
 		data.table::fwrite(gterms, outft, row.names=FALSE)
 		if (split_license) {
-			xx <- x[grepl("CC", x[,"license"]), ]
+			xx <- x[grepl("CC|ETALAB", x[,"license"]), ]
 			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
 			if (nrow(xx) > 0) {
 				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-cc.csv"))

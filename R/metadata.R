@@ -71,7 +71,7 @@ get_license <- function(x) {
 			if (any(tolower(gg) == "creative commons attribution 4.0 international license")) {
 				gg <- "CC-BY-4.0"
 			} 
-			return(gg[1])
+			return(	gsub("-DEED.AST", "", gg[1]) )
 		} else {
 			trm <- g[1]
 			trm <- gsub("http://", "", trm)
@@ -107,7 +107,8 @@ get_license <- function(x) {
 		lic <- gsub(" ", "-", gsub("CC-ZERO", "CC-0", lic))
 	}
 	if (is.null(lic)) lic <- "unknown"
-	lic
+	
+	gsub("-DEED.AST", "", lic)
 }
 
 
