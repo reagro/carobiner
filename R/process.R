@@ -287,12 +287,12 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 
 	
 		R_mtime <- data.frame(uri=tolower(gsub(".R$|.r$", "", basename(ffR))), 
-								R=file.mtime(ffR), id=1:length(ffR))
+								R=file.mtime(ffR), id=1:length(ffR), files=ffR)
 		csv_mtime$uri <- tolower(csv_mtime$uri)
 
 		mtime <- merge(csv_mtime, R_mtime, by="uri", all.y=TRUE)
 		keep <- which(is.na(mtime$csv) | (mtime$R > mtime$csv))
-		ffR <- ffR[mtime$id[keep]]
+		ffR <- mtime$files[mtime$id[keep]]
 		if (length(ffR) == 0) {
 			return(invisible(TRUE))
 		}
