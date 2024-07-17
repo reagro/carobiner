@@ -283,14 +283,15 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 			if (length(fr) > 0) file.remove(fr)
 		}
 
-		csv_mtime <- data.frame(uri=gsub("_meta.csv$", "", basename(fcsv)), csv=file.mtime(fcsv))
+		csv_group <- gsub("/", "", gsub(file.path(path, "data", "clean"), "", dirname(fcsv)))
+		csv_mtime <- data.frame(uri=gsub("_meta.csv$", "", basename(fcsv)), csv=file.mtime(fcsv), group=csv_group)
 
-	
+		R_group <- gsub("/", "", gsub(file.path(path, "scripts"), "", dirname(ffR)))
 		R_mtime <- data.frame(uri=tolower(gsub(".R$|.r$", "", basename(ffR))), 
-								R=file.mtime(ffR), id=1:length(ffR), files=ffR)
+								R=file.mtime(ffR), id=1:length(ffR), files=ffR, group=R_group)
 		csv_mtime$uri <- tolower(csv_mtime$uri)
 
-		mtime <- merge(csv_mtime, R_mtime, by="uri", all.y=TRUE)
+		mtime <- merge(csv_mtime, R_mtime, by=c("group", "uri"), all.y=TRUE)
 		keep <- which(is.na(mtime$csv) | (mtime$R > mtime$csv))
 		ffR <- mtime$files[mtime$id[keep]]
 		if (length(ffR) == 0) {
