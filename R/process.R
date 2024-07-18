@@ -250,37 +250,41 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	}
 
 	base <- file.path(path, "scripts")
-	ffR <- list.files(file.path(base, group), pattern="R$", full.names=TRUE, recursive=TRUE)
+	ffR <- list.files(file.path(base, group), pattern="\\.R$", full.names=TRUE, recursive=TRUE)
 	ff_un <- grepl("^_", basename(ffR))
 	ffR <- ffR[!ff_un]
 	ffR <- ffR[!grepl("/_pending/", ffR)]
-	ffR <- ffR[!grepl("/_removed/", ffR)]
-	ffR <- ffR[basename(ffR) != "template.R"]
+	#ffR <- ffR[!grepl("/_removed/", ffR)]
+	#ffR <- ffR[basename(ffR) != "template.R"]
+
+	if (length(ffR) == 0) {
+		return(invisible(TRUE))
+	}
+
 
 	fcsv <- list.files(file.path(path, "data", "clean", group), pattern="_meta.csv$", full.names=TRUE, recursive=TRUE)
 	if (length(fcsv) == 0) cache = FALSE
 	
-	## should loop over groups to avoid mixing in removed groups 
-	
 	if (cache) {
-		### remove compiled data that is no longer in the group
-
-		have_csv <- data.frame(group = basename(dirname(fcsv)), 
-					URI=tolower(gsub("_meta.csv$", "", basename(fcsv), ignore.case = TRUE)),
-					csvfile = fcsv,
-					csvtime = file.mtime(fcsv),
-					data = TRUE) 
+		have_csv <- data.frame(
+			group = basename(dirname(fcsv)), 
+			URI=tolower(gsub("_meta.csv$", "", basename(fcsv), ignore.case = TRUE)),
+			csvfile = fcsv,
+			csvtime = file.mtime(fcsv),
+			data = TRUE) 
 					
-		have_R <- data.frame(group = basename(dirname(ffR)), 
-					URI= tolower(gsub("\\.R$", "", basename(ffR), ignore.case = TRUE)),
-					Rfile = ffR,
-					Rtime = file.mtime(ffR),
-					script = TRUE) 
+		have_R <- data.frame(
+			group = basename(dirname(ffR)), 
+			URI= tolower(gsub("\\.R$", "", basename(ffR), ignore.case = TRUE)),
+			Rfile = ffR,
+			Rtime = file.mtime(ffR),
+			script = TRUE) 
 
 		have <- merge(have_csv, have_R, by=c("group", "URI"), all=TRUE)
 
 		i <- which(is.na(have$script))
 		if (length(i) > 0) {
+			# remove compiled data for which there is no matching script
 			file.remove(have$csvfile[i])
 			file.remove(gsub("_meta", "", have$csvfile[i]))
 			have <- have[-i, ,drop=FALSE]
@@ -292,13 +296,13 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		if (length(ffR) == 0) {
 			return(invisible(TRUE))
 		}
+		
 	} else {
 		fcsv <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", full.names=TRUE, recursive=TRUE)
 		file.remove(fcsv)
 		fmsg <- list.files(file.path(path, "data", "messages", group), pattern="\\.csv$", recursive=TRUE, full.names=TRUE)
 		file.remove(fmsg)
 	}
-
 
 	ffR <- sort(ffR)
 	
