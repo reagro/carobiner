@@ -264,36 +264,31 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 	
 	if (cache) {
 		### remove compiled data that is no longer in the group
-		have_csv = do.call(rbind, sapply(strsplit(gsub("_meta.csv$", "", fcsv, ignore.case = TRUE), 
-				paste0(file.path(path, "data", "clean"), "/")), 
-				\(i) strsplit(i[2], "/"))) |> data.frame()
-		colnames(have_csv) <- c("group", "URI")
-		have_R = do.call(rbind, sapply(strsplit(gsub("\\.R$", "", ffR, ignore.case = TRUE),  
-				paste0(file.path(base), "/")), 
-				\(i) strsplit(tolower(i[2]), "/"))) |> data.frame()
-		colnames(have_R) <- c("group", "URI")
-		have_R$script <- TRUE
-		have_csv$URI <- tolower(have_csv$URI)
-		have <- merge(have_csv, have_R, by=c("group", "URI"), all.x=TRUE)
-		have <- have[is.na(have$script), ]
-		if (nrow(have) > 0) {
-			fr <- file.path(path, "data", "clean", have$group, have$URI)
-			fr <- c(paste0(fr, ".csv"), paste0(fr, "_meta.csv"))
-			fr <- fr[file.exists(fr)]
-			if (length(fr) > 0) file.remove(fr)
+
+		have_csv <- data.frame(group = basename(dirname(fcsv)), 
+					URI=tolower(gsub("_meta.csv$", "", basename(fcsv), ignore.case = TRUE)),
+					csvfile = fcsv,
+					csvtime = file.mtime(fcsv),
+					data = TRUE) 
+					
+		have_R <- data.frame(group = basename(dirname(ffR)), 
+					URI= tolower(gsub("\\.R$", "", basename(ffR), ignore.case = TRUE)),
+					Rfile = ffR,
+					Rtime = file.mtime(ffR),
+					script = TRUE) 
+
+		have <- merge(have_csv, have_R, by=c("group", "URI"), all=TRUE)
+
+		i <- which(is.na(have$script))
+		if (length(i) > 0) {
+			file.remove(have$csvfile[i])
+			file.remove(gsub("_meta", "", have$csvfile[i]))
+			have <- have[-i, ,drop=FALSE]
 		}
-
-		csv_group <- gsub("/", "", gsub(file.path(path, "data", "clean"), "", dirname(fcsv)))
-		csv_mtime <- data.frame(uri=gsub("_meta.csv$", "", basename(fcsv)), csv=file.mtime(fcsv), group=csv_group)
-
-		R_group <- gsub("/", "", gsub(file.path(path, "scripts"), "", dirname(ffR)))
-		R_mtime <- data.frame(uri=tolower(gsub(".R$|.r$", "", basename(ffR))), 
-								R=file.mtime(ffR), id=1:length(ffR), files=ffR, group=R_group)
-		csv_mtime$uri <- tolower(csv_mtime$uri)
-
-		mtime <- merge(csv_mtime, R_mtime, by=c("group", "uri"), all.y=TRUE)
-		keep <- which(is.na(mtime$csv) | (mtime$R > mtime$csv))
-		ffR <- mtime$files[mtime$id[keep]]
+		
+		keep <- which(is.na(have$data) | (have$Rtime > have$csvtime))
+		ffR <- have$Rfile[keep]
+		
 		if (length(ffR) == 0) {
 			return(invisible(TRUE))
 		}
