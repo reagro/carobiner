@@ -35,6 +35,8 @@ make_reports <- function(path, group="", cache=TRUE) {
 
 			gpath <- file.path(path, "/data/clean/", grp)
 			ff <- list.files(gpath, pattern="meta.csv$", full.names=TRUE)
+			ff <- grep("_nodata", ff, value=TRUE, invert=TRUE)
+			
 			if (length(ff) == 0) next
 			
 			outf <- gsub("_meta.csv", ".html", ff)

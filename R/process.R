@@ -6,9 +6,11 @@
 
 write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NULL, options=NULL) {
 
-	if (path=="ignore" & missing(metadata)) return(TRUE)
-
+	group <- metadata$group
+	check_group(group)
+	cleanuri <- metadata$dataset_id
 	stopifnot(nrow(metadata) == 1)
+
 
 	to_mem <- FALSE
 	if (is.null(path)) {
@@ -16,12 +18,24 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NUL
 		to_mem <- TRUE
 	}
 
-	group <- metadata$group
-	check_group(group)
+	if (!to_mem) {
+		dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 
-	cleanuri <- metadata$dataset_id
+		if (missing(records)) {
+			if (!grepl("_nodata$", cleanuri)) {
+				stop("records missing")
+			}
+			d <- data.frame(ignore=TRUE)
+			outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
+			write.csv(d, outf, row.names=FALSE)	
+			mf <- gsub(".csv$", "_meta.csv", outf)
+			utils::write.csv(metadata, mf, row.names=FALSE)
+			return(TRUE)
+		}
+	}
+	
 	stopifnot(all(records$dataset_id == cleanuri))
-
+	
 	if (nrow(records) > 0) {
 		dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
 		records$dataset_id <- metadata$dataset_id
@@ -71,7 +85,6 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NUL
 	}
 
 	
-	dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 #?	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
 	if (!is.null(id)) {
 		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, "-", id, ".csv"))
@@ -261,8 +274,9 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		return(invisible(TRUE))
 	}
 
-
 	fcsv <- list.files(file.path(path, "data", "clean", group), pattern="_meta.csv$", full.names=TRUE, recursive=TRUE)
+	fcsv <- gsub("_nodata", "", fcsv)
+	
 	if (length(fcsv) == 0) cache = FALSE
 	
 	if (cache) {
