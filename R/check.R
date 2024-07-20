@@ -172,7 +172,7 @@ check_cropyield <- function(x, answ) {
 	a <- suppressWarnings(
 			stats::aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
 		)
-	a <- a[a$yield < 100, ]
+	a <- a[which(a$yield < 100), ]
 	if (nrow(a) > 0) {
 		crops <- unique(a$crop)
 		bad <- paste(crops, collapse=", ")
