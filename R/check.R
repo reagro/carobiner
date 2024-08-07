@@ -360,13 +360,15 @@ check_d_terms <- function(answ, x, type, group, check) {
 				paste("unknown variables: ", paste(xnms, collapse=", ")))
 	}
 	
-	req <- trms[trms$required == "yes" | trms$required == group, "name"]
-	r <- req[!(req %in% nms)]
-	if (length(r) > 0) {
-		answ[nrow(answ)+1, ] <- c("required variable missing",
-				paste("required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
+	if (type != "timerecs") {
+		req <- trms[trms$required == "yes" | trms$required == group, "name"]
+		r <- req[!(req %in% nms)]
+		if (length(r) > 0) {
+			answ[nrow(answ)+1, ] <- c("required variable missing",
+					paste("required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
+		}
 	}
-
+	
 	nms <- nms[nms %in% trms$name]
 	trms <- trms[trms$name %in% nms, ]
 
@@ -407,7 +409,9 @@ check_d_terms <- function(answ, x, type, group, check) {
 		
 	}
 	
-	if (type=="records") {
+	if (type=="metadata") {
+		answ <- check_metadata(x, trms, answ)
+	} else {
 		answ <- check_datatypes(x[, nms], trms, answ)
 		if (check != "nogeo") {
 			answ <- check_lonlat(x, answ)	
@@ -415,14 +419,12 @@ check_d_terms <- function(answ, x, type, group, check) {
 		if (nrow(x) != nrow(unique(x))) {
 			answ[nrow(answ)+1, ] <- c("duplicates", "duplicate records detected")
 		}
-		if (!is.null(x$record_id)) {
+		if ((type == "records") & (!is.null(x$record_id))) {
 			if (nrow(x) != length(unique(x$record_id))) {
 				answ[nrow(answ)+1, ] <- c("duplicates", "duplicates in record_id")
 			}		
 		}
 		answ <- check_location_names(x, answ) 
-	} else {
-		answ <- check_metadata(x, trms, answ)
 	}
 	
 	answ
@@ -454,7 +456,7 @@ check_treatment <- function(answ, treatment, data_type, vars) {
 }
 
 
-check_terms <- function(metadata, records, group="", check="all") {
+check_terms <- function(metadata, records, timerecs=NULL, group="", check="all") {
 	answ <- data.frame(check="", msg="")[0,]
 	if (check == "none") {
 		return(answ)
@@ -469,6 +471,16 @@ check_terms <- function(metadata, records, group="", check="all") {
 	}
 	if (!missing(records)) {
 		answ <- check_d_terms(answ, records, "records", group=group, check=check)
+	}
+	if (!is.null(timerecs)) {
+		if (is.null(timerecs$record_id)) {
+			answ[nrow(answ)+1, ] <- c("record_id", "timerecs do not have record_id")			
+		} else if (is.null(records$record_id)) {
+			answ[nrow(answ)+1, ] <- c("record_id", "both 'records' and 'timerecs' must have a record_id")
+		} else if (any(!(timerecs$record_id %in% records$record_id))) {
+			answ[nrow(answ)+1, ] <- c("record_id", "timerecs record_id(s) not in records record_id")
+		}
+		answ <- check_d_terms(answ, timerecs, "timerecs", group=group, check=check)
 	}
 	answ
 }

@@ -179,7 +179,7 @@ simple_uri <- function(uri, reverse=FALSE) {
 }
 
 
-.download_ckan_files <- function(u, baseu, path, uname) {
+.download_ckan_files <- function(u, baseu, path, uname, overwrite=TRUE) {
 	pid <- unlist(strsplit(u, "dataset/"))[2]
 	uu <- paste0(baseu, "/api/3/action/package_show?id=", pid)
 	y <- httr::GET(uu)
@@ -194,10 +194,16 @@ simple_uri <- function(uri, reverse=FALSE) {
 	d <- js$result$resources
 	done <- TRUE
 	files <- ""[0]
+	i <- duplicated(tolower(d$name))
+	d$name[i] <- paste0(d$name[i], "_dup")
+	i <- duplicated(tolower(d$name))
+	d$name[i] <- paste0(d$name[i], "_2")
+	
 	for (i in 1:nrow(d)) {
 		u <- file.path(baseu, "dataset", d$package_id[i], "resource", d$id[i], "download", d$name[i])
 		#if (d$available[i] == "yes") { "active" ?
 		outf <- file.path(path, d$name[i])
+		if ((!overwrite) & file.exists(outf)) next
 		ok <- try(utils::download.file(d$url[i], outf, mode="wb", quiet=TRUE), silent=TRUE )
 		if (inherits(ok, "try-error")) {
 			print("cannot download")

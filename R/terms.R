@@ -68,7 +68,13 @@ get_variables <- function(group) {
 
 #get_terms <- function(type, group, path) {
 accepted_variables <- function(type, group) {
-	if (type == "records") {
+	if (type=="metadata") {
+		trms <- get_variables("metadata")
+		if (is.null(trms)) {
+			stop("Please first install the standard terms with 'carobiner::update_terms()'", call. = FALSE)
+		}
+
+	} else { #"records", "timerecs"
 		trms <- get_variables("all")
 		if (is.null(trms)) {
 			stop("Please first install the standard terms with 'carobiner::update_terms()'", call. = FALSE)
@@ -85,24 +91,6 @@ accepted_variables <- function(type, group) {
 				trms <- rbind(trms, add)
 			}
 		}
-#		if (group != "") {
-#			trms2 <- get_variables(group)
-#			if (!is.null(trms2)) {
-#				trms <- rbind(trms, trms2)
-#				tab <- table(trms[,1])
-#				if (any(tab > 1)) {
-#					print(paste("duplicated terms:", names(tab[tab>1])))
-#				}
-#			}
-#		}
-	} else if (type=="metadata") {
-		trms <- get_variables("metadata")
-		if (is.null(trms)) {
-			stop("Please first install the standard terms with 'carobiner::update_terms()'", call. = FALSE)
-		}
-
-	} else {
-		stop("invalid 'type' argument; should be 'records' or 'metadata'") 
 	}
 	trms
 }

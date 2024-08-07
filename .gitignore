@@ -21,3 +21,4 @@ vignettes/*.pdf
 rsconnect/
 inst/terms/values/
 inst/terms/variables/
+inst/gadm/
