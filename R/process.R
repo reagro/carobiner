@@ -4,7 +4,7 @@
 
 
 
-write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NULL, options=NULL) {
+write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, options=NULL) {
 
 	group <- metadata$group
 	check_group(group)
@@ -78,31 +78,29 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, id=NUL
 	
 	records <- sort_by_terms(records, "records", group)
 	metadata <- sort_by_terms(metadata, "metadata", group)
-
+	timerecs <- sort_by_terms(timerecs, "timerecs", group)
 
 	if (to_mem) {
-		return(list(data=records, meta=metadata))
+		return(list(meta=metadata, data=records, long=timerecs))
+	}
+	
+	outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
+	dir.create(dirname(outf), FALSE, FALSE)
+	data.table::fwrite(records, outf, row.names=FALSE)
+
+	if (!is.null(timerecs)) {
+		outfw <- file.path(path, "data", "clean", group, paste0(cleanuri, "_long.csv"))
+		data.table::fwrite(timerecs, outfw, row.names=FALSE)
 	}
 
-	
-#?	dir.create(file.path(path, "data", "other"), FALSE, FALSE)
-	if (!is.null(id)) {
-		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, "-", id, ".csv"))
-	} else {
-		outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
+	if (!is.null(wth)) {
+		wthf <- file.path(path, "data", "clean", group, paste0(cleanuri, "_wth.csv"))
+		data.table::fwrite(wth, wthf, row.names=FALSE)
 	}
-	dir.create(dirname(outf), FALSE, FALSE)
-#	utils::write.csv(records, outf, row.names=FALSE)
-	data.table::fwrite(records, outf, row.names=FALSE)
-	
+
 	mf <- gsub(".csv$", "_meta.csv", outf)
-#	utils::write.csv(metadata, mf, row.names=FALSE)
 	data.table::fwrite(metadata, mf, row.names=FALSE)
 	
-# Update todo/to-do.csv list
-# RH: perhaps too much to run this for each dataset 
-#	update_todo(path)
-
 	TRUE
 }
 

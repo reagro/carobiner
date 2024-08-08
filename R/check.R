@@ -348,10 +348,15 @@ check_d_terms <- function(answ, x, type, group, check) {
 	}
 	if (any(bad)) {
 		b <- paste0(colnames(x)[bad], collapse= ", ")
-		answ[nrow(answ)+1, ] <- c("whitespace", 
-				paste0("whitespace in variable: ", b))
+		answ[nrow(answ)+1, ] <- c("whitespace", paste0("whitespace in variable: ", b))
 	}
 	nms <- names(x)
+	tnms <- table(nms)
+	if (any(tnms>1)) {
+		tnms <- paste(tnms[tnms>1], collapse=", ")
+		answ[nrow(answ)+1, ] <- c("duplicates", paste0("duplicate variable names: ", tnms))		
+	}
+	
 	trms <- accepted_variables(type, group)
 
 	xnms <- nms[!(nms %in% trms$name)]
@@ -481,6 +486,13 @@ check_terms <- function(metadata, records, timerecs=NULL, group="", check="all")
 			answ[nrow(answ)+1, ] <- c("record_id", "timerecs record_id(s) not in records record_id")
 		}
 		answ <- check_d_terms(answ, timerecs, "timerecs", group=group, check=check)
+		cns <- c(colnames(records), colnames(timerecs))
+		cns <- cns[!(cns %in% c("record_id"))]  # date?
+		cns <- table(cns)
+		if (any(cns>1)) {
+			dups <- paste(names(cns[cns>1]), collapse=", ")
+			answ[nrow(answ)+1, ] <- c("duplicates", paste("duplicate variables in records and timerecs:", dups))
+		}
 	}
 	answ
 }
