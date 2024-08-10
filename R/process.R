@@ -182,15 +182,23 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 		if (split_license) {
 			xx <- x[grepl("CC|ETALAB", x[,"license"]), ]
 			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
-			zz <- z[z$dataset_id %in% xx[, "dataset_id"], ]
 			if (nrow(xx) > 0) {
 				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-cc.csv"))
 				#utils::write.csv(xx, outmf, row.names=FALSE)
 				data.table::fwrite(xx, outmf, row.names=FALSE)
 				outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-cc.csv"))
 				data.table::fwrite(yy, outff, row.names=FALSE)
-				outzf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_long-cc.csv"))
-				data.table::fwrite(zz, outzf, row.names=FALSE)
+				if (length(z) > 0) {
+					zz <- z[z$dataset_id %in% xx[, "dataset_id"], ]
+					if (nrow(zz) > 0) {
+						outzf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_long-cc.csv"))
+						data.table::fwrite(zz, outzf, row.names=FALSE)
+					} else {
+						outzf <- NULL
+					}
+				} else {
+					outzf <- NULL	
+				}
 				if (zip) {
 					fzip <- gsub(".csv$", ".zip", outff)
 					if (file.exists(fzip)) file.remove(fzip)
@@ -206,9 +214,10 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 		data.table::fwrite(x, outmf, row.names=FALSE)
 		outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
 		data.table::fwrite(y, outff, row.names=FALSE)
-		outwf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_long.csv"))
-		data.table::fwrite(z, outwf, row.names=FALSE)
-
+		if (length(z) > 0) {
+			outwf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_long.csv"))
+			data.table::fwrite(z, outwf, row.names=FALSE)
+		}
 		if (zip) {
 			fzip <- gsub(".csv$", ".zip", outff)
 			if (file.exists(fzip)) file.remove(fzip)
