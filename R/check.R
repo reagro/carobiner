@@ -487,7 +487,7 @@ check_terms <- function(metadata, records, timerecs=NULL, group="", check="all")
 		}
 		answ <- check_d_terms(answ, timerecs, "timerecs", group=group, check=check)
 		cns <- c(colnames(records), colnames(timerecs))
-		cns <- cns[!(cns %in% c("record_id"))]  # date?
+		cns <- cns[!(cns %in% c("dataset_id", "record_id"))]  # date?
 		cns <- table(cns)
 		if (any(cns>1)) {
 			dups <- paste(names(cns[cns>1]), collapse=", ")
