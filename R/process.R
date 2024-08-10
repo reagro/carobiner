@@ -158,7 +158,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 			if (all(fftime < ft)) next
 		}
 
-		print(group)
+		print(grp)
 
 		mi <- grepl("_meta.csv$", ff)
 		li <- grepl("_long.csv$", ff)
