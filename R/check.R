@@ -356,7 +356,7 @@ check_d_terms <- function(answ, x, type, group, check) {
 		tnms <- paste(tnms[tnms>1], collapse=", ")
 		answ[nrow(answ)+1, ] <- c("duplicates", paste0("duplicate variable names: ", tnms))		
 	}
-	
+
 	trms <- accepted_variables(type, group)
 
 	xnms <- nms[!(nms %in% trms$name)]
@@ -364,8 +364,13 @@ check_d_terms <- function(answ, x, type, group, check) {
 		answ[nrow(answ)+1, ] <- c("unknown variables", 
 				paste("unknown variables: ", paste(xnms, collapse=", ")))
 	}
-	
-	if (type != "timerecs") {
+
+	if (type == "weather") {
+		if (!("date" %in% nms)) {
+			answ[nrow(answ)+1, ] <- c("required variable missing",
+					paste("required", type, "variable name(s) missing: ", paste(r, collapse=", ")))
+		}
+	} else if (type != "timerecs") {
 		req <- trms[trms$required == "yes" | trms$required == group, "name"]
 		r <- req[!(req %in% nms)]
 		if (length(r) > 0) {
@@ -461,7 +466,7 @@ check_treatment <- function(answ, treatment, data_type, vars) {
 }
 
 
-check_terms <- function(metadata, records, timerecs=NULL, group="", check="all") {
+check_terms <- function(metadata, records, timerecs=NULL, wth=NULL, group="", check="all") {
 	answ <- data.frame(check="", msg="")[0,]
 	if (check == "none") {
 		return(answ)
@@ -493,6 +498,12 @@ check_terms <- function(metadata, records, timerecs=NULL, group="", check="all")
 			dups <- paste(names(cns[cns>1]), collapse=", ")
 			answ[nrow(answ)+1, ] <- c("duplicates", paste("duplicate variables in records and timerecs:", dups))
 		}
+	}
+	if (!is.null(wth)) {
+		if (is.null(wth$date)) {
+			answ[nrow(answ)+1, ] <- c("weather", "weather data does not have variable 'date'")			
+		}
+		answ <- check_d_terms(answ, wth, "weather", group="weather", check=check)
 	}
 	answ
 }

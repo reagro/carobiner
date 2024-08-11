@@ -70,10 +70,13 @@ get_variables <- function(group) {
 accepted_variables <- function(type, group) {
 	if (type=="metadata") {
 		trms <- get_variables("metadata")
+	} else if (type=="weather") {
+		trms <- get_variables("all")
 		if (is.null(trms)) {
 			stop("Please first install the standard terms with 'carobiner::update_terms()'", call. = FALSE)
 		}
-
+		add <- get_variables("weather")
+		trms <- rbind(trms, add)
 	} else { #"records", "timerecs"
 		trms <- get_variables("all")
 		if (is.null(trms)) {

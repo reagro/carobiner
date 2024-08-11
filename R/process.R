@@ -13,6 +13,9 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, option
 	if (!is.null(timerecs)) {
 		timerecs$dataset_id <- cleanuri
 	}
+	if (!is.null(wth)) {
+		wth$dataset_id <- cleanuri
+	}
 
 	to_mem <- FALSE
 	if (is.null(path)) {
@@ -40,7 +43,7 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, option
 		dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
 		records$dataset_id <- metadata$dataset_id
 		opt <- options("carobiner_check")
-		answ <- carobiner:::check_terms(metadata, records, timerecs, group, check=opt)	
+		answ <- carobiner:::check_terms(metadata, records, timerecs, wth, group, check=opt)	
 		fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
 
 		if (!to_mem) {
