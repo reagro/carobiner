@@ -41,6 +41,13 @@ simple_uri <- function(uri, reverse=FALSE) {
 }
 
 
+filter_files <- function(x) { 
+	x <- grep("\\.json$|^ok\\.txt$|\\.pdf$|_files.txt$|\\.zip$|\\.doc$|\\.docx$", x, value=TRUE, invert=TRUE)
+	# remove opened excel files
+	grep("/~$", x, fixed=TRUE, invert=TRUE, value=TRUE)
+}
+
+
 
 .dataverse_unzip <- function(zipf, path, unzip) {
 	allf <- NULL
@@ -66,8 +73,8 @@ simple_uri <- function(uri, reverse=FALSE) {
 			}
 		}
 	}
-	zf <- grep("\\.pdf$|_files.txt$|\\.zip$", allf, value=TRUE, invert=TRUE)
-	file.path(path, zf)
+	ff <- filter_files(allf) 
+	file.path(path, ff)
 }
 
 
@@ -334,7 +341,7 @@ http_address <- function(uri) {
 		have <- file.exists(outf)
 		if (all(have)) {
 			outf <- list.files(path, full.names=TRUE)
-			return(grep("ok.txt|\\.zip$|\\.pdf", outf, value=TRUE, invert=TRUE))
+			return(filter_files(outf)) 
 		}
 		oks[have] <- 0
 	} 
@@ -357,7 +364,7 @@ http_address <- function(uri) {
 		writeLines(c(utils::timestamp(quiet=TRUE), files), file.path(path, "ok.txt"))
 	}
 
-	return(grep("ok.txt|\\.zip$|\\.pdf", outf, value=TRUE, invert=TRUE))
+	filter_files(outf) 
 } 
 
 .copy_files <- function(path, files, cache) {
@@ -419,12 +426,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 
 	if (cache && file.exists(file.path(path, "ok.txt"))) {
 		ff <- list.files(path, full.names=TRUE, recursive=TRUE)
-		ff <- ff[grep("_files.txt$|\\.json$|\\.pdf$|\\.doc$|\\.docx$|\\.zip$", ff, invert=TRUE)]
-		ff <- ff[basename(ff) != "ok.txt"]
-
-		# remove opened excel files
-		ff[grep("/~$", ff, fixed=TRUE, invert=TRUE)]
-		return(ff)
+		return(filter_files(ff))
 	}
 	
 	zipf <- file.path(path, paste0(uname, ".zip"))
@@ -470,9 +472,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 		ff <- .download_dataverse_files(u, baseu, path, uname, domain, protocol, unzip, zipf)
 	}
 	
-	# remove opened excel files
-	i <- grep("/~$", ff, fixed=TRUE, invert=TRUE)
-	ff[i]
+	filter_files(ff)
 }
 
 # uri <- "doi:10.5061/dryad.pj76g30"

@@ -220,6 +220,8 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 		if (length(z) > 0) {
 			outwf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_long.csv"))
 			data.table::fwrite(z, outwf, row.names=FALSE)
+		} else {
+			outwf <- NULL
 		}
 		if (zip) {
 			fzip <- gsub(".csv$", ".zip", outff)
