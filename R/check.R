@@ -384,7 +384,7 @@ check_d_terms <- function(answ, x, type, group, check) {
 
 	voc <- trms[!is.na(trms$vocabulary) & (trms$vocabulary != ""), ]
 	voc <- voc[voc$name %in% nms, ]
-	if (nrow(voc) > 0) {
+	if (NROW(voc) > 0) {
 		for (i in 1:nrow(voc)) {
 			accepted <- accepted_values(voc$vocabulary[i])[,1]
 			provided <- unique(x[, voc$name[i]])

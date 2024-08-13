@@ -1,40 +1,89 @@
 
+term_paths <- function(local_terms=NULL) {
+   list(
+	   git_path="reagro/terminag",
+       local_path= NULL
+   )
+}
+
+
 update_terms <- function(quiet=FALSE, force=FALSE) {
+
+    org <- term_paths()
+    if ((is.null(org$git_path)) & (is.null(org$local_path))) {
+		warn("terms paths are empty")
+		return(NULL)
+	}
+
 
 	p <- system.file("terms", package="carobiner")
 	dir.create(file.path(p, "variables"), FALSE, TRUE)
 	dir.create(file.path(p, "values"), FALSE, TRUE)
+	
+    if (!is.null(org$git_path)) {
+		burl <- file.path("https://api.github.com/repos", org$git_path)
+  	   	v <- readLines(file.path(burl, "commits/main"))
+		gsha <- jsonlite::fromJSON(v)$sha
 
-	v <- readLines("https://api.github.com/repos/reagro/terminag/commits/main")
-	gsha <- jsonlite::fromJSON(v)$sha
-
-	f <- file.path(p, "sha.txt")
-	if (!force && file.exists(f)) {
-		rsha <- readLines(f)
-		if (gsha == rsha) {
-			if (!quiet) message("terms were up to date")
-			return(invisible())
+		f <- file.path(p, "sha.txt")
+		continue <- TRUE
+		if (!force && file.exists(f)) {
+			rsha <- readLines(f)
+			if (gsha == rsha) {
+				if (!quiet) message("terms were up to date")
+				continue <- FALSE
+			}
+		}
+		if (continue) {
+			writeLines(gsha, file.path(p, "sha.txt"))	
+			req <- httr::GET(file.path(burl, "git/trees/main?recursive=1"))
+			httr::stop_for_status(req)
+			ff <- sapply(httr::content(req)$tree, \(i) i$path)
+			ff <- grep("\\.csv$", ff, value = TRUE)
+    		rurl <- file.path("https://raw.githubusercontent.com", org$git_path)
+			ff <- file.path(rurl, "main", ff)
+			i <- grepl("variables_", ff)
+			pva <- c("values", "variables")[i+1]
+			pva <- file.path(p, pva, basename(ff))
+			for (i in 1:length(ff)) {
+				utils::download.file(ff[i], pva[i], quiet=TRUE)
+			}
+			#gv <- readLines("https://raw.githubusercontent.com/reagro/terminag/main/version.txt", warn = FALSE)
+			#gv <- trimws(unlist(strsplit(gv[grep("version", gv)], "="))[2])
+			#f <- system.file("terms/version.txt", package="carobiner")
+			#if (!file.exist(f)) return(TRUE)
+			#rv <- readLines(f)
+			#rv <- trimws(unlist(strsplit(rv[grep("version", rv)], "="))[2])
 		}
 	}
-	writeLines(gsha, file.path(p, "sha.txt"))
+    if (!is.null(org$local_path)) {
+    	lf <- list.files(org$local_path) 
+		if (length(lf) > 0) {
+		   	pf <- list.files(p)
+			i <- grepl("variables_", pf)
+			pva <- c("values", "variables")[i+1]
+			pva <- file.path(p, pva, basename(ff))
+		   	add <- tolower(basename(lf)) %in% tolower(basename(pf))    
+			for (i in 1:length(lf)) {
+				if (add[i]) {
+					v1 <- read.csv(pf[i])
+					v2 <- read.csv(lf[i])
+					v <- NULL
+					v <- try(rbind(v1, v2))
+					if (!is.null(v)) write.csv(v, lf[i], row.names=FALSE)
+				} else {
+					file.copy(pf[i], pva[i], overwrite=TRUE)
+				}
+			}
 
-	req <- httr::GET("https://api.github.com/repos/reagro/terminag/git/trees/main?recursive=1")
-	httr::stop_for_status(req)
-	ff <- sapply(httr::content(req)$tree, \(i) i$path)
-	ff <- grep("\\.csv$", ff, value = TRUE)
-	ff <- file.path("https://raw.githubusercontent.com/reagro/terminag/main", ff)
-	i <- grepl("variables_", ff)
-	pva <- c("values", "variables")[i+1]
-	for (i in 1:length(ff)) {
-		utils::download.file(ff[i], file.path(p, pva[i], basename(ff[i])), quiet=TRUE)
+
+
+
+			if (any(!i)) {
+
+			}
+		}
 	}
-
-	#gv <- readLines("https://raw.githubusercontent.com/reagro/terminag/main/version.txt", warn = FALSE)
-	#gv <- trimws(unlist(strsplit(gv[grep("version", gv)], "="))[2])
-	#f <- system.file("terms/version.txt", package="carobiner")
-	#if (!file.exist(f)) return(TRUE)
-	#rv <- readLines(f)
-	#rv <- trimws(unlist(strsplit(rv[grep("version", rv)], "="))[2])
 
 	if (!quiet) message("terms were updated")
 	invisible()
