@@ -153,14 +153,18 @@ filter_files <- function(x) {
 		zipf <- NULL
 		while(TRUE) {
 #			print(paste("part", i)); utils::flush.console()
-			cs <- cumsum(f$originalFileSize)
+			if (!is.null(f$originalFileSize)) {
+				cs <- cumsum(f$originalFileSize)
+			} else {
+				cs <- cumsum(f$filesize)
+			}
 			k <- which (cs < 9000000)
 			if (length(k) == 0) k <- 1
 			files <- paste0(f$id[k], collapse = ",")
 			fu <- paste0(protocol, domain, "/api/access/datafiles/", files, "?format=original")
 			zipi <- file.path(path, paste0(uname, "_", i, ".zip"))
 			if (grepl("worldagroforestry", uu)  || grepl("cirad.fr", fu) || grepl("cipotato", fu)) {
-## temporary fix because WorldAgroFor https cert has expired
+## temporary fix for expired https certificates
 				utils::download.file(fu, zipi, quiet=TRUE, mode="wb", method="curl", extra="-k")
 			} else {
 				utils::download.file(fu, zipi, mode="wb", quiet=TRUE)
