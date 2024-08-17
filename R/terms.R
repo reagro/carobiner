@@ -18,7 +18,7 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 	p <- system.file("terms", package="carobiner")
 	dir.create(file.path(p, "variables"), FALSE, TRUE)
 	dir.create(file.path(p, "values"), FALSE, TRUE)
-	
+
     if (!is.null(org$git_path)) {
 		burl <- file.path("https://api.github.com/repos", org$git_path)
   	   	v <- readLines(file.path(burl, "commits/main"))
@@ -150,7 +150,7 @@ accepted_values <- function(name) {
 	path <- system.file("terms", package="carobiner")
 	f <- file.path(path, "values", paste0("values_", name, ".csv"))
 	if (file.exists(f)) {
-		utils::read.csv(f)	
+		utils::read.csv(f)
 	} else {
 		NULL
 	}
