@@ -2,14 +2,13 @@
 term_paths <- function(local_terms=NULL) {
    list(
 	   git_path="reagro/terminag",
-       local_path= NULL
+       local_path= local_terms
    )
 }
 
+update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 
-update_terms <- function(quiet=FALSE, force=FALSE) {
-
-    org <- term_paths()
+    org <- term_paths(local_terms=local_terms)
     if ((is.null(org$git_path)) & (is.null(org$local_path))) {
 		warn("terms paths are empty")
 		return(NULL)
@@ -57,23 +56,21 @@ update_terms <- function(quiet=FALSE, force=FALSE) {
 		}
 	}
     if (!is.null(org$local_path)) {
-    	lf <- list.files(org$local_path) 
+    	lf <- list.files(org$local_path, recursive = T) 
 		if (length(lf) > 0) {
-		   	pf <- list.files(p)
-			i <- grepl("variables_", pf)
-			pva <- c("values", "variables")[i+1]
-			pva <- file.path(p, pva, basename(ff))
-		   	add <- tolower(basename(lf)) %in% tolower(basename(pf))    
+		   	pf <- list.files(p, recursive = T)
 			for (i in 1:length(lf)) {
-				if (add[i]) {
-					v1 <- read.csv(pf[i])
-					v2 <- read.csv(lf[i])
-					v <- NULL
-					v <- try(rbind(v1, v2))
-					if (!is.null(v)) write.csv(v, lf[i], row.names=FALSE)
-				} else {
-					file.copy(pf[i], pva[i], overwrite=TRUE)
-				}
+			  if (basename(lf[i]) %in% basename(pf)) {
+			    v1 <- read.csv(file.path(p, pf[grepl(basename(lf[i]), pf)]))
+			    v2 <- read.csv(file.path(org$local_path, lf[i]))
+			    v <- NULL
+			    v <- try(rbind(v1, v2))
+			    if (!is.null(v)) write.csv(v, file.path(p, pf[i]), row.names=FALSE)
+			  } else {
+			    nt <- file.path(org$local_path, lf[i])
+			    ot <- file.path(p, lf[i])
+			    file.copy(nt, ot, overwrite=FALSE)
+			  }
 			}
 
 
@@ -88,6 +85,7 @@ update_terms <- function(quiet=FALSE, force=FALSE) {
 	if (!quiet) message("terms were updated")
 	invisible()
 }
+
 
 
 #get_groups <- function(path) {
