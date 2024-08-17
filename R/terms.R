@@ -33,6 +33,7 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 				continue <- FALSE
 			}
 		}
+		git_updated <- FALSE
 		if (continue) {
 			writeLines(gsha, file.path(p, "sha.txt"))	
 			req <- httr::GET(file.path(burl, "git/trees/main?recursive=1"))
@@ -47,6 +48,7 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 			for (i in 1:length(ff)) {
 				utils::download.file(ff[i], pva[i], quiet=TRUE)
 			}
+			git_updated <- TRUE
 			#gv <- readLines("https://raw.githubusercontent.com/reagro/terminag/main/version.txt", warn = FALSE)
 			#gv <- trimws(unlist(strsplit(gv[grep("version", gv)], "="))[2])
 			#f <- system.file("terms/version.txt", package="carobiner")
@@ -56,28 +58,26 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 		}
 	}
     if (!is.null(org$local_path)) {
-    	lf <- list.files(org$local_path, recursive = T) 
+    	lf <- list.files(org$local_path, recursive = TRUE) 
 		if (length(lf) > 0) {
-		   	pf <- list.files(p, recursive = T)
+		   	pf <- list.files(p, recursive = TRUE)
 			for (i in 1:length(lf)) {
 			  if (basename(lf[i]) %in% basename(pf)) {
 			    v1 <- read.csv(file.path(p, pf[grepl(basename(lf[i]), pf)]))
 			    v2 <- read.csv(file.path(org$local_path, lf[i]))
 			    v <- NULL
 			    v <- try(rbind(v1, v2))
-			    if (!is.null(v)) write.csv(v, file.path(p, pf[i]), row.names=FALSE)
+			    if (!is.null(v)) {
+					#to avoid binding local multiple times if not git updated
+					#not in other cases to trigger a warning when the terms are used 
+					if (!git_updated) v <- unique(v)  
+					write.csv(v, file.path(p, lf[i]), row.names=FALSE)
+				}
 			  } else {
 			    nt <- file.path(org$local_path, lf[i])
 			    ot <- file.path(p, lf[i])
-			    file.copy(nt, ot, overwrite=FALSE)
+			    file.copy(nt, ot, overwrite=TRUE)
 			  }
-			}
-
-
-
-
-			if (any(!i)) {
-
 			}
 		}
 	}
