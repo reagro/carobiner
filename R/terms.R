@@ -63,8 +63,8 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 		   	pf <- list.files(p, recursive = TRUE)
 			for (i in 1:length(lf)) {
 			  if (basename(lf[i]) %in% basename(pf)) {
-			    v1 <- read.csv(file.path(p, pf[grepl(basename(lf[i]), pf)]))
-			    v2 <- read.csv(file.path(org$local_path, lf[i]))
+			    v1 <- utils::read.csv(file.path(p, pf[grepl(basename(lf[i]), pf)]))
+			    v2 <- utils::read.csv(file.path(org$local_path, lf[i]))
 			    v <- NULL
 			    v <- try(rbind(v1, v2))
 			    if (!is.null(v)) {
