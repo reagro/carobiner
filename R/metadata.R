@@ -15,7 +15,11 @@ get_metadata <- function(cleanuri, path, group="", major=1, minor=0) {
 	jmajor <- x$data$latestVersion$versionNumber 
 	if (!is.null(jmajor)) {
 		jminor <- x$data$latestVersion$versionMinorNumber 
-		if (jmajor != major) stop(paste("different major version", jmajor, "for", cleanuri), call.=FALSE)
+		if (jmajor > major) {
+		  warning(paste("using newer major version", jmajor, "for", cleanuri), call.=FALSE)
+		} else if (jmajor < major) {
+		  warning(paste("wrong major version in script", jmajor, "for", cleanuri), call.=FALSE)
+		}
 		if (jminor != minor) warning(paste("different minor version", jminor, "for", cleanuri), call.=FALSE)
 	} else { # ckan
 		v <- x$result$version
