@@ -483,16 +483,27 @@ check_terms <- function(metadata, records, timerecs=NULL, wth=NULL, group="", ch
 		answ <- check_d_terms(answ, records, "records", group=group, check=check)
 	}
 	if (!is.null(timerecs)) {
-		if (is.null(timerecs$record_id)) {
-			answ[nrow(answ)+1, ] <- c("record_id", "timerecs do not have record_id")			
-		} else if (is.null(records$record_id)) {
-			answ[nrow(answ)+1, ] <- c("record_id", "both 'records' and 'timerecs' must have a record_id")
-		} else if (any(!(timerecs$record_id %in% records$record_id))) {
-			answ[nrow(answ)+1, ] <- c("record_id", "timerecs record_id(s) not in records record_id")
-		}
+	
+	  rcid <- !is.null(timerecs$record_id)
+	  trid <- !is.null(timerecs$trial_id)
+	  if ((rcid + trid) != 1) {
+	    answ[nrow(answ)+1, ] <- c("id", "timerecs must have either record_id or trial_id")
+	  } else if (rcid) {
+	    if (is.null(records$record_id)) {
+	      answ[nrow(answ)+1, ] <- c("id", "record_id in 'timerecs' but not in other records")
+	    } else if (any(!(timerecs$record_id %in% records$record_id))) {
+	      answ[nrow(answ)+1, ] <- c("id", "record_id(s) do not match")
+	    }
+	  } else {
+	    if (is.null(records$trial_id)) {
+	      answ[nrow(answ)+1, ] <- c("id", "trial_id in 'timerecs' but not in other records")
+	    } else if (any(!(timerecs$trial_id %in% records$trial_id))) {
+	      answ[nrow(answ)+1, ] <- c("id", "trial_id(s) do not match")
+	    }
+	  }
 		answ <- check_d_terms(answ, timerecs, "timerecs", group=group, check=check)
 		cns <- c(colnames(records), colnames(timerecs))
-		cns <- cns[!(cns %in% c("dataset_id", "record_id"))]  # date?
+		cns <- cns[!(cns %in% c("dataset_id", "record_id", "trial_id"))]  # date?
 		cns <- table(cns)
 		if (any(cns>1)) {
 			dups <- paste(names(cns[cns>1]), collapse=", ")
