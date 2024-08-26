@@ -71,7 +71,7 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 					#to avoid binding local multiple times if not git updated
 					#not in other cases to trigger a warning when the terms are used 
 					if (!git_updated) v <- unique(v)  
-					write.csv(v, file.path(p, lf[i]), row.names=FALSE)
+					utils::write.csv(v, file.path(p, lf[i]), row.names=FALSE)
 				}
 			  } else {
 			    nt <- file.path(org$local_path, lf[i])
