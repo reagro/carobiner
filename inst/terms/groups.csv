@@ -1,9 +1,9 @@
 name,include,description
-agronomy,crop;soil,"agronomy experiments (conservation ag, intercropping)"
-pest_disease,crop;soil,"crop pest, disease or weed management trials"
-soil_samples,soil,soil sampling data
-survey,crop;soil;survey,"household, agronomic and crop-cut surveys"
-varieties,crop;soil,crop variety trials (not wheat or maize)
-varieties_maize,crop;soil;maize,maize variety trials
-varieties_wheat,crop;soil;wheat,wheat variety trials
-weather,weather,weather data
+agronomy,location;crop;soil,"agronomy experiments (conservation ag, intercropping)"
+pest_disease,location;crop;soil,"crop pest, disease or weed management trials"
+soil_samples,location;soil,soil sampling data
+survey,location;crop;soil;survey,"household, agronomic and crop-cut surveys"
+varieties,location;crop;soil,crop variety trials (not wheat or maize)
+varieties_maize,location;crop;soil;maize,maize variety trials
+varieties_wheat,location;crop;soil;wheat,wheat variety trials
+weather,location;weather,weather data
