@@ -1,11 +1,13 @@
 
 
 eng_months_to_nr <- function(x) {
-	mnths <- tolower(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
-	#x <- substr(x, 1, 3)
+	mnths1 <- c("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december")
+	mnths2 <- substr(mnths1, 1, 3)
+
 	x <- tolower(x)
 	for (i in 1:12) {
-		x <- sub(mnths[i], i, x, ignore.case=TRUE)
+		x <- sub(mnths1[i], i, x, ignore.case=TRUE)
+		x <- sub(mnths2[i], i, x, ignore.case=TRUE)
 	}
 	x
 }

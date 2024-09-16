@@ -106,9 +106,8 @@ check_start_end_dates <- function(x) {
 }
 
 
-check_location_names <- function(x, answ) {
-	locvars <- c(paste0("adm_", 1:5), "site", "location")	
-	locvars <- locvars[locvars %in% names(x)]
+not_all_caps <- function(x, vars, answ) {
+	locvars <- vars[vars %in% names(x)]
 	for (v in locvars) {
 		m <- na.omit(x[v])[,1]
 		if (sum(toupper(m) == m) > (0.25 * length(m))) {
@@ -434,7 +433,7 @@ check_d_terms <- function(answ, x, type, group, check) {
 				answ[nrow(answ)+1, ] <- c("duplicates", "duplicates in record_id")
 			}		
 		}
-		answ <- check_location_names(x, answ) 
+		answ <- not_all_caps(x, c(paste0("adm", 1:5), "site", "location"), answ)	
 	}
 	
 	answ
