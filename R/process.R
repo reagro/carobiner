@@ -25,7 +25,7 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, option
 
 	if (!to_mem) {
 		dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
-		list.files(file.path(path, "data", "clean", group), cleanuri) |> file.remove()
+		list.files(file.path(path, "data", "clean", group), cleanuri, full.names=FALSE) |> file.remove()
 
 		if (missing(records)) {
 			if (!grepl("_nodata$", cleanuri)) {
