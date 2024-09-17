@@ -184,11 +184,13 @@ get_authors <- function(x) {
 	}
 	if (is.null(out)) {
 		r <- x$result
-		out <- r$creator
-		i <- grep("contributor_person$|contributor_person_*.[0-9]$", names(r))	
-		r <- unlist(r[i])
-		add <- r[order(names(r))]
-		out <- c(out, add)
+		if (!is.null(r)) {
+			out <- r$creator
+			i <- grep("contributor_person$|contributor_person_*.[0-9]$", names(r))	
+			r <- unlist(r[i])
+			add <- r[order(names(r))]
+			out <- c(out, add)
+		}
 	}
 	#zenodo
 	if (is.null(out)) {
