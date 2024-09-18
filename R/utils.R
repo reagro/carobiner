@@ -33,8 +33,11 @@ change_names <- function(x, from, to, must_have=TRUE) {
 
 
 
-bindr <- function( ...) {
+bindr <- function(...) {
 	d <- list(...)
+	i <- sapply(d, is.null)
+	if (all(i)) return(NULL)
+	d <- d[!i]
 	nms <- unique(unlist(lapply(d, names)))
 	out <- lapply(d, 
 			function(x) {
