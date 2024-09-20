@@ -167,6 +167,7 @@ check_lonlat <- function(x, answ) {
 
 check_cropyield <- function(x, answ) {
 	if (!all(c("crop", "yield") %in% names(x))) return(answ)
+	if (all(is.na(x$yield))) return(answ)
 	x <- x[, c("crop", "yield")]
 	a <- suppressWarnings(
 			stats::aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
@@ -425,9 +426,6 @@ check_d_terms <- function(answ, x, type, group, check) {
 		if (check != "nogeo") {
 			answ <- check_lonlat(x, answ)	
 		}
-		if (nrow(x) != nrow(unique(x))) {
-			answ[nrow(answ)+1, ] <- c("duplicates", "duplicate records detected")
-		}
 		if ((type == "records") & (!is.null(x$record_id))) {
 			if (nrow(x) != length(unique(x$record_id))) {
 				answ[nrow(answ)+1, ] <- c("duplicates", "duplicates in record_id")
@@ -439,6 +437,16 @@ check_d_terms <- function(answ, x, type, group, check) {
 	answ
 }
 
+
+## needs fixing. duplicates need to be considered together for recs and timerecs
+find_duplicates <- function(answ, x, tmr==NULL) {
+	if (is.null(tmr)) {
+		if (nrow(x) != nrow(unique(x))) {
+			answ[nrow(answ)+1, ] <- c("duplicates", "duplicate records detected")
+		}
+	}
+	answ
+}
 
 check_treatment <- function(answ, treatment, data_type, vars) {
 	if (is.na(treatment)) {
@@ -480,6 +488,8 @@ check_terms <- function(metadata, records, timerecs=NULL, wth=NULL, group="", ch
 	}
 	if (!missing(records)) {
 		answ <- check_d_terms(answ, records, "records", group=group, check=check)
+		answ <- find_duplicates(answ, records, timerecs) {
+
 	}
 	if (!is.null(timerecs)) {
 	

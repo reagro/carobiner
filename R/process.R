@@ -44,7 +44,7 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, option
 		dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
 		records$dataset_id <- metadata$dataset_id
 		opt <- options("carobiner_check")
-		answ <- carobiner:::check_terms(metadata, records, timerecs, wth, group, check=opt)	
+		answ <- check_terms(metadata, records, timerecs, wth, group, check=opt)	
 		fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
 
 		if (!to_mem) {
@@ -123,10 +123,10 @@ sort_by_terms <- function(x, type, group) {
 }
 
 
-compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=FALSE) {
-	w <- options("warn")
-	if (w$warn < 1) {
-		on.exit(options(warn=w$warn))
+compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=FALSE, cache=FALSE) {
+	warn <- options("warn")
+	if (warn$warn < 1) {
+		on.exit(options(warn=warn$warn))
 		options(warn=1)
 	}
 	dir.create(file.path(path, "data", "compiled"), showWarnings = FALSE, recursive = TRUE)
@@ -178,6 +178,9 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 #		}
 		z <- sort_by_terms(.binder(ff[li]), "records", grp)
 		
+		wf <- list.files(file.path(path, "data", "messages", grp), full.names=TRUE)
+		wrn <- .binder(wf)
+		
 		gterms <- accepted_variables("records", grp)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
 
@@ -186,17 +189,21 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 		if (split_license) {
 			xx <- x[grepl("CC|ETALAB", x[,"license"]), ]
 			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
+			wwrn <- wrn[wrn$dataset_id %in% xx[, "dataset_id"], ]
 			if (nrow(xx) > 0) {
 				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-cc.csv"))
 				#utils::write.csv(xx, outmf, row.names=FALSE)
 				data.table::fwrite(xx, outmf, row.names=FALSE)
 				outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-cc.csv"))
 				data.table::fwrite(yy, outff, row.names=FALSE)
+				outwf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_warnings-cc.csv"))
+				data.table::fwrite(wwrn, outwf, row.names=FALSE)
+				
 				if (length(z) > 0) {
 					zz <- z[z$dataset_id %in% xx[, "dataset_id"], ]
 					if (nrow(zz) > 0) {
-						outzf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_long-cc.csv"))
-						data.table::fwrite(zz, outzf, row.names=FALSE)
+						outlf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_long-cc.csv"))
+						data.table::fwrite(zz, outlf, row.names=FALSE)
 					} else {
 						outzf <- NULL
 					}
@@ -206,37 +213,42 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, cache=
 				if (zip) {
 					fzip <- gsub(".csv$", ".zip", outff)
 					if (file.exists(fzip)) file.remove(fzip)
-					utils::zip(fzip, c(outft, outmf, outff, outzf), zipflags, zip=pzip)
+					utils::zip(fzip, c(outft, outmf, outff, outlf, outwf), zipflags, zip=pzip)
+				} 
+				if (excel) {
 					fxls <- gsub(".csv$", ".xlsx", outff)
-					dx <- list(sources=xx, terms=gterms, data=yy)
+					dx <- list(sources=xx, terms=gterms, data=yy, warnings=wwrn)
 					writexl::write_xlsx(dx, fxls)
 				}
 			}
 		}
+		outwf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_warnings.csv"))
+		data.table::fwrite(wrn, outwf, row.names=FALSE)
 		outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata.csv"))
-		#utils::write.csv(x, outmf, row.names=FALSE)
 		data.table::fwrite(x, outmf, row.names=FALSE)
 		outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
 		data.table::fwrite(y, outff, row.names=FALSE)
 		if (length(z) > 0) {
-			outwf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_long.csv"))
-			data.table::fwrite(z, outwf, row.names=FALSE)
+			outlf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_long.csv"))
+			data.table::fwrite(z, outlf, row.names=FALSE)
 		} else {
-			outwf <- NULL
+			outlf <- NULL
 		}
 		if (zip) {
 			fzip <- gsub(".csv$", ".zip", outff)
 			if (file.exists(fzip)) file.remove(fzip)
-			utils::zip(fzip, c(outft, outmf, outff, outwf), flags=zipflags, zip=pzip)
+			utils::zip(fzip, c(outft, outmf, outff, outlf, outwf), flags=zipflags, zip=pzip)
+		}
+		if (excel) {
 			fxls <- gsub(".csv$", ".xlsx", outff)
-			dx <- list(sources=x, terms=gterms, data=y)
+			dx <- list(sources=x, terms=gterms, data=y, warnings=wrn)
 			writexl::write_xlsx(dx, fxls)
 		}
 		
 		ret <- c(ret, outmf, outff)
 	}
 	utils::flush.console()
-	return(ret)
+	ret
 }
 
 
