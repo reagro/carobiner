@@ -488,8 +488,7 @@ check_terms <- function(metadata, records, timerecs=NULL, wth=NULL, group="", ch
 	}
 	if (!missing(records)) {
 		answ <- check_d_terms(answ, records, "records", group=group, check=check)
-		answ <- find_duplicates(answ, records, timerecs) {
-
+		answ <- find_duplicates(answ, records, timerecs)
 	}
 	if (!is.null(timerecs)) {
 	
