@@ -205,10 +205,10 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 						outlf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_long-cc.csv"))
 						data.table::fwrite(zz, outlf, row.names=FALSE)
 					} else {
-						outzf <- NULL
+						outlf <- NULL
 					}
 				} else {
-					outzf <- NULL	
+					outlf <- NULL
 				}
 				if (zip) {
 					fzip <- gsub(".csv$", ".zip", outff)
