@@ -439,7 +439,7 @@ check_d_terms <- function(answ, x, type, group, check) {
 
 
 ## needs fixing. duplicates need to be considered together for recs and timerecs
-find_duplicates <- function(answ, x, tmr==NULL) {
+find_duplicates <- function(answ, x, tmr=NULL) {
 	if (is.null(tmr)) {
 		if (nrow(x) != nrow(unique(x))) {
 			answ[nrow(answ)+1, ] <- c("duplicates", "duplicate records detected")
