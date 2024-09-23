@@ -14,8 +14,7 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 		return(NULL)
 	}
 
-
-	p <- system.file("terms", package="carobiner")
+	p <- file.path(rappdirs::user_data_dir(), ".terminag")
 	dir.create(file.path(p, "variables"), FALSE, TRUE)
 	dir.create(file.path(p, "values"), FALSE, TRUE)
 
@@ -103,8 +102,9 @@ get_groups <- function() {
 
 
 get_variables <- function(group) {
-	path <- system.file("terms", package="carobiner")
-	f <- file.path(path, "variables", paste0("variables_", group, ".csv"))		
+	p <- file.path(rappdirs::user_data_dir(), ".terminag")
+#	path <- system.file("terms", package="carobiner")
+	f <- file.path(p, "variables", paste0("variables_", group, ".csv"))		
 	if (file.exists(f)) {
 		utils::read.csv(f)	
 	} else {
@@ -147,8 +147,9 @@ accepted_variables <- function(type, group) {
 
 
 accepted_values <- function(name) {
-	path <- system.file("terms", package="carobiner")
-	f <- file.path(path, "values", paste0("values_", name, ".csv"))
+	p <- file.path(rappdirs::user_data_dir(), ".terminag")
+#	path <- system.file("terms", package="carobiner")
+	f <- file.path(p, "values", paste0("values_", name, ".csv"))
 	if (file.exists(f)) {
 		utils::read.csv(f)
 	} else {
