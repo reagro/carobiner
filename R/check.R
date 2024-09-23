@@ -130,11 +130,12 @@ check_lonlat <- function(x, answ) {
 		# there is already a message for missing required variables
 		return(answ)
 	}
-	path <- system.file(package="carobiner")
+#	path <- system.file(package="carobiner")
+	p <- file.path(rappdirs::user_data_dir(), ".carob")
 
 #	wres <- ifelse(res=="high", 1, 5)
 	wres <- 1
-	w <- geodata::world(path=path, res=wres)
+	w <- geodata::world(path=p, res=wres)
 	x <- unique(stats::na.omit(x[, c("country", "longitude", "latitude")]))
 	e <- terra::extract(w, x[, c("longitude", "latitude")])
 	e$country <- x$country
