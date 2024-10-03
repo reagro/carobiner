@@ -319,18 +319,15 @@ check_metadata <- function(x, trms, answ) {
 
 check_pubs <- function(x, path, answ) {
 	if (isTRUE(nchar(x$publication) > 0 )) {
-
-		if (grepl("http", x$publication)) {
-			answ[nrow(answ)+1, ] <- c("publication", "http in publication")
-		}
-
-		allpubs <- list.files(file.path(path, "references"))
-		pubs <- unlist(strsplit(x$publication, ";|; "))
-		pubs <- simple_uri(pubs)
-		for (pub in pubs) {
-			where <- grep(pub, allpubs)
-			if (length(where) == 0) {
-				answ[nrow(answ)+1, ] <- c("reference", paste("citation reference file missing:", pub))	
+		if (!grepl("http", x$publication)) {
+			allpubs <- list.files(file.path(path, "references"))
+			pubs <- unlist(strsplit(x$publication, ";|; "))
+			pubs <- simple_uri(pubs)
+			for (pub in pubs) {
+				where <- grep(pub, allpubs)
+				if (length(where) == 0) {
+					answ[nrow(answ)+1, ] <- c("reference", paste("citation reference file missing:", pub))	
+				}
 			}
 		}
 	} 	

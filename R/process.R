@@ -39,7 +39,7 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, option
 			return(TRUE)
 		}
 	}
-		
+
 	if (nrow(records) > 0) {
 		dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
 		records$dataset_id <- metadata$dataset_id
