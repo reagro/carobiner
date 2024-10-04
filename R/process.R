@@ -48,7 +48,7 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, option
 		fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
 
 		if (!to_mem) {
-			asnw <- check_pubs(metadata, path, answ)
+			answ <- check_pubs(metadata, path, answ)
 		}
 
 		if (nrow(answ) > 0) {
