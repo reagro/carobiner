@@ -402,7 +402,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	unzip=TRUE
 	
 	if (is.null(files)) {	
-		uname <- simple_uri(uri)
+		uname <- carobiner::simple_uri(uri)
 	} else {
 		uname <- gsub("/|:", "_", uri)
 	}
@@ -439,7 +439,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 		return(.dataverse_unzip(zipf, path, unzip))
 	}
 
-	uri <- http_address(uri)
+	uri <- carobiner:::http_address(uri)
 	
 	if (!file.exists(path)) {
 		stop(paste("cannot create path:", path))
@@ -455,13 +455,13 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 		x <- httr::GET(uri)
 	}
 
-	if (x$status_code != 200) {
+	if (!x$status_code %in% c(200, 202)) {
 		message(paste("Dataset or resource not reachable.\nStatus code: ", x$status_code))
 		return()
 	}
 	u <- x$url
-	domain <- .getdomain(u)
-	protocol <- .getprotocol(u)
+	domain <- carobiner:::.getdomain(u)
+	protocol <- carobiner:::.getprotocol(u)
 	baseu <- paste0(protocol, domain)
 
 	if (grepl("/stash/", u)) {	
