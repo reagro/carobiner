@@ -46,6 +46,7 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, option
 		opt <- options("carobiner_check")
 		answ <- check_terms(metadata, records, timerecs, wth, group, check=opt)	
 		fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
+		if (file.exists(fmsg)) file.remove(fmsg)
 
 		if (!to_mem) {
 			answ <- check_pubs(metadata, path, answ)
