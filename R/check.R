@@ -1,4 +1,26 @@
 
+evaluate_quality <- function(x, group) {
+	# are required variables present?
+	reqs <- c("planting_date", "harvest_date", "N_fertilizer", "P_fertilizer", "K_fertilizer", "irrigated", "latitude", "longitude")
+	if (group == "survey") {
+		reqs <- reqs[-c(1:2)]
+	}
+	out <- data.frame(matrix(nrow=1, ncol=length(reqs)))
+	names(out) <- reqs
+	for (r in reqs) {
+		if (is.null(x[[r]])) x[[r]] <- NA
+		if (group != "survey") {
+			if (r %in% reqs[1:2]) {
+				# not a full date
+				x[[r]][nchar(x[[r]]) != 8] <- NA
+			}
+		}
+		out[[r]] <- 1 - mean(is.na(x[[r]]))
+	}
+	data.frame(dataset_id = x$dataset_id[1], out)
+}
+
+
 
 check_consistency <- function(x, answ) {
 	#e.g. if OM is used, then the type and amount should be specified 

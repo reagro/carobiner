@@ -42,12 +42,18 @@ write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, option
 
 	if (nrow(records) > 0) {
 		dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
+		dir.create(file.path(path, "data", "evaluation", group), FALSE, TRUE)
 		records$dataset_id <- metadata$dataset_id
 		opt <- options("carobiner_check")
 		answ <- check_terms(metadata, records, timerecs, wth, group, check=opt)	
 		fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
 		if (file.exists(fmsg)) file.remove(fmsg)
-
+		
+		feval <- file.path(path, "data", "evaluation", group, paste0(cleanuri, ".csv"))
+		if (file.exists(feval)) file.remove(feval)
+		e <- evaluate_quality(records, group)	
+		data.table::fwrite(e, feval, row.names=FALSE)		
+		
 		if (!to_mem) {
 			answ <- check_pubs(metadata, path, answ)
 		}
