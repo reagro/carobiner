@@ -424,8 +424,13 @@ check_d_terms <- function(answ, x, type, group, check) {
 				if (!is.null(voc$multiple_allowed)) {
 					if (voc$multiple_allowed[i] == "yes") {
 						if (!is.na(provided[1])) {
-							provided <- unlist(strsplit(provided, ";|; "))
+							provided <- unique(unlist(strsplit(provided, ";|; ")))
 						}
+					}
+				}
+				if (voc$vocabulary[i] == "crop") {
+					if (any(grepl("_", provided))) {
+						provided <- unique(unlist(strsplit(provided, "_")))
 					}
 				}
 				if (voc$NAok[i]=="yes") {
@@ -551,7 +556,7 @@ check_terms <- function(metadata, records, timerecs=NULL, wth=NULL, group="", ch
 		if (is.null(wth$date)) {
 			answ[nrow(answ)+1, ] <- c("weather", "weather data does not have variable 'date'")			
 		}
-		answ <- check_d_terms(answ, wth, "weather", group="weather", check=check)
+		answ <- check_d_terms(answ, wth, "records", group="weather", check=check)
 	}
 	answ
 }
