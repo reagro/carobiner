@@ -1,7 +1,7 @@
 Package: carobiner
 Type: Package
 Title: Standardizing agricultural research data 
-Description: A collection functions to support the "Carob" project to standardize and aggregate open agricultural research data trough reproducible workflows. See https://github.com/reagro/carob for details.
+Description: A collection functions to support the "Carob" project to standardize and aggregate open agricultural research data trough reproducible workflows. See https://carob-data.org and https://github.com/reagro/carob for details.
 Version: 0.5-1
 Imports: geodata, terra, readxl, writexl, httr, data.table, archive, jsonlite, rappdirs
 Suggests: revtools, stringr, rmarkdown, kable, kableExtra, summarytools

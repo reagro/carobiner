@@ -1,22 +1,31 @@
 
 evaluate_quality <- function(x, group) {
 	# are required variables present?
-	reqs <- c("planting_date", "harvest_date", "N_fertilizer", "P_fertilizer", "K_fertilizer", "irrigated", "latitude", "longitude")
+	reqs <- c("planting_date", "harvest_date", "N_fertilizer", "P_fertilizer", "K_fertilizer", "irrigated", "latitude", "longitude", "location")
 	if (group == "survey") {
 		reqs <- reqs[-c(1:2)]
 	}
+	if (is.null(x[["geo_from_source"]])) x[["geo_from_source"]] <- NA
 	out <- data.frame(matrix(nrow=1, ncol=length(reqs)))
 	names(out) <- reqs
 	for (r in reqs) {
 		if (is.null(x[[r]])) x[[r]] <- NA
-		if (group != "survey") {
-			if (r %in% reqs[1:2]) {
-				# not a full date
-				x[[r]][nchar(x[[r]]) != 8] <- NA
-			}
-		}
-		out[[r]] <- 1 - mean(is.na(x[[r]]))
 	}
+	if (group != "survey") {
+		if (r %in% reqs[1:2]) {
+			# not a full date
+			x[[r]][nchar(x[[r]]) != 8] <- NA
+		}
+	}
+	
+	if (is.null(x$geo_from_source)) x$geo_from_source <- TRUE
+	x$longitude[!x$geo_from_source] <- NA
+	x$latitude[!x$geo_from_source] <- NA
+
+	for (r in reqs) {
+		out[[r]] <- mean(!is.na(x[[r]]))
+	}
+	
 	data.frame(dataset_id = x$dataset_id[1], out)
 }
 
@@ -471,7 +480,7 @@ find_duplicates <- function(answ, x, tmr=NULL) {
 check_treatment <- function(answ, treatment, data_type, vars) {
 	if (is.na(treatment)) {
 		answ[nrow(answ)+1, ] <- c("exp_treatment", 
-			"metadata variable exp_treatment cannot be NA")
+			"metadata variable treatment_vars cannot be NA")
 		return(answ)
 	}
 	
