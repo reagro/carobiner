@@ -27,4 +27,4 @@ write_files(path=NULL, metadata, records, timerecs=NULL, wth=NULL, id=NULL, opti
 
 \value{
 if \code{path=NULL} a list of data.frames (metadata and records). Otherwise a logical value indicating if the standardized dataset was succesfully written to the Carob repo.
-
+}
