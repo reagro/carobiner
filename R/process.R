@@ -4,7 +4,7 @@
 
 
 
-write_files <- function(path, metadata, records, timerecs=NULL, wth=NULL, options=NULL) {
+write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, options=NULL) {
 
 	group <- metadata$group
 	check_group(group)

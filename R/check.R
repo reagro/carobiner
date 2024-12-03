@@ -353,9 +353,9 @@ check_pubs <- function(x, path, answ) {
 		if (!grepl("http", x$publication)) {
 			allpubs <- list.files(file.path(path, "references"))
 			pubs <- unlist(strsplit(x$publication, ";|; "))
-			pubs <- simple_uri(pubs)
+			pubs <- carobiner:::simple_uri(pubs)
 			for (pub in pubs) {
-				where <- grep(pub, allpubs)
+				where <- grep(pub, allpubs, fixed=TRUE)
 				if (length(where) == 0) {
 					answ[nrow(answ)+1, ] <- c("reference", paste("citation reference file missing:", pub))	
 				}
