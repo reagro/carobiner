@@ -40,6 +40,10 @@ get_license <- function(x) {
 	if (!is.null(x$licenses$name)) { # Rothamsted
 		return(x$licenses$name)
 	}
+  
+  if (!is.null(x$license)) { # Dryad
+    return(x$license)
+  }
 
 	lic <- x$data$latestVersion$license
 	trms <- x$data$latestVersion$termsOfUse
@@ -242,7 +246,7 @@ extract_metadata <- function(js, uri, group) {
 	cit <- paste0(auth, " (", year, "). ", titl, " ", pub, ". ", v, uri)
 
 	data.frame(
-		dataset_id = simple_uri(uri),
+		dataset_id = carobner::simple_uri(uri),
 		group = group,
 		uri = uri,
 		license = lic,
