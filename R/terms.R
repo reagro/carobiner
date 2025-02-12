@@ -47,6 +47,7 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 			for (i in 1:length(ff)) {
 				utils::download.file(ff[i], pva[i], quiet=TRUE)
 			}
+			file.copy(file.path(system.file("terms", package="carobiner"), "groups.csv"), p, overwrite = TRUE, recursive = FALSE)
 			git_updated <- TRUE
 			#gv <- readLines("https://raw.githubusercontent.com/reagro/terminag/main/version.txt", warn = FALSE)
 			#gv <- trimws(unlist(strsplit(gv[grep("version", gv)], "="))[2])
@@ -91,8 +92,8 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 get_groups <- function() {
 #	f <- file.path(path, "terms", "groups.csv")
 #	if (!isTRUE(file.exists(f))) {
-	path <- system.file("terms", package="carobiner")
-	f <- file.path(path, "groups.csv")
+  path <- file.path(rappdirs::user_data_dir(), ".carob/terminag")
+  f <- file.path(path, "groups.csv")
 #	}
 	if (!file.exists(f)) {
 		stop("the groups file is missing")
