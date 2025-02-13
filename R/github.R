@@ -30,6 +30,9 @@ on_github <- function(uri=NULL) {
 }
 
 read_carob <- function(uri) {
+
+# todo: vectorize over uri
+
 	d <- all_github_scripts()
 	uri <- carobiner:::simple_uri(uri)
 	i <- stats::na.omit(match(uri, d$dataset))
@@ -39,6 +42,9 @@ read_carob <- function(uri) {
 	if (d$pending[i]) {
 		stop("this dataset is pending and this function won't run it")	
 	}
+	# first try to read from server 
+	
+	# else:
 	u <- "https://raw.githubusercontent.com/reagro/carob/refs/heads/master/scripts/"
 	u <- paste0(u, d$group[i], "/", d$dataset[i], ".R")
 	

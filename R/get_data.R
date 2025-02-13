@@ -93,9 +93,9 @@ filter_files <- function(x) {
 	if (grepl("worldagroforestry", uu) || grepl("cirad.fr", uu) || grepl("cipotato", uu)) {
 		# temporary fix because WorldAgroFor https cert has expired
 		# not sure why for CIP on Ubuntu (cert expired)
-		utils::download.file(uu, tmpf, quiet=TRUE, method="curl", extra="-k")
+		utils::download.file(uu, tmpf, quiet=TRUE, method="curl", extra="-k", mode="wb")
 	} else {
-		utils::download.file(uu, tmpf, quiet=TRUE)
+		utils::download.file(uu, tmpf, quiet=TRUE, mode="wb")
 	}
 	js <- readLines(tmpf, encoding = "UTF-8", warn=FALSE)
 	js <- jsonlite::fromJSON(js)

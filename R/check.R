@@ -220,9 +220,13 @@ check_cropyield <- function(x, answ) {
 	i <- x$yield > x$max_yield
 	if (any(i)) {
 		crops <- unique(x$crop[i])
-		bad <- paste(crops, collapse=", ")
-		answ[nrow(answ)+1, ] <- c("low yield",
-				paste0("crop yield too high?: ", bad))
+		if (length(crops) == 1) {
+			bad <- paste0(crops, ": ", max(x$yield, na.rm=TRUE))
+		} else {
+			bad <- paste(crops, collapse=", ")
+		}
+		answ[nrow(answ)+1, ] <- c("high yield",
+				paste0("crop yield too high? ", bad))
 	}
 	#check_outliers_iqr(x, "yield", TRUE)
 
