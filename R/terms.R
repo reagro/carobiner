@@ -132,7 +132,7 @@ accepted_variables <- function(type, group) {
 		grps <- get_groups()
 		include <- grps$include[grps$name == group]
 		if (length(include) == 0) {
-			include <- c("crop;soil")
+			include <- c("location;crop;soil")
 		} 
 		if (!all(include == "")) {
 			include <- trimws(unlist(strsplit(include, ";")))
