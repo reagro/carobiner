@@ -17,96 +17,85 @@ clean_up <- function(fin, fout) {
 
 make_reports <- function(path, group="", cache=TRUE) {
 
-	if (group[1] == "") {
-		group <- get_groups()$name
-	} 
+	fff <- list.files(file.path(path, "data", "clean", group), pattern="_meta\\.csv$", recursive=TRUE, full.name=TRUE)
+	fff <- grep("_nodata_meta", fff, ignore.case=TRUE, invert=TRUE, value=TRUE)
+	if (length(fff) == 0) return()
+	
+	outf <- gsub("_meta\\.csv$", ".html", fff)
+	if (cache) {
+		i <- file.exists(outf)
+		j <- which(i)
+		ptm <- file.info(fff[j])$mtime
+		ftm <- file.info(outf[j])$mtime
+		i[j[ptm > ftm]] <- FALSE
+		fff <- fff[!i]
+		outf <- outf[!i]
+		if (length(fff) == 0) return()
+	}
 
 	rmd <- file.path(path, "misc", "reports", "dataset.Rmd")
 	if (file.exists(rmd)) {
 		rmd <- readLines(rmd, warn=FALSE)
 
-		for (grp in group) {
-	#		if (grepl("_trials$", grp)) {
-	#			rmd <- file.path(path, "reports", "trials.Rmd")	
-	#		} else {
-	#			rmd <- file.path(path, "reports", paste0(grp, ".Rmd"))
-	#		}
-	#		rmd <- readLines(rmd, warn=FALSE)
+		grp <- basename(dirname(fff))
+		
+		for (i in 1:length(fff)) {
 
-			gpath <- file.path(path, "/data/clean/", grp)
-			ff <- list.files(gpath, pattern="meta.csv$", full.names=TRUE)
-			ff <- grep("_nodata", ff, value=TRUE, invert=TRUE)
-			
-			if (length(ff) == 0) next
-			
-			outf <- gsub("_meta.csv", ".html", ff)
-			if (cache) {
-				i <- file.exists(outf)
-				j <- which(i)
-				ptm <- file.info(ff[j])$mtime
-				ftm <- file.info(outf[j])$mtime
-				i[j[ptm > ftm]] <- FALSE
-				ff <- ff[!i]
-				outf <- outf[!i]
-				if (length(ff) == 0) next
-			}
 			uri <- grep("^uri <- ", rmd)
 			igrp <- grep("^group <- ", rmd)
-			rmd[igrp] <- paste0("group <- '", grp, "'")
-			
+			rmd[igrp] <- paste0("group <- '", grp[i], "'")
+				
 			fRmd <- file.path(path, "temp.Rmd")	
 			fhtml <- file.path(path, "temp.html")
 			on.exit(unlink(fRmd))
-			for (i in 1:length(ff)) {
-				print(outf[i]); utils::flush.console()
-				unlink(outf[i])
-				m <- utils::read.csv(ff[i], nrows=1)
-				rmd[uri] <- paste0("uri <- '", m$uri, "'")
-				writeLines(rmd, fRmd)
-				unlink(fhtml)
-				e <- try(rmarkdown::render(fRmd, "html_document", "temp", envir=new.env(), quiet=TRUE))
-				if (file.exists(fhtml)) {
-					clean_up(fhtml, outf[i])
-				}
-			}
-		}
-	}
-	
-	rmd <- file.path(path, "misc", "reports", "aggregate.Rmd")
-	
-	if (file.exists(rmd)) {
-		rmd <- readLines(rmd, warn=FALSE)
-
-		for (grp in group) {
-			gpath <- file.path(path, "/data/compiled/")
-			ff <- file.path(gpath, paste0("carob_", grp, ".csv"))
-			if (!file.exists(ff)) next
-			
-			outf <- gsub(".csv", ".html", ff)
-			if (cache) {
-				i <- file.exists(outf)
-				j <- which(i)
-				ptm <- file.info(ff[j])$mtime
-				ftm <- file.info(outf[j])$mtime
-				i[j[ptm > ftm]] <- FALSE
-				ff <- ff[!i]
-				outf <- outf[!i]
-				if (length(ff) == 0) next
-			}
-			igrp <- grep("^group <- ", rmd)
-			rmd[igrp] <- paste0("group <- '", grp, "'")
-			
-			fRmd <- file.path(path, "temp.Rmd")	
-			fhtml <- file.path(path, "temp.html")
-			on.exit(unlink(fRmd))
-			print(outf); utils::flush.console()
-			unlink(outf)
+			print(outf[i]); utils::flush.console()
+			unlink(outf[i])
+			m <- utils::read.csv(fff[i], nrows=1)
+			rmd[uri] <- paste0("uri <- '", m$uri, "'")
 			writeLines(rmd, fRmd)
 			unlink(fhtml)
 			e <- try(rmarkdown::render(fRmd, "html_document", "temp", envir=new.env(), quiet=TRUE))
 			if (file.exists(fhtml)) {
-				clean_up(fhtml, outf)
+				clean_up(fhtml, outf[i])
 			}
+		}
+	}
+		
+	rmd <- file.path(path, "misc", "reports", "aggregate.Rmd")	
+	if (!file.exists(rmd)) return()
+	
+	rmd <- readLines(rmd, warn=FALSE)
+	if (group == "") group <- unique(grp) 
+	
+	for (grp in group) {
+		gpath <- file.path(path, "/data/compiled/")
+		ff <- file.path(gpath, paste0("carob_", grp, ".csv"))
+		if (!file.exists(ff)) next
+		
+		outf <- gsub(".csv", ".html", ff)
+		if (cache) {
+			i <- file.exists(outf)
+			j <- which(i)
+			ptm <- file.info(ff[j])$mtime
+			ftm <- file.info(outf[j])$mtime
+			i[j[ptm > ftm]] <- FALSE
+			ff <- ff[!i]
+			outf <- outf[!i]
+			if (length(ff) == 0) next
+		}
+		igrp <- grep("^group <- ", rmd)
+		rmd[igrp] <- paste0("group <- '", grp, "'")
+		
+		fRmd <- file.path(path, "temp.Rmd")	
+		fhtml <- file.path(path, "temp.html")
+		on.exit(unlink(fRmd))
+		print(outf); utils::flush.console()
+		unlink(outf)
+		writeLines(rmd, fRmd)
+		unlink(fhtml)
+		e <- try(rmarkdown::render(fRmd, "html_document", "temp", envir=new.env(), quiet=TRUE))
+		if (file.exists(fhtml)) {
+			clean_up(fhtml, outf)
 		}
 	}
 }

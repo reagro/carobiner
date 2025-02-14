@@ -112,6 +112,11 @@ get_variables <- function(group) {
 	}
 }
 
+get_variable_group_names <- function() {
+	p <- file.path(rappdirs::user_data_dir(), ".carob/terminag")
+#	path <- system.file("terms", package="carobiner")
+	gsub("^variables_|\\.csv$", "", list.files(file.path(p, "variables"), pattern="variables_.*.\\.csv$"))
+}
 
 #get_terms <- function(type, group, path) {
 accepted_variables <- function(type, group) {
@@ -122,24 +127,32 @@ accepted_variables <- function(type, group) {
 		if (is.null(trms)) {
 			stop("Please first install the standard terms with 'carobiner::update_terms()'", call. = FALSE)
 		}
-		add <- get_variables("weather")
-		trms <- rbind(trms, add)
+		wth <- get_variables("weather")
+		loc <- get_variables("location")
+		trms <- rbind(trms, loc, wth)
 	} else { #"records", "timerecs"
+		
 		trms <- get_variables("all")
 		if (is.null(trms)) {
 			stop("Please first install the standard terms with 'carobiner::update_terms()'", call. = FALSE)
 		}
 		grps <- get_groups()
-		include <- grps$include[grps$name == group]
+		include <- unique(grps$include[grps$name == group])
+		include <- include[include != ""]
+		
 		if (length(include) == 0) {
-			include <- c("location;crop;soil")
-		} 
-		if (!all(include == "")) {
-			include <- trimws(unlist(strsplit(include, ";")))
-			for (inc in include) {
-				add <- get_variables(inc)
-				trms <- rbind(trms, add)
+			include <- c("location", "crop", "soil", "weather")
+			vnms <- get_variable_group_names()
+			i <- vnms == gsub("^varieties_", "", group)
+			if (any(i)) {
+				include <- unique(c(include, vnms[i]))
 			}
+		} else {
+			include <- trimws(unlist(strsplit(include, ";")))
+		}
+		for (inc in include) {
+			add <- get_variables(inc)
+			trms <- rbind(trms, add)
 		}
 	}
 	trms

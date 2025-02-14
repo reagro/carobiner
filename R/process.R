@@ -7,7 +7,7 @@
 write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, options=NULL) {
 
 	group <- metadata$group
-	check_group(group)
+#	check_group(group)
 	cleanuri <- metadata$dataset_id
 	stopifnot(nrow(metadata) == 1)
 	if (!is.null(timerecs)) {
@@ -186,7 +186,12 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 		z <- sort_by_terms(.binder(ff[li]), "records", grp)
 		
 		wf <- list.files(file.path(path, "data", "messages", grp), full.names=TRUE)
-		wrn <- .binder(wf)
+		if (length(wf) > 0) {
+			wrn <- .binder(wf)
+			have_warnings <- TRUE
+		} else {
+			have_warnings <- FALSE
+		}
 		
 		gterms <- accepted_variables("records", grp)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
@@ -196,7 +201,8 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 		if (split_license) {
 			xx <- x[grepl("CC|ETALAB", x[,"license"]), ]
 			yy <- y[y$dataset_id %in% xx[, "dataset_id"], ]
-			wwrn <- wrn[wrn$dataset_id %in% xx[, "dataset_id"], ]
+
+			if (have_warnings) wwrn <- wrn[wrn$dataset_id %in% xx[, "dataset_id"], ]
 			if (nrow(xx) > 0) {
 				outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata-cc.csv"))
 				#utils::write.csv(xx, outmf, row.names=FALSE)
@@ -204,7 +210,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 				outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, "-cc.csv"))
 				data.table::fwrite(yy, outff, row.names=FALSE)
 				outwf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_warnings-cc.csv"))
-				data.table::fwrite(wwrn, outwf, row.names=FALSE)
+				if (have_warnings) data.table::fwrite(wwrn, outwf, row.names=FALSE)
 				
 				if (length(z) > 0) {
 					zz <- z[z$dataset_id %in% xx[, "dataset_id"], ]
@@ -224,13 +230,19 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 				} 
 				if (excel) {
 					fxls <- gsub(".csv$", ".xlsx", outff)
-					dx <- list(sources=xx, terms=gterms, data=yy, warnings=wwrn)
+					if (have_warnings) {
+						dx <- list(sources=xx, terms=gterms, data=yy, warnings=wwrn)
+					} else {
+						dx <- list(sources=xx, terms=gterms, data=yy) # warnings=NULL)?
+					}
 					writexl::write_xlsx(dx, fxls)
 				}
 			}
 		}
-		outwf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_warnings.csv"))
-		data.table::fwrite(wrn, outwf, row.names=FALSE)
+		if (have_warnings) {
+			outwf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_warnings.csv"))
+			data.table::fwrite(wrn, outwf, row.names=FALSE)
+		}
 		outmf <- file.path(path, "data", "compiled", paste0("carob", wgroup, "_metadata.csv"))
 		data.table::fwrite(x, outmf, row.names=FALSE)
 		outff <- file.path(path, "data", "compiled", paste0("carob", wgroup, ".csv"))
@@ -298,10 +310,9 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 		options(warn=1)
 	}
 
-
-	if (group != "") {
-		check_group(group)
-	}
+#	if (group != "") {
+#		check_group(group)
+#	}
 
 	base <- file.path(path, "scripts")
 	ffR <- list.files(file.path(base, group), pattern="\\.R$", full.names=TRUE, recursive=TRUE)
