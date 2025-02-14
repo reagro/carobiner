@@ -329,7 +329,7 @@ check_datatypes <- function(x, trms, answ) {
 #x = check_empty(d)
 
 
-check_group <- function(name) {
+.check_group <- function(name) {
 	grp <- get_groups()
 	ok <- all(name %in% grp$name)
 	if (!ok) {
