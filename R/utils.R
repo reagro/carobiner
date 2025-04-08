@@ -1,4 +1,15 @@
 
+unlabel <- function(d) {
+	for (i in 1:ncol(d)) {
+		v <- d[,i,drop=TRUE]
+		if (inherits(v, "haven_labelled")) {
+			labs <- attr(v, "labels")
+			d[i] <- names(labs)[match(as.numeric(v), labs)]
+		}
+	}
+	data.frame(d)
+}
+
 
 eng_months_to_nr <- function(x) {
 	mnths1 <- c("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december")
