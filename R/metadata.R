@@ -246,7 +246,7 @@ extract_metadata <- function(js, uri, group) {
 	cit <- paste0(auth, " (", year, "). ", titl, " ", pub, ". ", v, uri)
 
 	data.frame(
-		dataset_id = carobiner::simple_uri(uri),
+		dataset_id = simple_uri(uri),
 		group = group,
 		uri = uri,
 		license = lic,
@@ -260,7 +260,7 @@ extract_metadata <- function(js, uri, group) {
 
 
 read_metadata <- function(uri, path, group, major=1, minor=0) {
-	dataset_id <- carobiner::simple_uri(uri)
+	dataset_id <- simple_uri(uri)
 	js <- get_metadata(dataset_id, path, group, major=major, minor=minor)
 	extract_metadata(js, uri, group)
 }

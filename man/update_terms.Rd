@@ -12,7 +12,7 @@ Update the accepted terms (variables and values) from the "terminag" repo. You m
 
 
 \usage{
-update_terms(quiet=FALSE)
+update_terms(quiet=FALSE, force = FALSE, local_terms = NULL)
 }
  
 \arguments{

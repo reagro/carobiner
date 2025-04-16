@@ -27,7 +27,7 @@ get_locations <- function(path, country=NULL) {
 			x <- data.frame(data.table::fread(f))
 			unique(x[,fields[fields %in% colnames(x)]])
 		})
-	d <- data.frame(do.call(carobiner::bindr, d))
+	d <- data.frame(do.call(bindr, d))
 	d <- d[!is.na(d$longitude), ]
 	d <- d[order(d$country), ]
 	if (!is.null(country)) {

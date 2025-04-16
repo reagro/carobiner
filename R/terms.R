@@ -10,7 +10,7 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 
     org <- term_paths(local_terms=local_terms)
     if ((is.null(org$git_path)) & (is.null(org$local_path))) {
-		warn("terms paths are empty")
+		warning("terms paths are empty")
 		return(NULL)
 	}
 

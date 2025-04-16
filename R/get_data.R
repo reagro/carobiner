@@ -392,9 +392,44 @@ http_address <- function(uri) {
 }
 
 
+file_downloads <- function(files, path, cache) {
+	http <- grepl("^http", files)
+	if (all(http)) {
+		.download_files(path, files, cache)
+	} else if (all(!http)) {
+		.copy_files(path, files, cache)
+	} else {
+		stop("Either all files, or no files should start with 'http'" )
+	}
+}
+
+
+
+new_get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
+	if (is.null(path)) {
+		path <- file.path(tempdir(), "carob")
+	}
+	path <- file.path(path, "data/raw", group)
+	unzip=TRUE
+	if (is.null(files)) {	
+		uname <- yuri::simpleURI(uri)
+	} else {
+		uname <- gsub("/|:", "_", uri)
+	}
+	if (!file.exists(file.path(path, uname, "ok.txt"))) {
+		cache <- FALSE
+	}
+	dir.create(path, FALSE, TRUE)
+	if (!is.null(files)) {
+		return(file_downloads(files, path, cache))
+	}
+	yuri::dataURI(uri, path, unzip=unzip, cache=cache)
+}
+
+
 
 get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
-
+# now in yuri
 	if (is.null(path)) {
 		path <- file.path(tempdir(), "carob")
 	}
@@ -402,7 +437,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	unzip=TRUE
 	
 	if (is.null(files)) {	
-		uname <- carobiner::simple_uri(uri)
+		uname <- simple_uri(uri)
 	} else {
 		uname <- gsub("/|:", "_", uri)
 	}
@@ -417,14 +452,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	dir.create(path, FALSE, TRUE)
 
 	if (!is.null(files)) {
-		http <- grepl("^http", files)
-		if (all(http)) {
-			return(.download_files(path, files, cache))
-		} else if (all(!http)) {
-			return(.copy_files(path, files, cache))
-		} else {
-			stop("Either all files, or no files should start with 'http'" )
-		}
+		return(file_downloads(files, path, cache))
 	}
 
 
@@ -439,7 +467,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 		return(.dataverse_unzip(zipf, path, unzip))
 	}
 
-	uri <- carobiner:::http_address(uri)
+	uri <- http_address(uri)
 	
 	if (!file.exists(path)) {
 		stop(paste("cannot create path:", path))
@@ -460,8 +488,8 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 		return()
 	}
 	u <- x$url
-	domain <- carobiner:::.getdomain(u)
-	protocol <- carobiner:::.getprotocol(u)
+	domain <- .getdomain(u)
+	protocol <- .getprotocol(u)
 	baseu <- paste0(protocol, domain)
 
 	if (grepl("/stash/", u)) {	

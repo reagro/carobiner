@@ -17,7 +17,7 @@ clean_up <- function(fin, fout) {
 
 make_reports <- function(path, group="", cache=TRUE) {
 
-	fff <- list.files(file.path(path, "data", "clean", group), pattern="_meta\\.csv$", recursive=TRUE, full.name=TRUE)
+	fff <- list.files(file.path(path, "data", "clean", group), pattern="_meta\\.csv$", recursive=TRUE, full.names=TRUE)
 	fff <- grep("_nodata_meta", fff, ignore.case=TRUE, invert=TRUE, value=TRUE)
 	if (length(fff) == 0) return()
 	

@@ -33,7 +33,7 @@ write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, o
 			}
 			d <- data.frame(ignore=TRUE)
 			outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
-			write.csv(d, outf, row.names=FALSE)	
+			utils::write.csv(d, outf, row.names=FALSE)	
 			mf <- gsub(".csv$", "_meta.csv", outf)
 			utils::write.csv(metadata, mf, row.names=FALSE)
 			return(TRUE)

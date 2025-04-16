@@ -34,7 +34,7 @@ read_carob <- function(uri) {
 # todo: vectorize over uri
 
 	d <- all_github_scripts()
-	uri <- carobiner:::simple_uri(uri)
+	uri <- simple_uri(uri)
 	i <- stats::na.omit(match(uri, d$dataset))
 	if (length(i) == 0) {
 		stop("this URI is not in Carob")

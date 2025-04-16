@@ -140,7 +140,7 @@ check_start_end_dates <- function(x) {
 not_all_caps <- function(x, vars, answ) {
 	locvars <- vars[vars %in% names(x)]
 	for (v in locvars) {
-		m <- na.omit(x[v])[,1]
+		m <- stats::na.omit(x[v])[,1]
 		if (sum(toupper(m) == m) > (0.25 * length(m))) {
 			answ[nrow(answ)+1, ] <- c("all uppercase",
 				paste0("names in uppercase: ", v))
@@ -357,7 +357,7 @@ check_pubs <- function(x, path, answ) {
 		if (!grepl("http", x$publication)) {
 			allpubs <- list.files(file.path(path, "references"))
 			pubs <- unlist(strsplit(x$publication, ";|; "))
-			pubs <- carobiner:::simple_uri(pubs)
+			pubs <- simple_uri(pubs)
 			for (pub in pubs) {
 				where <- grep(pub, allpubs, fixed=TRUE)
 				if (length(where) == 0) {
@@ -452,7 +452,7 @@ check_d_terms <- function(answ, x, type, group, check) {
 		}
 		dats <- grep("_date", nms, value=TRUE)
 		for (dat in dats) {
-			answ <- carobiner:::check_date(x, dat, answ, voc)
+			answ <- check_date(x, dat, answ, voc)
 		} 
 		
 	}

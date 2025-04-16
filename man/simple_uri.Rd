@@ -1,9 +1,10 @@
 \name{simple_uri}
 
+
 \alias{simple_uri}
 
 \title{
-Clean an URI so that it can be used as a filename
+Adjust an URI so that it can be used as a foldername and filename
 }
 
 \description{
