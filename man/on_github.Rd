@@ -22,7 +22,7 @@ on_github(uri=NULL)
 \value{
 data.frame with variables: dataset, group, and pending
 
-\code{dataset} is the identifier derived from the URI, see \code{\link{simple_uri}}.
+\code{dataset} is the identifier derived from the URI, see \code{\link[yuri]{simpleURI}}.
 if a dataset is \code{pending}, the script is in the \code{_pending} folder and needs more work before it can be included.
 }
 

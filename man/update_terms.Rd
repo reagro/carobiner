@@ -17,6 +17,8 @@ update_terms(quiet=FALSE, force = FALSE, local_terms = NULL)
  
 \arguments{
   \item{quiet}{logical. If \code{TRUE} a message is printed}
+  \item{force}{logical}
+  \item{local_terms}{character (path)}
 } 
  
 \value{

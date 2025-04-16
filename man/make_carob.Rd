@@ -30,7 +30,7 @@ make_carob(path, group="", quiet=FALSE, check="all", report=FALSE, cache=TRUE, .
 }
  
 \arguments{
-  \item{cleanuri}{character. A "clean" URI made with \code{\link{simple_uri}}}
+  \item{cleanuri}{character. A "clean" URI made with \code{\link[yuri]{simpleURI}}}
   \item{path}{character. Local path to the Carob repo}
   \item{group}{character. group name}
   \item{quiet}{logical. Be quiet?}
