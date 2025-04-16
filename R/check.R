@@ -357,7 +357,7 @@ check_pubs <- function(x, path, answ) {
 		if (!grepl("http", x$publication)) {
 			allpubs <- list.files(file.path(path, "references"))
 			pubs <- unlist(strsplit(x$publication, ";|; "))
-			pubs <- simple_uri(pubs)
+			pubs <- yuri::simpleURI(pubs)
 			for (pub in pubs) {
 				where <- grep(pub, allpubs, fixed=TRUE)
 				if (length(where) == 0) {

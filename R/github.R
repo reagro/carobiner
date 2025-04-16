@@ -18,7 +18,7 @@ all_github_scripts <- function() {
 on_github <- function(uri=NULL) {
 	d <- all_github_scripts()
 	if (!is.null(uri)) {
-		uri <- simple_uri(uri)
+		uri <- yuri::simpleURI(uri)
 		i <- stats::na.omit(match(uri, d$dataset))
 		if (length(i) == 0) return("not found")
 		return(d[i,])
@@ -34,7 +34,7 @@ read_carob <- function(uri) {
 # todo: vectorize over uri
 
 	d <- all_github_scripts()
-	uri <- simple_uri(uri)
+	uri <- yuri::simpleURI(uri)
 	i <- stats::na.omit(match(uri, d$dataset))
 	if (length(i) == 0) {
 		stop("this URI is not in Carob")

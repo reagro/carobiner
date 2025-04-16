@@ -9,7 +9,7 @@ update_todo <- function(path) {
 	uri <- gsub("https://doi.org/", "doi:", tolower(todo$uri))
 	uri <- gsub("https://hdl.handle.net/", "hdl:", uri)
 
-	id <- tolower(sapply(uri, simple_uri, USE.NAMES=F))
+	id <- tolower(sapply(uri, yuri::simpleURI, USE.NAMES=F))
 	done <- basename(list.files(file.path(path, "scripts"), pattern="^doi|^hdl.*\\.R$", recursive=TRUE))
 	done <- gsub("\\.r$", "", tolower(done))
 	i <- which(id %in% done)
