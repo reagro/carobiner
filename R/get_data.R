@@ -11,7 +11,6 @@ filter_files <- function(x) {
 }
 
 
-
 .download_files <- function(path, files, cache) {
 
 	outf <- gsub("%20", "_", basename(files))
@@ -36,7 +35,7 @@ filter_files <- function(x) {
 	zf <- grep("\\.zip$", outf, value=TRUE)
 	if (length(zf) > 0) {
 		for (z in zf) {
-			yuri:::.dataverse_unzip(z, path, TRUE)
+			yuri:::	.dataverse_unzip(z, path, TRUE)
 		}
 		outf <- list.files(path, full.names=TRUE)
 	}

@@ -28,9 +28,10 @@ if a dataset is \code{pending}, the script is in the \code{_pending} folder and 
 
 
 \examples{
+\dontrun{
 all <- on_github()
 
 test <- on_github("doi:10.25502/07RT-7A40/D")
 }
-
+}
 

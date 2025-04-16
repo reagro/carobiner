@@ -49,7 +49,7 @@ read_carob <- function(uri) {
 	u <- paste0(u, d$group[i], "/", d$dataset[i], ".R")
 	
 	r <- readLines(u)
-	rm(carob_script)
+	carob_script <- NULL
 	carob_script <- eval(parse(text=r)) 
 	carob_script(NULL)
 }

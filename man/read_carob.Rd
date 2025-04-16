@@ -25,7 +25,9 @@ list with three (or more) elements: metadata, records, and long
 
 
 \examples{
+\dontrun{
 test <- read_carob("doi:10.25502/07RT-7A40/D")
+}
 }
 
 
