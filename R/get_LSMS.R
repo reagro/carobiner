@@ -16,7 +16,6 @@ get_LSMS <- function(uri, path, cache=TRUE) {
 	lsms_login = "https://microdata.worldbank.org/index.php/auth/login"
 	#html <- httr::content(GET(lsms_login), "text")
 	p <- httr::POST(lsms_login, body = list('email' = LSMS_email, 'password' = LSMS_password))
-	uri <- "doi:10.48529/w1jq-qh85"
 	uhtml <- paste0("https://doi.org/", gsub("doi:", "", uri))
 	z <- httr::GET(uhtml)
 	zurl <- gsub("0;url=", "", z$headers$refresh)
@@ -49,7 +48,7 @@ get_LSMS <- function(uri, path, cache=TRUE) {
 	z <- strsplit(s, '\" href=\"')	
 	pdf <- sapply(z, \(i) i[[1]])
 	updf <- sapply(z, \(i) strsplit(i[[2]], '\">')[[1]][1])	
-	fpdf <- paste0(updf, "/", pdf)
+	fpdf <- gsub(" ", "%20", paste0(updf, "/", pdf))
 	dp <- file.path(path, "docs")
 	dir.create(dp, FALSE, FALSE)
 	for (f in fpdf) {
