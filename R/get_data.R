@@ -35,7 +35,7 @@ filter_files <- function(x) {
 	zf <- grep("\\.zip$", outf, value=TRUE)
 	if (length(zf) > 0) {
 		for (z in zf) {
-			yuri:::	.dataverse_unzip(z, path, TRUE)
+			yuri:::.dataverse_unzip(z, path, TRUE)
 		}
 		outf <- list.files(path, full.names=TRUE)
 	}
@@ -82,9 +82,10 @@ file_downloads <- function(files, path, cache) {
 
 get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	if (is.null(path)) {
-		path <- file.path(tempdir(), "carob")
+		path <- file.path(tempdir(), "carob", fsep="/")
+	} else {
+		path <- file.path(path, "data/raw", group)
 	}
-	path <- file.path(path, "data/raw", group)
 	if (is.null(files)) {	
 		uname <- yuri::simpleURI(uri)
 	} else {
@@ -95,13 +96,17 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	}
 	dir.create(path, FALSE, TRUE)
 	if (!is.null(files)) {
-		return(file_downloads(files, path, cache))
+		file_downloads(files, path, cache)
+	} else {
+		if (group == "LSMS") {
+			path <- file.path(path, uname)
+			ff <- get_LSMS(uri, path, cache=cache)		
+		} else {
+			ff <- yuri::dataURI(uri, path, unzip=TRUE, cache=cache)
+		}
+		filter_files(ff)
 	}
-	ff <- yuri::dataURI(uri, path, unzip=TRUE, cache=cache)
-	filter_files(ff)
 }
-
-
 
 # uri <- "doi:10.5061/dryad.pj76g30"
 # path <- getwd()

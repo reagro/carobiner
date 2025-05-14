@@ -25,7 +25,7 @@ write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, o
 
 	if (!to_mem) {
 		dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
-		list.files(file.path(path, "data", "clean", group), cleanuri, full.names=TRUE) |> file.remove()
+		file.remove(list.files(file.path(path, "data", "clean", group), cleanuri, full.names=TRUE))
 
 		if (missing(records)) {
 			if (!grepl("_nodata$", cleanuri)) {
@@ -66,8 +66,8 @@ write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, o
 			fign <- file.path(path, "scripts", group, "ignore.csv")
 			if (file.exists(fign)) {
 				ign <- utils::read.csv(fign)
-				ign <- apply(ign, 1, \(i) paste(i, collapse="#"))
-				ans <- apply(answ, 1, \(i) paste(i, collapse="#"))
+				ign <- apply(ign, 1, function(i) paste(i, collapse="#"))
+				ans <- apply(answ, 1, function(i) paste(i, collapse="#"))
 				m <- stats::na.omit(match(ign, ans))
 				if (length(m)  > 0) {
 					answ <- answ[-m, ]
@@ -175,8 +175,8 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 		li <- grepl("_long.csv$", ff)
 		x <- sort_by_terms(.binder(ff[mi]), "metadata", grp)
 		x[is.na(x)] <- ""
-		x[] <- sapply(x, \(i) gsub("\n", " ", i))
-		x[] <- sapply(x, \(i) gsub("\t", " ", i))
+		x[] <- sapply(x, function(i) gsub("\n", " ", i))
+		x[] <- sapply(x, function(i) gsub("\t", " ", i))
 		y <- sort_by_terms(.binder(ff[!(mi|li)]), "records", grp)
 # should be dealt with in source file
 #		if ("reference" %in% colnames(y)) {

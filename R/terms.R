@@ -37,7 +37,7 @@ update_terms <- function(quiet=FALSE, force=FALSE, local_terms=NULL) {
 			writeLines(gsha, file.path(p, "sha.txt"))	
 			req <- httr::GET(file.path(burl, "git/trees/main?recursive=1"))
 			httr::stop_for_status(req)
-			ff <- sapply(httr::content(req)$tree, \(i) i$path)
+			ff <- sapply(httr::content(req)$tree, function(i) i$path)
 			ff <- grep("\\.csv$", ff, value = TRUE)
     		rurl <- file.path("https://raw.githubusercontent.com", org$git_path)
 			ff <- file.path(rurl, "main", ff)

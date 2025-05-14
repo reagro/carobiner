@@ -75,7 +75,7 @@ get_license <- function(x) {
 			if (grepl("by.4.0", trms)) {
 				return("CC-BY-4.0")
 			}
-  			gg <- regmatches(g, gregexpr('Creative (.+?) license', g, ignore.case=TRUE)) |> unlist()
+  			gg <- unlist(regmatches(g, gregexpr('Creative (.+?) license', g, ignore.case=TRUE)))
 			if (any(tolower(gg) == "creative commons attribution 4.0 international license")) {
 				gg <- "CC-BY-4.0"
 			} 
@@ -107,7 +107,7 @@ get_license <- function(x) {
 	}
 	
 	if (is.list(lic)) {
-		lic <- lapply(lic, \(x) gsub(" ", "-", gsub("CC-ZERO", "CC-0", x)))
+		lic <- lapply(lic, function(x) gsub(" ", "-", gsub("CC-ZERO", "CC-0", x)))
 		if ((length(lic) > 1) && ("name" %in% names(lic))) {
 			lic <- lic$name
 		}
@@ -260,6 +260,9 @@ extract_metadata <- function(js, uri, group) {
 
 
 read_metadata <- function(uri, path, group, major=1, minor=0) {
+	if (group == "LSMS") {
+		return(LSMS_metadata(uri, path, major, minor))
+	}
 	dataset_id <- yuri::simpleURI(uri)
 	js <- get_metadata(dataset_id, path, group, major=major, minor=minor)
 	extract_metadata(js, uri, group)

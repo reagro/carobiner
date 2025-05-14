@@ -58,7 +58,7 @@ geocode_nominatim <- function(place, input) {
 	x <- sapply(out, terra::svc)
 	names(x) <- place
 	
-	y <- lapply(x, \(s) {
+	y <- lapply(x, function(s) {
 		if (length(s) == 0) {
 			cbind(NA, NA)
 		} else {
@@ -87,11 +87,11 @@ geocode <- function(country, location, adm1=NULL, adm2=NULL, adm3=NULL, adm4=NUL
 	addr <- trimws(input)
 	addr[is.na(addr)] <- ""
 	noc <- addr[,-1, drop=FALSE]
-	noc <- apply(noc, 1, \(i) paste0(i, collapse=""))
+	noc <- apply(noc, 1, function(i) paste0(i, collapse=""))
 	if (any(noc=="")) {
 		stop("all records must include a country and a place or admin name")
 	}
-	addr <- apply(addr, 1, \(v) paste(v, collapse=","))
+	addr <- apply(addr, 1, function(v) paste(v, collapse=","))
 	addr <- gsub("(,)\\1+", "\\1", addr)
 	addr <- gsub("( )\\1+", "\\1", addr)
 	addr <- gsub(", ,", ",", addr)

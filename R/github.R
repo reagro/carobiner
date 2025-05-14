@@ -2,7 +2,7 @@
 all_github_scripts <- function() {
 	req <- httr::GET("https://api.github.com/repos/reagro/carob/git/trees/master?recursive=1")
 	httr::stop_for_status(req)
-	ff <- sapply(httr::content(req)$tree, \(i) i$path)
+	ff <- sapply(httr::content(req)$tree, function(i) i$path)
 	ff <- grep("scripts/", ff, value = TRUE)
 	ff <- grep("\\.R$", ff, value = TRUE)
 	ff <- gsub("scripts/", "", ff)
