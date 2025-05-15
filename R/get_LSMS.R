@@ -17,6 +17,9 @@ get_LSMS <- function(uri, path, pwds, cache=TRUE) {
 	lsms_login = "https://microdata.worldbank.org/index.php/auth/login"
 	#html <- httr::content(GET(lsms_login), "text")
 	p <- httr::POST(lsms_login, body = list('email' = pwds$LSMS_email, 'password' = pwds$LSMS_password))
+	if (grepl("login", p$headers$refresh)) {
+		stop("invalid email/password")
+	}
 	uhtml <- paste0("https://doi.org/", gsub("doi:", "", uri))
 	z <- httr::GET(uhtml)
 	zurl <- gsub("0;url=", "", z$headers$refresh)
@@ -26,22 +29,23 @@ get_LSMS <- function(uri, path, pwds, cache=TRUE) {
 	i <- grep("Data in CSV", x)
 	if (length(i) == 0) {
 		i <- grep("Data in ASCII", x)
-		if (length(i) == 0) {
-			stop("no data here (or a barrier?)")
-		}
 	}
-	x <- x[i:(i+10)]
-	i <- grep("href=", x)
-	x <- x[i:(i+1)]
-	x <- gsub("href=|title=", "", x)
-	durl <- paste0(trimws(gsub('\"', "", x)), collapse="/")
-	g <- httr::GET(durl)
-	bin <- httr::content(g, "raw")
-	fout <- file.path(path, basename(durl))
-	writeBin(bin, fout)
-	utils::unzip(fout, exdir = path)
-	writeLines(c(utils::timestamp(quiet=TRUE), uri), fok)
-
+	if (length(i) == 0) {
+		haveData <- FALSE
+		warning("these files need to be downloaded manually")
+	} else {
+		haveData <- TRUE
+		x <- x[i:(i+10)]
+		i <- grep("href=", x)
+		x <- x[i:(i+1)]
+		x <- gsub("href=|title=", "", x)
+		durl <- paste0(trimws(gsub('\"', "", x)), collapse="/")
+		g <- httr::GET(durl)
+		fout <- file.path(path, basename(durl))
+		writeBin(httr::content(g, "raw"), fout)
+		utils::unzip(fout, exdir = path)
+	}
+	
 	url <- paste0(zurl, "/study-description")
 	r <- httr::content(httr::GET(url), as="text")
 	writeLines(r, file.path(path, "study-description.html"))
@@ -62,7 +66,13 @@ get_LSMS <- function(uri, path, pwds, cache=TRUE) {
 		download.file(f, file.path(dp, basename(f)), mode="wb", quiet=TRUE)
 	}
 	
-	return(list.files(path, recursive=TRUE))	
+	writeLines(c(utils::timestamp(quiet=TRUE), uri), fok)
+
+	if (haveData) {
+		return(list.files(path, recursive=TRUE))	
+	} else {
+		return(NULL)
+	}
 }
 
 
