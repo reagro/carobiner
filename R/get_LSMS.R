@@ -23,6 +23,12 @@ get_LSMS <- function(uri, path, cache=TRUE) {
 	r <- httr::content(httr::GET(url), as="text")
 	x <- unlist(strsplit(gsub("\t|\r", "", r), "\n"))
 	i <- grep("Data in CSV", x)
+	if (length(i) == 0) {
+		i <- grep("Data in ASCII", x)
+		if (length(i) == 0) {
+			stop("no data here (or a barrier?)")
+		}
+	}
 	x <- x[i:(i+10)]
 	i <- grep("href=", x)
 	x <- x[i:(i+1)]
