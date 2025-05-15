@@ -1,21 +1,22 @@
 
-get_LSMS <- function(uri, path, cache=TRUE) {
+get_LSMS <- function(uri, path, pwds, cache=TRUE) {
 
 	fok <- file.path(path, "ok.txt")
 	if (cache && file.exists(fok)) {
 		return(list.files(path, recursive=TRUE))
 	}
-	if (!exists("LSMS_email")) {
-		stop("required global variable 'LSMS_email' not found")
+
+	if (!isTRUE(nchar(pwds$LSMS_email) > 4)) {
+		stop("required user name 'LSMS_email' not found; see 'passwords_template.R'")
 	}
-	if (!exists("LSMS_password")) {
-		stop("required global variable 'LSMS_password' not found")
+	if (!isTRUE(nchar(pwds$LSMS_password) > 1)) {
+		stop("required password 'LSMS_password' not found; see 'passwords_template.R'")
 	}
 
 	dir.create(path, FALSE, FALSE)
 	lsms_login = "https://microdata.worldbank.org/index.php/auth/login"
 	#html <- httr::content(GET(lsms_login), "text")
-	p <- httr::POST(lsms_login, body = list('email' = LSMS_email, 'password' = LSMS_password))
+	p <- httr::POST(lsms_login, body = list('email' = pwds$LSMS_email, 'password' = pwds$LSMS_password))
 	uhtml <- paste0("https://doi.org/", gsub("doi:", "", uri))
 	z <- httr::GET(uhtml)
 	zurl <- gsub("0;url=", "", z$headers$refresh)
@@ -60,6 +61,8 @@ get_LSMS <- function(uri, path, cache=TRUE) {
 	for (f in fpdf) {
 		download.file(f, file.path(dp, basename(f)), mode="wb", quiet=TRUE)
 	}
+	
+	return(list.files(path, recursive=TRUE))	
 }
 
 

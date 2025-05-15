@@ -80,29 +80,42 @@ file_downloads <- function(files, path, cache) {
 }
 
 
+
+get_pwds <- function(path) {
+	fpwd <- file.path(path, "passwords.R")
+	if (file.exists(fpwd)) {
+		source(fpwd, local=TRUE)
+		pwds()
+	} else {
+		data.frame()
+	}
+}
+
+
 get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 	if (is.null(path)) {
-		path <- file.path(tempdir(), "carob", fsep="/")
+		dpath <- file.path(tempdir(), "carob", fsep="/")
 	} else {
-		path <- file.path(path, "data/raw", group)
+		dpath <- file.path(path, "data/raw", group)
 	}
 	if (is.null(files)) {	
 		uname <- yuri::simpleURI(uri)
 	} else {
 		uname <- gsub("/|:", "_", uri)
 	}
-	if (!file.exists(file.path(path, uname, "ok.txt"))) {
+	if (!file.exists(file.path(dpath, uname, "ok.txt"))) {
 		cache <- FALSE
 	}
-	dir.create(path, FALSE, TRUE)
+	dir.create(dpath, FALSE, TRUE)
 	if (!is.null(files)) {
-		file_downloads(files, path, cache)
+		file_downloads(files, dpath, cache)
 	} else {
 		if (group == "LSMS") {
-			path <- file.path(path, uname)
-			ff <- get_LSMS(uri, path, cache=cache)		
+			pwds <- get_pwds(path)
+			dpath <- file.path(dpath, uname)
+			ff <- get_LSMS(uri, dpath, pwds, cache=cache)		
 		} else {
-			ff <- yuri::dataURI(uri, path, unzip=TRUE, cache=cache)
+			ff <- yuri::dataURI(uri, dpath, unzip=TRUE, cache=cache)
 		}
 		filter_files(ff)
 	}
