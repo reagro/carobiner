@@ -3,19 +3,26 @@ get_LSMS <- function(uri, path, pwds, cache=TRUE) {
 
 	fok <- file.path(path, "ok.txt")
 	if (cache && file.exists(fok)) {
-		return(list.files(path, recursive=TRUE))
+		return(list.files(path, recursive=TRUE, full.names=TRUE))
 	}
 
-	if (!isTRUE(nchar(pwds$LSMS_email) > 4)) {
-		stop("required user name 'LSMS_email' not found; see 'passwords_template.R'")
+	if (!exists("LSMS_email")) {
+		if (isTRUE(nchar(pwds$LSMS_email) > 4)) {
+			LSMS_email <- pwds$LSMS_email
+		} else {
+			stop("'LSMS_email' not found; you can provide it in the global environment or in 'passwords.R'")
+		}
 	}
-	if (!isTRUE(nchar(pwds$LSMS_password) > 1)) {
-		stop("required password 'LSMS_password' not found; see 'passwords_template.R'")
+	if (!exists("LSMS_password")) {
+		if (isTRUE(nchar(pwds$LSMS_password) > 1)) {
+			LSMS_password <- pwds$LSMS_password
+		} else {
+			stop("'LSMS_password' not found; you can provide it in the global environment or in 'passwords.R'")		
+		}
 	}
 
 	dir.create(path, FALSE, FALSE)
 	lsms_login = "https://microdata.worldbank.org/index.php/auth/login"
-	#html <- httr::content(GET(lsms_login), "text")
 	p <- httr::POST(lsms_login, body = list('email' = pwds$LSMS_email, 'password' = pwds$LSMS_password))
 	if (grepl("login", p$headers$refresh)) {
 		stop("invalid email/password")
@@ -69,7 +76,7 @@ get_LSMS <- function(uri, path, pwds, cache=TRUE) {
 	writeLines(c(utils::timestamp(quiet=TRUE), uri), fok)
 
 	if (haveData) {
-		return(list.files(path, recursive=TRUE))	
+		return(list.files(path, recursive=TRUE, full.names=TRUE))
 	} else {
 		return(NULL)
 	}
@@ -93,7 +100,7 @@ LSMS_metadata <- function(uri, path, major, minor) {
 		dataset_id = suri,
 		group="LSMS",
 		uri=uri,
-		license=NA,
+		license="bespoke: acknowledge source, no redistribution, report data use",
 		title= tit,
 		authors=NA,
 		data_published=dat,
