@@ -70,7 +70,7 @@ update_carob <- function(path, group="") {
 		test <- is_current(jf)
 		if (!is.na(test[1]) && (!isTRUE(test[1]))) {
 			d <- dirname(jf)
-			group <- basename(dirname(f))
+			group <- basename(dirname(d))
 
 			vold <- test[1]
 			vnew <- test[2]
