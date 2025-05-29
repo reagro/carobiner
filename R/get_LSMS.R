@@ -1,4 +1,5 @@
 
+
 get_LSMS <- function(uri, path, pwds, cache=TRUE) {
 
 	fok <- file.path(path, "ok.txt")
@@ -24,11 +25,16 @@ get_LSMS <- function(uri, path, pwds, cache=TRUE) {
 	dir.create(path, FALSE, FALSE)
 	lsms_login = "https://microdata.worldbank.org/index.php/auth/login"
 	p <- httr::POST(lsms_login, body = list('email' = pwds$LSMS_email, 'password' = pwds$LSMS_password))
-	if (grepl("login", p$headers$refresh)) {
-		stop("invalid email/password")
+	if (p$status != 200) {
+		stop(paste0("bad POST response, status=", p$status, ". invalid email/password?"))
+	} else if (!(is.null(p$headers$refresh))) {
+		if (grepl("login", p$headers$refresh)) {
+			stop("invalid email/password")
+		}
 	}
 	uhtml <- paste0("https://doi.org/", gsub("doi:", "", uri))
 	z <- httr::GET(uhtml)
+
 	zurl <- gsub("0;url=", "", z$headers$refresh)
 	url <- paste0(zurl, "/get-microdata")
 	r <- httr::content(httr::GET(url), as="text")

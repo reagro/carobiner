@@ -130,6 +130,71 @@ sort_by_terms <- function(x, type, group) {
 }
 
 
+combine_compiled <- function(path, zip=TRUE, ...) {
+
+	fff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", recursive=TRUE)
+	grps <- unique(sapply(strsplit(fff, "/"), function(i) ifelse(length(i) > 1, i[1], "doi")))
+	cpath <- file.path(path, "data", "compiled")
+
+	pzip <- Sys.getenv("R_ZIPCMD")
+	if (pzip == "") {pzip <- "zip"}
+	zipflags <- "-jq9"		
+
+	ff <- list.files(cpath, pattern = "^carob_all.*.csv$|^carob_all.*.zip$", full.names=TRUE)
+	# |^carob_all.*.xlsx$
+	file.remove(ff)
+
+	ff <- list.files(cpath, pattern = "\\.csv$", full.names=TRUE)
+
+	i <- grep("terms.csv$", ff)
+	gf <- ff[i]
+	ff <- ff[-i]
+	cterms <- unique(lapply(gf, read.csv))
+	cterms <- do.call(carobiner:::bindr, cterms)
+	fterms <- file.path(cpath, paste0("carob_all_terms.csv"))
+	data.table::fwrite(cterms, fterms, row.names=FALSE)
+	fg <- c("metadata", "warnings", "long", "")
+
+	for (add in c("-cc", "")) {
+		j <- grepl(paste0("-cc.csv$"), ff)		
+		if (add == "") {
+			j <- !j
+		}
+		fi <- ff[j]
+		d <- list()
+		fcsv <- NULL
+		for (x in fg) {
+			name <- ifelse(x=="", "data", x)
+			i <- grep(paste0(x, add, ".csv$"), fi)
+			gf <- fi[i]
+			fi <- fi[-i]
+			y <- lapply(gf, read.csv)
+			d[[name]] <- do.call(carobiner:::bindr, y)
+			outf <- file.path(cpath, paste0("carob_all_", x, add, ".csv"))
+			outf <- gsub("_-cc.csv", "-cc.csv", outf)
+			outf <- gsub("_.csv", ".csv", outf)
+			data.table::fwrite(d[[name]], outf, row.names=FALSE)
+			fcsv <- c(fcsv, outf)
+		}
+
+		excel=FALSE
+		if (excel) {
+			fxls <- gsub(".csv$", ".xlsx", outf)
+			d$terms = cterms
+			d <- d[c(1,5,4,3,2)]
+			writexl::write_xlsx(d, fxls)
+			rm(d)
+		}
+
+		if (zip) {
+			fzip <- gsub("\\.csv$", ".zip", outf)
+			zf <- c(fcsv, fterms)
+			utils::zip(fzip, zf, zipflags, zip=pzip)
+		}
+	}
+}
+
+
 compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=FALSE, cache=FALSE) {
 	warn <- options("warn")
 	if (warn$warn < 1) {
@@ -267,6 +332,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 		ret <- c(ret, outmf, outff)
 	}
 	utils::flush.console()
+	
 	ret
 }
 
@@ -405,14 +471,20 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 }
 
 
-make_carob <- function(path, group="", quiet=FALSE, check="all", report=FALSE, cache=TRUE, ...) {
+make_carob <- function(path, group="", quiet=FALSE, check="all", report=FALSE, combine=FALSE, cache=TRUE, ...) {
 	get_packages(group)
-	message(" === process ===")
+	message(" === process ==="); flush.console()
 	process_carob(path, group=group, quiet=quiet, check=check, cache=cache)
-	message(" === compile ===")
-	compile_carob(path, group=group, cache=cache, ...)
+	message(" === compile ==="); flush.console()
+	out <- compile_carob(path, group=group, cache=cache, ...)
+	if (!is.null(out)) {
+		if (combine) {
+			message(" === combine ==="); flush.console()
+			combine_compiled(path, ...)
+		}
+	}
 	if (report) {
-		message(" === report ===")
+		message(" === report ==="); flush.console()
 		make_reports(path, group="", cache=TRUE)
 	}
 	message(" === done ===")
