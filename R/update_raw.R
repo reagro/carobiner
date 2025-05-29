@@ -17,6 +17,9 @@ is_current <- function(jf ) {
 	old_minor <- x$data$latestVersion$versionMinorNumber
 	uri <- x$data$latestVersion$datasetPersistentId
 	url <- x$data$persistentUrl
+	
+	httr::set_config(httr::config(ssl_verifypeer = 0L))
+
 	g <- httr::GET(url)
 	if (g$status_code %in% c(200,202)) {
 		u <- g$url
@@ -67,7 +70,8 @@ update_carob <- function(path, group="") {
 	jff <- grep("/old_", jff, value=TRUE, invert=TRUE)
 	
 	for (jf in jff) {
-		test <- is_current(jf)
+		test <- try(is_current(jf))
+		if (inherits(test, "try-error")) next
 		if (!is.na(test[1]) && (!isTRUE(test[1]))) {
 			d <- dirname(jf)
 			group <- basename(dirname(d))
