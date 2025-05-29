@@ -41,9 +41,13 @@ get_license <- function(x) {
 		return(x$licenses$name)
 	}
   
-  if (!is.null(x$license)) { # Dryad
-    return(x$license)
-  }
+	if (!is.null(x$license)) { # Dryad
+		lic <- x$license
+		if (substr(lic, 1, 4) == "http") {
+			lic <- gsub(".html$", "", basename(lic))
+		}
+		return(lic)
+	}
 
 	lic <- x$data$latestVersion$license
 	trms <- x$data$latestVersion$termsOfUse
@@ -72,8 +76,11 @@ get_license <- function(x) {
 					return("CIMMYT license")
 				}
 			}
-			if (grepl("by.4.0", trms)) {
+			if (grepl("by.4.0|CC-BY-4.0|", trms, ignore.case=TRUE)) {
 				return("CC-BY-4.0")
+			}
+			if (grepl("CC0-1.0", trm, ignore.case=TRUE)) {
+				return("CC0-1.0")
 			}
   			gg <- unlist(regmatches(g, gregexpr('Creative (.+?) license', g, ignore.case=TRUE)))
 			if (any(tolower(gg) == "creative commons attribution 4.0 international license")) {
@@ -112,7 +119,7 @@ get_license <- function(x) {
 			lic <- lic$name
 		}
 	} else {
-		lic <- gsub(" ", "-", gsub("CC-ZERO", "CC-0", lic))
+		lic <- gsub(" ", "-", gsub("CC-ZERO", "CC0", lic))
 	}
 	if (is.null(lic)) lic <- "unknown"
 	
@@ -158,7 +165,7 @@ get_description <- function(x) {
 	}
 	if (is.null(out)) {
 		#dryad
-		out <- x$abstract
+		out <- gsub("<p>|</p>", "", x$abstract)
 	}
 	if (is.null(out)) {
 		#zenodo

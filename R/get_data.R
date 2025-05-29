@@ -5,7 +5,7 @@
 
 
 filter_files <- function(x) { 
-	x <- grep("\\.json$|ok\\.txt$|\\.pdf$|_files.txt$|\\.zip$|\\.doc$|\\.docx$", x, value=TRUE, invert=TRUE)
+	x <- grep("\\.json$|ok\\.txt$|\\.pdf$|_files.txt$|\\.zip$|\\.doc$|\\.docx$|/old_", x, value=TRUE, invert=TRUE)
 	# remove opened excel files
 	grep("/~$", x, fixed=TRUE, invert=TRUE, value=TRUE)
 }

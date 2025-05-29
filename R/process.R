@@ -130,6 +130,43 @@ sort_by_terms <- function(x, type, group) {
 }
 
 
+zip_clean <- function(path) {
+
+	pzip <- Sys.getenv("R_ZIPCMD")
+	if (pzip == "") {pzip <- "zip"}
+	zipflags <- "-jq9"		
+
+	zpath <- file.path(path, "data", "clean", "zip")
+	dir.create(zpath, FALSE, FALSE)
+
+	ff <- list.files(file.path(path, "data", "clean"), pattern="_meta.csv$", recursive=TRUE, full.names=TRUE)
+	zz <- file.path(zpath, basename(gsub("_meta.csv", ".zip", ff)))
+	e <- file.exists(zz)
+
+	if (sum(e) > 0) {
+		i <- which(e)
+		zzi <- zz[i]
+		ffinfo <- file.info(ff[i])$mtime
+		zzinfo <- file.info(zzi)$mtime
+		j <- zzinfo < ffinfo
+		if (any(j)) {
+			rz <- zzi[j]
+			file.remove(rz)
+		}
+	}
+	
+	for (i in 1:length(ff)) {
+		if (file.exists(zz[i])) next
+		d <- read.csv(ff[i])
+		if (grepl("CC|ETALAB", d$license)) {
+			pat <- paste0(gsub("_meta.csv", "", basename(ff[i])), ".*.csv")
+			fd <- list.files(dirname(ff[i]), pattern=pat, full.names=TRUE, recursive=TRUE)
+			utils::zip(zz[i], fd, zipflags, zip=pzip)
+		}
+	}
+}
+
+
 combine_compiled <- function(path, zip=TRUE, ...) {
 
 	fff <- list.files(file.path(path, "data", "clean"), pattern=".csv$", recursive=TRUE)
