@@ -201,6 +201,10 @@ check_cropyield <- function(x, answ) {
 	if (!all(c("crop", "yield") %in% names(x))) return(answ)
 	if (all(is.na(x$yield))) return(answ)
 	x <- x[, c("crop", "yield")]
+	x <- na.omit(x)
+	if (nrow(x) == 0) {
+		return(answ)
+	}
 	a <- suppressWarnings(
 			stats::aggregate(x[,"yield", drop=FALSE], x[, "crop", drop=FALSE], max, na.rm=TRUE)
 		)

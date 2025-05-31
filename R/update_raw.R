@@ -11,7 +11,6 @@ is_current <- function(jf ) {
 	x <- jsonlite::fromJSON(jf)
 	old_major <- x$data$latestVersion$versionNumber
 	if (is.null(old_major)) {
-		warning("not dataverse?")
 		return(NA)
 	}
 	old_minor <- x$data$latestVersion$versionMinorNumber

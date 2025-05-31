@@ -91,6 +91,11 @@ write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, o
 	metadata <- sort_by_terms(metadata, "metadata", group)
 	timerecs <- sort_by_terms(timerecs, "timerecs", group)
 
+	if (nrow(records) > 0) {
+		metadata$crops <- paste(sort(unique(records$crop)), collapse=";")
+		metadata$countries <- paste(sort(unique(records$country)), collapse=";")
+	}
+	
 	if (to_mem) {
 		return(list(meta=metadata, data=records, long=timerecs))
 	}
@@ -514,15 +519,15 @@ make_carob <- function(path, group="", quiet=FALSE, check="all", report=FALSE, c
 	process_carob(path, group=group, quiet=quiet, check=check, cache=cache)
 	message(" === compile ==="); flush.console()
 	out <- compile_carob(path, group=group, cache=cache, ...)
+	if (report) {
+		message(" === report ==="); flush.console()
+		make_reports(path, group="", cache=TRUE)
+	}
 	if (!is.null(out)) {
 		if (combine) {
 			message(" === combine ==="); flush.console()
 			combine_compiled(path, ...)
 		}
-	}
-	if (report) {
-		message(" === report ==="); flush.console()
-		make_reports(path, group="", cache=TRUE)
 	}
 	message(" === done ===")
 }

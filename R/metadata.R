@@ -166,6 +166,7 @@ get_description <- function(x) {
 	if (is.null(out)) {
 		#dryad
 		out <- gsub("<p>|</p>", "", x$abstract)
+		if (length(out) < 2) out <- NULL
 	}
 	if (is.null(out)) {
 		#zenodo
@@ -182,7 +183,8 @@ get_description <- function(x) {
 	out <- gsub("\u201C", "'", out)
 	out <- gsub("\u201D", "'", out)
 	out <- gsub("\u2018", "'", out)
-	gsub("\u2019", "'", out)
+	out <- gsub("\u2019", "'", out)
+	gsub("<p>|</p>", "'", out)
 }
 
 
@@ -225,15 +227,15 @@ get_authors <- function(x) {
 
 extract_metadata <- function(js, uri, group) {
 	
-	lic <- get_license(js)
+	lic <- carobiner:::get_license(js)
 	if (is.null(lic)) {
 		warning("no license found")
 		lic <- as.character(NA)
 	}
 
-	authors <- get_authors(js)
+	authors <- carobiner:::get_authors(js)
 	auth <- paste(authors, collapse="; ")
-	titl <- gsub("\\.\\.$", ".", paste0(get_title(js), "."))
+	titl <- gsub("\\.\\.$", ".", paste0(carobiner:::get_title(js), "."))
 
 	pubdate <- c(js$data$publicationDate, js$result$creation_date, js$publicationDate, js$metadata$publication_date)
 	if (is.null(pubdate)) pubdate <- "????-??-??"
@@ -260,7 +262,7 @@ extract_metadata <- function(js, uri, group) {
 		title = titl,
 		authors = authors,
 		data_published = pubdate,
-		description = get_description(js),
+		description = carobiner:::get_description(js),
 		data_citation = cit
 	)
 }
