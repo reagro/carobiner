@@ -129,7 +129,7 @@ get_function <- function(name, path, group="") {
 
 
 sort_by_terms <- function(x, type, group) {
-	trms <- vocal::accepted_variables(type, ifelse(group == "doi", "", group))
+	trms <- vocal::accepted_variables(type, ifelse(group == "doi", "", group), voc="reagro/terminag")
 	trms <- trms$name[trms$name %in% names(x)]
 	x[, trms]
 }
@@ -300,7 +300,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 			have_warnings <- FALSE
 		}
 		
-		gterms <- vocal::accepted_variables("records", grp)
+		gterms <- vocal::accepted_variables("records", grp, voc="reagro/terminag")
 		gterms <- gterms[, c("name", "type", "unit", "description")]
 
 #		utils::write.csv(gterms, outft, row.names=FALSE)

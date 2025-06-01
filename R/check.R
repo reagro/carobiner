@@ -216,7 +216,7 @@ check_cropyield <- function(x, answ) {
 				paste0("crop yield too low (tons not kg?): ", bad))
 		return(answ)
 	}
-	trms <- vocal::accepted_values("crop")
+	trms <- vocal::accepted_values("crop", voc="reagro/terminag")
 	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
 	trms <- stats::na.omit(trms)
 	if (nrow(trms) == 0) return(answ)
@@ -394,7 +394,7 @@ check_d_terms <- function(answ, x, type, group, check) {
 		answ[nrow(answ)+1, ] <- c("duplicates", paste0("duplicate variable names: ", tnms))		
 	}
 
-	trms <- vocal::accepted_variables(type, group)
+	trms <- vocal::accepted_variables(type, group, voc="reagro/terminag")
 
 	xnms <- nms[!(nms %in% trms$name)]
 	if (length(xnms) > 0) {
@@ -423,7 +423,7 @@ check_d_terms <- function(answ, x, type, group, check) {
 	voc <- voc[voc$name %in% nms, ]
 	if (NROW(voc) > 0) {
 		for (i in 1:nrow(voc)) {
-			accepted <- vocal::accepted_values(voc$vocabulary[i])[,1]
+			accepted <- vocal::accepted_values(voc$vocabulary[i], voc="reagro/terminag")[,1]
 			provided <- unique(x[, voc$name[i]])
 			if (voc$required[i] != "yes") {
 				provided <- stats::na.omit(provided)
