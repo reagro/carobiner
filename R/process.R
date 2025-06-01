@@ -129,7 +129,7 @@ get_function <- function(name, path, group="") {
 
 
 sort_by_terms <- function(x, type, group) {
-	trms <- accepted_variables(type, ifelse(group == "doi", "", group))
+	trms <- vocal::accepted_variables(type, ifelse(group == "doi", "", group))
 	trms <- trms$name[trms$name %in% names(x)]
 	x[, trms]
 }
@@ -162,7 +162,7 @@ zip_clean <- function(path) {
 	
 	for (i in 1:length(ff)) {
 		if (file.exists(zz[i])) next
-		d <- read.csv(ff[i])
+		d <- utils::read.csv(ff[i])
 		if (grepl("CC|ETALAB", d$license)) {
 			pat <- paste0(gsub("_meta.csv", "", basename(ff[i])), ".*.csv")
 			fd <- list.files(dirname(ff[i]), pattern=pat, full.names=TRUE, recursive=TRUE)
@@ -191,8 +191,8 @@ combine_compiled <- function(path, zip=TRUE, ...) {
 	i <- grep("terms.csv$", ff)
 	gf <- ff[i]
 	ff <- ff[-i]
-	cterms <- unique(lapply(gf, read.csv))
-	cterms <- do.call(carobiner:::bindr, cterms)
+	cterms <- unique(lapply(gf, utils::read.csv))
+	cterms <- do.call(bindr, cterms)
 	fterms <- file.path(cpath, paste0("carob_all_terms.csv"))
 	data.table::fwrite(cterms, fterms, row.names=FALSE)
 	fg <- c("metadata", "warnings", "long", "")
@@ -210,8 +210,8 @@ combine_compiled <- function(path, zip=TRUE, ...) {
 			i <- grep(paste0(x, add, ".csv$"), fi)
 			gf <- fi[i]
 			fi <- fi[-i]
-			y <- lapply(gf, read.csv)
-			d[[name]] <- do.call(carobiner:::bindr, y)
+			y <- lapply(gf, utils::read.csv)
+			d[[name]] <- do.call(bindr, y)
 			outf <- file.path(cpath, paste0("carob_all_", x, add, ".csv"))
 			outf <- gsub("_-cc.csv", "-cc.csv", outf)
 			outf <- gsub("_.csv", ".csv", outf)
@@ -300,7 +300,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 			have_warnings <- FALSE
 		}
 		
-		gterms <- accepted_variables("records", grp)
+		gterms <- vocal::accepted_variables("records", grp)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
 
 #		utils::write.csv(gterms, outft, row.names=FALSE)
@@ -515,17 +515,17 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 
 make_carob <- function(path, group="", quiet=FALSE, check="all", report=FALSE, combine=FALSE, cache=TRUE, ...) {
 	get_packages(group)
-	message(" === process ==="); flush.console()
+	message(" === process ==="); utils::flush.console()
 	process_carob(path, group=group, quiet=quiet, check=check, cache=cache)
-	message(" === compile ==="); flush.console()
+	message(" === compile ==="); utils::flush.console()
 	out <- compile_carob(path, group=group, cache=cache, ...)
 	if (report) {
-		message(" === report ==="); flush.console()
+		message(" === report ==="); utils::flush.console()
 		make_reports(path, group="", cache=TRUE)
 	}
 	if (!is.null(out)) {
 		if (combine) {
-			message(" === combine ==="); flush.console()
+			message(" === combine ==="); utils::flush.console()
 			combine_compiled(path, ...)
 		}
 	}

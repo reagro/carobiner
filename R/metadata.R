@@ -227,15 +227,15 @@ get_authors <- function(x) {
 
 extract_metadata <- function(js, uri, group) {
 	
-	lic <- carobiner:::get_license(js)
+	lic <- get_license(js)
 	if (is.null(lic)) {
 		warning("no license found")
 		lic <- as.character(NA)
 	}
 
-	authors <- carobiner:::get_authors(js)
+	authors <- get_authors(js)
 	auth <- paste(authors, collapse="; ")
-	titl <- gsub("\\.\\.$", ".", paste0(carobiner:::get_title(js), "."))
+	titl <- gsub("\\.\\.$", ".", paste0(get_title(js), "."))
 
 	pubdate <- c(js$data$publicationDate, js$result$creation_date, js$publicationDate, js$metadata$publication_date)
 	if (is.null(pubdate)) pubdate <- "????-??-??"
@@ -262,7 +262,7 @@ extract_metadata <- function(js, uri, group) {
 		title = titl,
 		authors = authors,
 		data_published = pubdate,
-		description = carobiner:::get_description(js),
+		description = get_description(js),
 		data_citation = cit
 	)
 }

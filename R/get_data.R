@@ -84,8 +84,14 @@ file_downloads <- function(files, path, cache) {
 get_pwds <- function(path) {
 	fpwd <- file.path(path, "passwords.R")
 	if (file.exists(fpwd)) {
+		pwds <- function(){NULL}
 		source(fpwd, local=TRUE)
-		pwds()
+		p <- pwds()
+		if (is.null(p)) {
+			warning("invalid passwords file")
+			data.frame()
+		}
+		p
 	} else {
 		data.frame()
 	}

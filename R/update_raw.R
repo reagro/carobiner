@@ -65,7 +65,7 @@ is_current <- function(jf ) {
 
 update_carob <- function(path, group="") {
 
-	jff <- list.files(file.path(path, "data/raw/", group), pattern=".json$", recursive=TRUE, full=TRUE)
+	jff <- list.files(file.path(path, "data/raw/", group), pattern=".json$", recursive=TRUE, full.names=TRUE)
 	jff <- grep("/old_", jff, value=TRUE, invert=TRUE)
 	
 	for (jf in jff) {
@@ -77,7 +77,7 @@ update_carob <- function(path, group="") {
 
 			vold <- test[1]
 			vnew <- test[2]
-			message(paste(group, gsub(".json$", "", basename(jf)), vold, "->", vnew)); flush.console()
+			message(paste(group, gsub(".json$", "", basename(jf)), vold, "->", vnew)); utils::flush.console()
 
 			old <- list.files(d, full.names=TRUE, recursive=TRUE)
 			old <- grep(file.path(d, "old_"), old, value=TRUE, invert=TRUE)
@@ -87,7 +87,7 @@ update_carob <- function(path, group="") {
 			file.rename(old, new)
 			pat <- basename(d)
 			dd <- gsub("data/raw/", "data/clean/", dirname(d))
-			ff <- list.files(dd, pattern=pat, full=TRUE)
+			ff <- list.files(dd, pattern=pat, full.names=TRUE)
 			file.remove(ff)
 		}
 	}

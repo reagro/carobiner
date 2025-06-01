@@ -68,15 +68,15 @@ get_LSMS <- function(uri, path, pwds, cache=TRUE) {
 	x <- trimws(unlist(strsplit(gsub("\t|\r", "", r), "\n")))
 	x <- x[grep(paste0('href=\"', zurl, "/download"), x)]
 	p <- grep("pdf", x, value=TRUE)
-	s <- sapply(strsplit(p, 'title=\"'), \(i) i[[2]])
+	s <- sapply(strsplit(p, 'title=\"'), function(i) i[[2]])
 	z <- strsplit(s, '\" href=\"')	
-	pdf <- sapply(z, \(i) i[[1]])
-	updf <- sapply(z, \(i) strsplit(i[[2]], '\">')[[1]][1])	
+	pdf <- sapply(z, function(i) i[[1]])
+	updf <- sapply(z, function(i) strsplit(i[[2]], '\">')[[1]][1])	
 	fpdf <- gsub(" ", "%20", paste0(updf, "/", pdf))
 	dp <- file.path(path, "docs")
 	dir.create(dp, FALSE, FALSE)
 	for (f in fpdf) {
-		download.file(f, file.path(dp, basename(f)), mode="wb", quiet=TRUE)
+		utils::download.file(f, file.path(dp, basename(f)), mode="wb", quiet=TRUE)
 	}
 	
 	writeLines(c(utils::timestamp(quiet=TRUE), uri), fok)
