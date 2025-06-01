@@ -1,18 +1,4 @@
 
-aggregated_data <- function(path, group, cc=FALSE) {
-
-	if (cc) {
-		f <- file.path(path, "data", "compiled", paste0("carob_", group, "-cc.csv"))	
-	} else {
-		f <- file.path(path, "data", "compiled", paste0("carob_", group, ".csv"))
-	}
-	if (!file.exists(f)) {
-		stop("these data do not exist. First run 'make_carob'?")
-	}
-	data.frame(data.table::fread(f))	
-}
-
-
 get_locations <- function(path, country=NULL) {
 	ff <- list.files(file.path(path, "data/compiled"), pattern=".csv$", full.names=TRUE)
 	ff <- ff[!grepl("-cc.csv$", ff)]
