@@ -89,12 +89,18 @@ check_pubs <- function(x, path, answ) {
 
 
 
+check_packages <- function(name, version) {
+	if (packageVersion(name) < version) {
+		stop(paste0('please update package ', name, " with:\n   remotes::install.github('carob-data/", name, "')"))
+	}
+}
+
+
 check_d_terms <- function(answ, x, type, group, check) {
 
-	if (packageVersion("yuri") < "0.1-2") {
-		stop('update yuri with: remotes::install.github("reagro/yuri")')
-	}
-
+	check_packages("yuri", "0.1-2")
+	check_packages("vocal", "0.1-0")
+	
 	bad <- rep(FALSE, ncol(x))
 	chars <- sapply(x, is.character)
 	for (i in which(chars)) {
