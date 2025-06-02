@@ -4,7 +4,7 @@ Title: Standardizing agricultural research data
 Description: A collection functions to support the "Carob" project to standardize and aggregate open agricultural research data trough reproducible workflows. See https://carob-data.org and https://github.com/reagro/carob for details.
 Version: 0.6-1
 Imports: readxl, writexl, httr, data.table, jsonlite, yuri (>= 0.1-2), vocal (>= 0.1-0)
-Remotes: github::reagro/yuri, github::reagro/vocal
+Remotes: github::reagro/yuri@HEAD, github::reagro/vocal@HEAD
 Suggests: terra, revtools, stringr, rmarkdown, kableExtra, summarytools
 Date: 2025-06-01
 Encoding: UTF-8
