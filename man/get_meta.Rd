@@ -1,6 +1,6 @@
-\name{read_metadata}
+\name{get_metadata}
 
-\alias{read_metadata}
+\alias{get_metadata}
 
 \title{
 Get the dataset level meta-data
@@ -11,7 +11,7 @@ Read the meta-data file associated with a data set (from the associated json fil
 }
 
 \usage{
-read_metadata(uri, path, group, major=1, minor=0)
+get_metadata(uri, path, group, major=1, minor=0)
 }
  
 \arguments{
@@ -25,4 +25,3 @@ read_metadata(uri, path, group, major=1, minor=0)
 \value{
 data.frame
 }
-
