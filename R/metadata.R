@@ -25,7 +25,7 @@ check_version <- function(m, major=0, minor=0) {
 			mv <- paste0(mv, ".0")
 		}
 		if (mv != v) {
-			error(paste("version", v, "expected but version", mv, "found"), call.=FALSE)	
+			stop(paste("version", v, "expected but version", mv, "found"), call.=FALSE)	
 		}
 	}
 }
