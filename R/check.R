@@ -91,6 +91,10 @@ check_pubs <- function(x, path, answ) {
 
 check_d_terms <- function(answ, x, type, group, check) {
 
+	if (packageVersion("yuri") < "0.1-2") {
+		stop('update yuri with: remotes::install.github("reagro/yuri")')
+	}
+
 	bad <- rep(FALSE, ncol(x))
 	chars <- sapply(x, is.character)
 	for (i in which(chars)) {
