@@ -4,9 +4,14 @@
 ## ISSUES
 # list processing issues here so that an editor can look at them
 
+
+
 carob_script <- function(path) {
 
 "_description_"
+
+## when done, remove all the default comments, such as this one, from the script
+## only keep the comments you added that are specific to this dataset
 
 	uri <- _uri_
 	group <- "_group_"
@@ -15,7 +20,7 @@ carob_script <- function(path) {
 	meta <- data.frame(
 		carobiner::get_metadata(uri, path, group, major=_major_, minor=_minor_),
 		# include the data provider and/or all institutes listed as authors (if any)
-		data_institute = "_datainst_",
+		data_organization = "_dataorg_",
 		publication = "_pub_",
 		project = NA,
 		# data_type can be e.g. "on-farm experiment", "survey", "compilation"
@@ -29,7 +34,8 @@ carob_script <- function(path) {
 		completion = 0,
 		carob_contributor = "Your Name",
 		carob_date = "_today_",
-		notes = "", # notes for the end-user
+		# notes for the end-user
+		notes = "", 
 		# if available report the experimental or survey design
 		design = NA
 	)

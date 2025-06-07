@@ -26,8 +26,10 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	s <- gsub("_minor_", v[2], s)
 	s <- gsub("_uri_", uri, s)
 	s <- gsub("_group_", group, s)
+	s <- gsub("_dataorg_", meta$data_organization, s)
+	s <- gsub("_pub_", ifelse(is.na(meta$publication), "", meta$publication), s)
 	s <- gsub("_today_", as.character(as.Date(Sys.time())), s)
-
+	
 
 	f <- NULL
 	n <- 0
