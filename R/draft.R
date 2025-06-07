@@ -2,9 +2,9 @@
 
 draft <- function(uri, path, group, overwrite=FALSE) {
 
-#uri <- "hdl:11529/10548230"
-#group <- "survey"
-#overwrite <- TRUE
+uri <- "hdl:11529/10548230"
+group <- "survey"
+overwrite <- TRUE
 
 	did <- yuri::simpleURI(uri)
 	## check on_carob ...
@@ -31,9 +31,11 @@ draft <- function(uri, path, group, overwrite=FALSE) {
 	f <- paste(paste0(paste0("\tf", 1:n), ' <- ff[basename(ff) == "', basename(ff), '"]'), collapse="\n")
 	s <- gsub("_filename_", f, s)
 
-	fcsv <- grepl("\\.csv$", ff)
-	fxls <- grepl("\\.xlsx$|\\.xls$", ff)
-	r <- paste(paste0(paste0("\tr", 1:n), " <- read.xxx(", paste0("f", 1:n), ")"), collapse="\n")
+	fcsv <- grepl("\\.csv$", ff) * 1
+	fxls <- grepl("\\.xlsx$|\\.xls$", ff) * 2
+	i <- pmax(fcsv, fxls) + 1
+	rd <- c("read.???(", "read.csv(", "carobiner::read.excel(")[i]
+	r <- paste(paste0(paste0("\tr", 1:n), " <- ", rd, paste0("f", 1:n), ")"), collapse="\n")
 	s <- gsub("_read_", r, s)
 
 	dir.create(dirname(fscript), FALSE, TRUE)
@@ -42,6 +44,6 @@ draft <- function(uri, path, group, overwrite=FALSE) {
 	invisible(fscript)
 }
 
-draft("hdl:11529/10548230", path, "survey", overwrite=TRUE)
+#draft("hdl:11529/10548230", path, "survey", overwrite=TRUE)
 
 
