@@ -30,14 +30,14 @@ check_version <- function(m, major=0, minor=0) {
 	}
 }
 
-get_metadata <- function(uri, path, group, major=1, minor=0) {
+get_metadata <- function(uri, path, group, major=1, minor=0, check=TRUE) {
 	if (group == "LSMS") {
 		return(LSMS_metadata(uri, path, major, minor))
 	}
 	dataset_id <- yuri::simpleURI(uri)
 	jpath <- file.path(path, "data", "raw", group, dataset_id)
 	m <- yuri::extract_metadata(uri, jpath)
-	check_version(m, major=major, minor=minor)
+	if (check) check_version(m, major=major, minor=minor)
 	m$group = group
 	m
 }
