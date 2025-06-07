@@ -2,9 +2,9 @@
 
 draft <- function(uri, path, group, overwrite=FALSE) {
 
-uri <- "hdl:11529/10548230"
-group <- "survey"
-overwrite <- TRUE
+#uri <- "hdl:11529/10548230"
+#group <- "survey"
+#overwrite <- TRUE
 
 	did <- yuri::simpleURI(uri)
 	## check on_carob ...
