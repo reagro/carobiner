@@ -30,7 +30,7 @@ check_version <- function(m, major=0, minor=0) {
 	}
 }
 
-get_metadata <- function(uri, path, group, major=1, minor=0, check=TRUE) {
+get_metadata <- function(uri, path, group, major=1, minor=0, check=TRUE, org=FALSE) {
 	if (group == "LSMS") {
 		return(LSMS_metadata(uri, path, major, minor))
 	}
@@ -38,7 +38,8 @@ get_metadata <- function(uri, path, group, major=1, minor=0, check=TRUE) {
 	jpath <- file.path(path, "data", "raw", group, dataset_id)
 	m <- yuri::extract_metadata(uri, jpath)
 	if (check) check_version(m, major=major, minor=minor)
-	m$group = group
+	if (!org) m$data_organization <- NULL
+	m$group <- group
 	m
 }
 

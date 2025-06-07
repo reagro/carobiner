@@ -1,6 +1,6 @@
 
 
-draft <- function(uri, path, group, overwrite=FALSE) {
+draft <- function(uri, path, group="draft", overwrite=FALSE) {
 
 #uri <- "hdl:11529/10548230"
 #group <- "survey"
@@ -16,7 +16,7 @@ draft <- function(uri, path, group, overwrite=FALSE) {
 	}
 	ff  <- carobiner::get_data(uri, path, group)
 
-	meta <-	carobiner::get_metadata(uri, path, group, major=0, minor=0, FALSE)
+	meta <-	carobiner::get_metadata(uri, path, group, major=0, minor=0, FALSE, TRUE)
 	v <- c(unlist(strsplit(meta$version, "\\.")), 0, 0)
 
 	s <- readLines(system.file("tmp/tmp", package="carobiner"))
@@ -64,7 +64,7 @@ draft <- function(uri, path, group, overwrite=FALSE) {
 				j <- which.min(dst)
 				sels <- sheets[j]
 				r <- c(r, paste0(paste0("\tr", n), " <- carobiner::read.excel(f", n, ", sheet=\"", sels, "\")"))
-				r <- c(r, paste("#other sheets are: ", paste(sheets[-j], collapse=", ")))
+				r <- c(r, paste("# other sheets: ", paste(sheets[-j], collapse=", ")))
 			}
 			n <- n + 1
 		}
