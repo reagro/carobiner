@@ -15,6 +15,7 @@ draft <- function(uri, path, group, overwrite=FALSE) {
 		error(paste(fscript, "exists. Use 'overwrite=TRUE' to overwrite it"))
 	}
 	ff  <- carobiner::get_data(uri, path, group)
+
 	meta <-	carobiner::get_metadata(uri, path, group, major=0, minor=0, FALSE)
 	v <- c(unlist(strsplit(meta$version, "\\.")), 0, 0)
 
@@ -27,23 +28,69 @@ draft <- function(uri, path, group, overwrite=FALSE) {
 	s <- gsub("_group_", group, s)
 	s <- gsub("_today_", as.character(as.Date(Sys.time())), s)
 
-	n <- length(ff)
-	f <- paste(paste0(paste0("\tf", 1:n), ' <- ff[basename(ff) == "', basename(ff), '"]'), collapse="\n")
-	s <- gsub("_filename_", f, s)
 
-	fcsv <- grepl("\\.csv$", ff) * 1
-	fxls <- grepl("\\.xlsx$|\\.xls$", ff) * 2
-	i <- pmax(fcsv, fxls) + 1
-	rd <- c("read.???(", "read.csv(", "carobiner::read.excel(")[i]
-	r <- paste(paste0(paste0("\tr", 1:n), " <- ", rd, paste0("f", 1:n), ")"), collapse="\n")
+	f <- NULL
+	n <- 0
+	is_xls <- grepl("\\.xlsx$|\\.xls$", ff)
+	if (any(is_xls)) {
+		fxls <- ff[is_xls]
+		n <- length(fxls)
+		f <- paste0(paste0("\tf", 1:n), ' <- ff[basename(ff) == "', basename(fxls), '"]')
+	}
+	is_csv <- grepl("\\.csv$", ff)
+	if (any(is_csv)) {
+		fcsv <- ff[is_csv]
+		n <- n+length(fcsv)
+		f <- c(f, paste0(paste0("\tf", (length(f)+1):n), ' <- ff[basename(ff) == "', basename(fcsv), '"]'))
+	}
+	is_other <- !(is_xls | is_csv)
+	if (any(is_other)) {
+		foth <- ff[is_other]
+		n <- n+length(fcsv)
+		f <- c(f, paste0(paste0("\tf", (length(f)+1):n), ' <- ff[basename(ff) == "', basename(foth), '"]'))
+	}
+	wf <- paste(f, collapse="\n")
+	s <- gsub("_filename_", wf, s)
+
+	r <- NULL
+	n <- 1
+	if (any(is_xls)) {
+		for (i in 1:length(fxls)) {
+			sheets <- readxl::excel_sheets(fxls[i])
+			if (length(sheets) == 1) {	
+				r <- c(r, paste0(paste0("\tr", n), " <- carobiner::read.excel(f", n, ")"))
+			} else {
+				dst <- utils::adist("data", sheets, ignore.case=TRUE)
+				j <- which.min(dst)
+				sels <- sheets[j]
+				r <- c(r, paste0(paste0("\tr", n), " <- carobiner::read.excel(f", n, ", sheet=\"", sels, "\")"))
+				r <- c(r, paste("#other sheets are: ", paste(sheets[-j], collapse=", ")))
+			}
+			n <- n + 1
+		}
+	}
+
+	if (any(is_csv)) {
+		nn <- sum(is_csv)
+		sq <- (n+1):(n+nn)
+		r <- c(r, paste0(paste0("\tr", sq), " <- read.csv(f", sq, ")"))
+		n <- n + nn
+	}
+	
+	if (any(is_other)) {
+		nn <- sum(is_other)
+		sq <- (n+1):(n+nn)
+		r <- c(r, paste0(paste0("\tr", sq), " <- read.???(f", sq, ")"))	
+	}
+	r <- paste(r, collapse="\n")
 	s <- gsub("_read_", r, s)
-
+	
 	dir.create(dirname(fscript), FALSE, TRUE)
 	writeLines(s, fscript)
 	message(fscript)
 	invisible(fscript)
 }
 
-#draft("hdl:11529/10548230", path, "survey", overwrite=TRUE)
+draft("hdl:11529/10548230", path, "survey", overwrite=TRUE)
 
 
