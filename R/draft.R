@@ -91,6 +91,6 @@ draft <- function(uri, path, group, overwrite=FALSE) {
 	invisible(fscript)
 }
 
-draft("hdl:11529/10548230", path, "survey", overwrite=TRUE)
+#draft("hdl:11529/10548230", path, "survey", overwrite=TRUE)
 
 
