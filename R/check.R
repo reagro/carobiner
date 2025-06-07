@@ -98,7 +98,7 @@ check_packages <- function(name, version) {
 
 check_d_terms <- function(answ, x, type, group, check) {
 
-	check_packages("yuri", "0.1-2")
+	check_packages("yuri", "0.1-4")
 	check_packages("vocal", "0.1-0")
 	
 	bad <- rep(FALSE, ncol(x))
