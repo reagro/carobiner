@@ -163,7 +163,7 @@ check_combined <- function(x, trms, voc) {
 
 check_weather <- function(x, answ) {
 	voc="carob-data/terminag"
-	trms <- vocal::accepted_variables(voc, c("all", "weather"))	
+	trms <- vocal::accepted_variables(voc, c("all", "location", "weather"))	
 	answ <- check_combined(x, trms, voc)
 	if (is.null(x$date)) {
 		answ[nrow(answ)+1, ] <- c("weather", "variable 'date' is missing")			
