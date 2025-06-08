@@ -72,7 +72,7 @@ write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, o
 			if (nrow(answ) > 0) {
 				data.table::fwrite(answ, fmsg, row.names=FALSE)
 				for (i in 1:nrow(answ)) {
-					message(paste("   ", answ$msg[i]))
+					message(paste0("    ", answ$check[i], ": ", answ$msg[i]))
 				}
 				message(paste("    contributor:", metadata$carob_contributor))
 			}

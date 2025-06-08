@@ -11,7 +11,14 @@ get_function <- function(name, path, group="") {
 
 
 sort_by_terms <- function(x, type, group) {
-	trms <- vocal::accepted_variables(type, ifelse(group == "doi", "", group), voc="carob-data/terminag")
+	if (type == "metadata") {
+		trms <- vocal::accepted_variables(voc="carob-data/terminag", "metadata")
+	} else if (type == "weather") {
+		trms <- vocal::accepted_variables(voc="carob-data/terminag", "weather")
+	} else {
+		vars <- get_groupvars(group)
+		trms <- vocal::accepted_variables(voc="carob-data/terminag", vars)
+	}
 	trms <- trms$name[trms$name %in% names(x)]
 	x[, trms]
 }
