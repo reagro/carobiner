@@ -17,7 +17,7 @@
 	}
 }
 
-check_version <- function(m, major=0, minor=0) {
+checkVersion <- function(m, major=0, minor=0) {
 	v <- paste0(major, ".", minor)
 	mv <- m$version 
 	if (!is.na(mv)) {
@@ -30,19 +30,29 @@ check_version <- function(m, major=0, minor=0) {
 	}
 }
 
-get_metadata <- function(uri, path, group, major=1, minor=0, check=TRUE, reduce=TRUE) {
+get_metadata <- function(uri, path, group, major=1, minor=0, ...) {
 	if (group == "LSMS") {
 		return(LSMS_metadata(uri, path, major, minor))
 	}
 	dataset_id <- yuri::simpleURI(uri)
 	jpath <- file.path(path, "data", "raw", group, dataset_id)
 	m <- yuri::extract_metadata(uri, jpath)
-	if (check) check_version(m, major=major, minor=minor)
-	if (reduce) {
-		m$data_organization <- NULL
-		m$publication <- NULL
-	}
 	m$group <- group
+	
+	d <- data.frame(list(...))
+	
+	draft <- isTRUE(d$draft)	
+	if (!draft) {
+		checkVersion(m, major=major, minor=minor)
+		m$data_publisher <- NULL 
+	}
+	d$draft <- NULL
+	
+	if (nrow(d) == 1) {
+		m[names(d)] <- d
+	} else if (nrow(d) > 1) {
+		warning("additional arguments must all have length 1")
+	}
 	m
 }
 

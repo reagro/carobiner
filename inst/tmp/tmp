@@ -17,8 +17,7 @@ carob_script <- function(path) {
 	group <- "_group_"
 	ff  <- carobiner::get_data(uri, path, group)
 
-	meta <- data.frame(
-		carobiner::get_metadata(uri, path, group, major=_major_, minor=_minor_),
+	meta <- carobiner::get_metadata(uri, path, group, major=_major_, minor=_minor_,
 		# include the data provider and/or all institutes listed as authors (if any)
 		data_organization = "_dataorg_",
 		publication = "_pub_",

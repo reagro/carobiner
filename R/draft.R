@@ -1,4 +1,7 @@
 
+quotes <- function(x) {
+	paste0("\"", x, "\"")
+}
 
 draft <- function(uri, path, group="draft", overwrite=FALSE) {
 
@@ -10,13 +13,13 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	## check on_carob ...
 	
 	fscript <- file.path(path, "scripts/_draft", group, paste0(did, ".R"))
-	
+
 	if (file.exists(fscript) && (!overwrite)) {
 		stop(paste(fscript, "exists. Use 'overwrite=TRUE' to overwrite it"))
 	}
 	ff  <- carobiner::get_data(uri, path, group)
 
-	meta <-	carobiner::get_metadata(uri, path, group, major=0, minor=0, FALSE, TRUE)
+	meta <-	carobiner::get_metadata(uri, path, group, major=0, minor=0, draft=TRUE)
 	v <- c(unlist(strsplit(meta$version, "\\.")), 0, 0)
 
 	s <- readLines(system.file("tmp/tmp", package="carobiner"))
@@ -24,7 +27,7 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	s <- gsub("_description_", meta$description, s)
 	s <- gsub("_major_", v[1], s)
 	s <- gsub("_minor_", v[2], s)
-	s <- gsub("_uri_", uri, s)
+	s <- gsub("_uri_", uri, quotes(s))
 	s <- gsub("_group_", group, s)
 	s <- gsub("_dataorg_", meta$data_organization, s)
 	s <- gsub("_pub_", ifelse(is.na(meta$publication), "", meta$publication), s)

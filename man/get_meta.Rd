@@ -11,7 +11,7 @@ Read the meta-data file associated with a data set (from the associated json fil
 }
 
 \usage{
-get_metadata(uri, path, group, major=1, minor=0, check=TRUE, reduce=TRUE)
+get_metadata(uri, path, group, major=1, minor=0, ...)
 }
  
 \arguments{
@@ -20,8 +20,7 @@ get_metadata(uri, path, group, major=1, minor=0, check=TRUE, reduce=TRUE)
   \item{group}{optional, a group name}
   \item{major}{major version to check for, alerts when there's a new major version}
   \item{minor}{minor version to check for, alerts when there's a new minor version}
-  \item{check}{logical. Should the version be checked?}
-  \item{reduce}{logical. Should some variables be removed (for backwards compatibility)?}
+  \item{...}{additional named metadata values}
 } 
 
 \value{

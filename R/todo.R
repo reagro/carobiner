@@ -8,17 +8,14 @@ update_todo <- function(path) {
 	todo$uri <- trimws(todo$uri)
 	uri <- gsub("https://doi.org/", "doi:", tolower(todo$uri))
 	uri <- gsub("https://hdl.handle.net/", "hdl:", uri)
+	id <- tolower(sapply(uri, yuri::simpleURI, USE.NAMES=FALSE))
 
-	id <- tolower(sapply(uri, yuri::simpleURI, USE.NAMES=F))
-	done <- basename(list.files(file.path(path, "scripts"), pattern="^doi|^hdl.*\\.R$", recursive=TRUE))
-	done <- gsub("\\.r$", "", tolower(done))
+	done <- list.files(file.path(path, "scripts"), pattern="^doi|^hdl.*\\.R$", recursive=TRUE)
+	done <- grep("_draft", done, invert=TRUE, value=TRUE)
+	done <- gsub("\\.r$", "", tolower(basename(done)))
+
 	i <- which(id %in% done)
-
-#	fdone <- list.files(file.path(path, "data", "compiled"), pattern="_metadata.csv$", full.names=TRUE)
-#	done <- do.call(bindr, lapply(fdone, utils::read.csv))
-#	i <- unique(stats::na.omit(match(tolower(done$uri), uri)))
 	if (length(i) > 0) {
-#		message(paste("removed", length(i), "datasets from to-do"))
 		todo <- todo[-i,]
 		utils::write.csv(todo, ftodo, row.names=FALSE)
 	}
