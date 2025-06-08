@@ -189,7 +189,8 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 			have_warnings <- FALSE
 		}
 		
-		gterms <- vocal::accepted_variables("records", grp, voc="carob-data/terminag")
+		gvars <- get_groupvars(grp)
+		gterms <- vocal::accepted_variables(voc="carob-data/terminag", gvars)
 		gterms <- gterms[, c("name", "type", "unit", "description")]
 
 #		utils::write.csv(gterms, outft, row.names=FALSE)

@@ -12,7 +12,7 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	fscript <- file.path(path, "scripts/_draft", group, paste0(did, ".R"))
 	
 	if (file.exists(fscript) && (!overwrite)) {
-		error(paste(fscript, "exists. Use 'overwrite=TRUE' to overwrite it"))
+		stop(paste(fscript, "exists. Use 'overwrite=TRUE' to overwrite it"))
 	}
 	ff  <- carobiner::get_data(uri, path, group)
 

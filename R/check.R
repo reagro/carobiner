@@ -65,7 +65,7 @@ check_pubs <- function(x, path, answ) {
 			for (pub in pubs) {
 				where <- grep(pub, allpubs, fixed=TRUE)
 				if (length(where) == 0) {
-					answ[nrow(answ)+1, ] <- c("reference", paste("citation reference file missing:", pub))	
+					answ[nrow(answ)+1, ] <- c("reference file missing", pub)
 				}
 			}
 		}
@@ -76,22 +76,11 @@ check_pubs <- function(x, path, answ) {
 
 
 check_packages <- function(name, version) {
-	if (packageVersion(name) < version) {
+	if (utils::packageVersion(name) < version) {
 		stop(paste0('please update package ', name, " with:\n   remotes::install.github('carob-data/", name, "')"))
 	}
 }
 
-
-check_weather <- function(x, answ) {
-	nms <- names(x)
-	if (!("date" %in% nms)) {
-		answ[nrow(answ)+1, ] <- c("required weather variable missing", paste(r, collapse=", "))
-	}	
-	if (is.null(x$date)) {
-		answ[nrow(answ)+1, ] <- c("weather", "variable 'date' is missing")			
-	}
-	answ
-}
 
 
 check_timerecs <- function(timerecs, records, answ) {
@@ -172,6 +161,16 @@ check_combined <- function(x, trms, voc) {
 	return( rbind(a1, a2) )
 }
 
+check_weather <- function(x, answ) {
+	voc="carob-data/terminag"
+	trms <- vocal::accepted_variables(voc, c("all", "weather"))	
+	answ <- check_combined(x, trms, voc)
+	if (is.null(x$date)) {
+		answ[nrow(answ)+1, ] <- c("weather", "variable 'date' is missing")			
+	}
+	answ
+}
+
 
 check_metadata <- function(x, voc="carob-data/terminag") {
 	trms <- vocal::accepted_variables(voc, "metadata")	
@@ -194,7 +193,7 @@ get_groupvars <- function(group) {
 
 check_records <- function(answ, x, group, check) {
 	voc <- "carob-data/terminag"
-	vars <- carobiner:::get_groupvars(group)
+	vars <- get_groupvars(group)
 	trms <- vocal::accepted_variables(voc, vars)
 	answ <- check_combined(x, trms, voc)
 
@@ -228,15 +227,15 @@ check_records <- function(answ, x, group, check) {
 
 check_terms <- function(metadata=NULL, records=NULL, timerecs=NULL, wth=NULL, group="", check="all") {
 
-	check_packages("yuri", "0.1-4")
-	check_packages("vocal", "0.2-0")
+	check_packages("yuri", "0.1-5")
+	check_packages("vocal", "0.2-1")
 
 	answ <- data.frame(check="", msg="")[0,]
 	if (check == "none") {
 		return(answ)
 	}
 	if (!is.null(metadata)) {
-		answ <- carobiner:::check_metadata(metadata)
+		answ <- check_metadata(metadata)
 		if (!missing(records)) {
 			if (!is.null(metadata$treatment_vars)) {
 				answ <- check_treatments(answ, metadata$treatment_vars, metadata$data_type, names(records), "treatment")
