@@ -230,7 +230,7 @@ check_records <- function(answ, x, group, check) {
 check_terms <- function(metadata=NULL, records=NULL, timerecs=NULL, wth=NULL, group="", check="all") {
 
 	check_packages("yuri", "0.1-6")
-	check_packages("vocal", "0.2-2")
+	check_packages("vocal", "0.2-3")
 
 	answ <- data.frame(check="", msg="")[0,]
 	if (check == "none") {
