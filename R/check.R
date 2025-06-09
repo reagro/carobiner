@@ -150,21 +150,22 @@ check_treatments <- function(answ, treatment, exp_type, vars, type) {
 }
 
 
-check_combined <- function(x, trms, voc) {
+check_combined <- function(x, trms, answ, voc) {
 	a1 <- vocal::check_variables(x, trms)
 	a2 <- vocal::check_values(x, trms, voc)
+	answ <- rbind(answ, a1, a2) 
 	dats <- grep("_date", names(x), value=TRUE)
 	if (length(dats) > 0) {
 		a3 <- do.call(rbind, lapply(dats, \(dat) vocal::check_date(x, dat, trms)))
-		return( rbind(a1, a2, a3) )
+		answ <- rbind(answ, a3) 
 	}
-	return( rbind(a1, a2) )
+	answ
 }
 
 check_weather <- function(x, answ) {
 	voc="carob-data/terminag"
 	trms <- vocal::accepted_variables(voc, c("all", "location", "weather"))	
-	answ <- check_combined(x, trms, voc)
+	answ <- check_combined(x, trms, answ, voc)
 	if (is.null(x$date)) {
 		answ[nrow(answ)+1, ] <- c("weather", "variable 'date' is missing")			
 	}
@@ -172,9 +173,10 @@ check_weather <- function(x, answ) {
 }
 
 
-check_metadata <- function(x, voc="carob-data/terminag") {
-	trms <- vocal::accepted_variables(voc, "metadata")	
-	answ <- check_combined(x, trms, voc)
+check_metadata <- function(x, answ, voc="carob-data/terminag") {
+	trms <- vocal::accepted_variables(voc, "metadata")
+	x[is.na(x)] <- as.character(NA)
+	answ <- check_combined(x, trms, answ, voc)
 	if (grepl("http", x$uri)) {
 		answ[nrow(answ)+1, ] <- c("uri", "http in uri")
 	}
@@ -195,7 +197,7 @@ check_records <- function(answ, x, group, check) {
 	voc <- "carob-data/terminag"
 	vars <- get_groupvars(group)
 	trms <- vocal::accepted_variables(voc, vars)
-	answ <- check_combined(x, trms, voc)
+	answ <- check_combined(x, trms, answ, voc)
 
 	aw <- vocal::check_datespan(x, "planting_date", "harvest_date", smin=45, smax=366)
 	answ <- rbind(answ, aw)
@@ -235,7 +237,7 @@ check_terms <- function(metadata=NULL, records=NULL, timerecs=NULL, wth=NULL, gr
 		return(answ)
 	}
 	if (!is.null(metadata)) {
-		answ <- check_metadata(metadata)
+		answ <- check_metadata(metadata, answ)
 		if (!missing(records)) {
 			if (!is.null(metadata$treatment_vars)) {
 				answ <- check_treatments(answ, metadata$treatment_vars, metadata$data_type, names(records), "treatment")
