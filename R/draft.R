@@ -1,6 +1,29 @@
 
 quotes <- function(x) paste0("\"", x, "\"") 
 
+grepr <- function(x) {
+	r <- list()
+	r$latitude <- grep("latitude", x, ignore.case=TRUE, value=TRUE)
+	r$longititude <- grep("longitude", x, ignore.case=TRUE, value=TRUE)
+	r$elevation <- grep("elevation|altitude", x, ignore.case=TRUE, value=TRUE)
+	r$country <- grep("country", x, ignore.case=TRUE, value=TRUE)
+	r$adm1 <- grep("region|state", x, ignore.case=TRUE, value=TRUE)
+	r$adm2 <- grep("province|district", x, ignore.case=TRUE, value=TRUE)
+	r$adm3 <- grep("ward|community", x, ignore.case=TRUE, value=TRUE)
+	r$location <- grep("village", x, ignore.case=TRUE, value=TRUE)
+	r$site <- grep("hamlet", x, ignore.case=TRUE, value=TRUE)
+	empty <- character(0)
+	e <- sapply(r, \(i) identical(i, empty))
+	r[!e]
+}
+
+wdist <- function(x, trms) {
+	d <- adist(x, trms)
+	a <- apply(d, 1, which.min)
+	z <- data.frame(from=x, to=trms[a], dist=d[cbind(1:nrow(d), a)])
+}
+
+
 draft <- function(uri, path, group="draft", overwrite=FALSE) {
 
 #uri <- "hdl:11529/10548230"
@@ -11,6 +34,7 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	## check on_carob ...
 	
 	fscript <- file.path(path, "scripts/_draft", group, paste0(did, ".R"))
+	dir.create(dirname(fscript), FALSE, TRUE)
 
 	if (file.exists(fscript) && (!overwrite)) {
 		stop(paste(fscript, "exists. Use 'overwrite=TRUE' to overwrite it"))
@@ -47,6 +71,8 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 		f <- c(f, paste0(paste0("\tf", (length(f)+1):n), ' <- ff[basename(ff) == "', basename(fcsv), '"]'))
 	}
 	is_other <- !(is_xls | is_csv)
+	ef <- f
+
 	if (any(is_other)) {
 		foth <- ff[is_other]
 		n <- n+length(fcsv)
@@ -79,6 +105,7 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 		r <- c(r, paste0(paste0("\tr", sq), " <- read.csv(f", sq, ")"))
 		n <- n + nn
 	}
+	er <- r
 	
 	if (any(is_other)) {
 		nn <- sum(is_other)
@@ -88,7 +115,43 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	r <- paste(r, collapse="\n")
 	s <- gsub("_read_", r, s)
 	
-	dir.create(dirname(fscript), FALSE, TRUE)
+	if (is.null(ef)) {
+		writeLines(s, fscript)
+		message(fscript)
+		return(invisible(fscript))
+	}
+	
+	f <- gsub("\t", "", ef)
+	r <- gsub("\t", "", er)
+	r <- r[!grepl("#", r)]
+	for (i in 1:length(f)) {
+		eval(parse(text = f[i]))
+		eval(parse(text = r[i]))
+	}
+	nms <- lapply(1:length(f), \(i) names(eval(parse(text = paste0("r", i)))))			
+	g <- lapply(nms, grepr)
+	txt <- NULL 
+	for (i in 1:length(g)) {
+		if (length(g[[i]]) > 0) {
+			a <- data.frame(g[[i]])
+			bod <- paste0("\t\t", names(a), " <- r", i, "[\"", a, "\"],", collapse= "\n")
+			txti <- paste0("\td", i, " <- data.frame(\n", bod, "\n\t)\n")
+			txti <- gsub(",\n\t)\n", "\n\t)\n", txti)
+			txt <- c(txt, txti)
+		}
+	}
+	
+	if (is.null(txt)) {
+		s <- gsub("_replacements_", "", s)
+	} else {
+		txt <- paste(txt, collapse="\n")
+		s <- gsub("_replacements_", txt, s)	
+	}
+
+	#trms <- vocal::accepted_variables("carob-data/terminag")	
+	#trms <- trms[!(trms$group %in% c("all", "metadata")), "name"]
+	
+	
 	writeLines(s, fscript)
 	message(fscript)
 	invisible(fscript)

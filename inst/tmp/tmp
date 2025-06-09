@@ -46,9 +46,8 @@ _filename_
 _read_
 
 ## select the variables of interest and assign them to the correct name
-	d <- data.frame(
-		_replacements_
-	)
+
+_replacements_
 
 ## separate individual trials. For example trials in different locations or years. 
 ## do _not_ separate by treatments within a trial. For a survey, each row gets a unique trial_id
