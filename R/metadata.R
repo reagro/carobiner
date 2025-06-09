@@ -17,20 +17,23 @@
 	}
 }
 
-checkVersion <- function(m, major=0, minor=0) {
-	v <- paste0(major, ".", minor)
-	mv <- m$version 
-	if (!is.na(mv)) {
-		if (!grepl("\\.", mv)) {
-			mv <- paste0(mv, ".0")
+checkVersion <- function(vmeta, major, minor) {
+	if (is.na(vmeta)) {
+		if (!(is.na(major) && is.na(minor))) {
+			stop(paste("version supplied where there is none? You can use 'NA'"), call.=FALSE)			
 		}
-		if (mv != v) {
-			stop(paste("version", v, "expected but version", mv, "found"), call.=FALSE)	
+	} else {
+		v <- c(unlist(strsplit(vmeta, "\\.")), NA)
+		if (!identical(v[1:2], as.character(c(major, minor)))) {
+			if (!is.na(minor)) {
+				major <- paste0(major, ".", minor)
+			}
+			stop(paste("version", major, "provided but expected", vmeta), call.=FALSE)	
 		}
 	}
 }
 
-get_metadata <- function(uri, path, group, major=1, minor=0, ...) {
+get_metadata <- function(uri, path, group, major, minor, ...) {
 	if (group == "LSMS") {
 		return(LSMS_metadata(uri, path, major, minor))
 	}
@@ -43,7 +46,7 @@ get_metadata <- function(uri, path, group, major=1, minor=0, ...) {
 	
 	draft <- isTRUE(d$draft)	
 	if (!draft) {
-		checkVersion(m, major=major, minor=minor)
+		checkVersion(m$version, major=major, minor=minor)
 		m$data_publisher <- NULL 
 	}
 	d$draft <- NULL

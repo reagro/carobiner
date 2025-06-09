@@ -42,7 +42,7 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	ff  <- carobiner::get_data(uri, path, group)
 
 	meta <-	carobiner::get_metadata(uri, path, group, major=0, minor=0, draft=TRUE)
-	v <- c(unlist(strsplit(meta$version, "\\.")), 0, 0)
+	v <- c(unlist(strsplit(meta$version, "\\.")), NA, NA)
 
 	s <- readLines(system.file("tmp/tmp", package="carobiner"))
 
