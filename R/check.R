@@ -1,5 +1,9 @@
 
-.carobiner_environment <- new.env(parent=emptyenv())
+check_packages <- function(name, version) {
+	if (utils::packageVersion(name) < version) {
+		stop(paste0('please update package ', name, " with:\n   remotes::install.github('carob-data/", name, "')"))
+	}
+}
 
 
 check_consistency <- function(x, answ) {
@@ -35,7 +39,7 @@ check_cropyield <- function(x, answ) {
 		answ[nrow(answ)+1, ] <- c("low yield (tons not kg?)", bad)
 		return(answ)
 	}
-	trms <- vocal::accepted_values("crop", voc="carob-data/terminag")
+	trms <- vocal::accepted_values("crop")
 	trms <- trms[match(unique(x$crop), trms$name), c("name", "max_yield")]
 	trms <- stats::na.omit(trms)
 	if (nrow(trms) == 0) return(answ)
@@ -74,12 +78,6 @@ check_pubs <- function(x, path, answ) {
 }
 
 
-
-check_packages <- function(name, version) {
-	if (utils::packageVersion(name) < version) {
-		stop(paste0('please update package ', name, " with:\n   remotes::install.github('carob-data/", name, "')"))
-	}
-}
 
 
 
@@ -150,9 +148,9 @@ check_treatments <- function(answ, treatment, exp_type, vars, type) {
 }
 
 
-check_combined <- function(x, trms, answ, voc) {
+check_combined <- function(x, trms, answ) {
 	a1 <- vocal::check_variables(x, trms)
-	a2 <- vocal::check_values(x, trms, voc)
+	a2 <- vocal::check_values(x, trms)
 	answ <- rbind(answ, a1, a2) 
 	dats <- grep("_date", names(x), value=TRUE)
 	if (length(dats) > 0) {
@@ -163,9 +161,8 @@ check_combined <- function(x, trms, answ, voc) {
 }
 
 check_weather <- function(x, answ) {
-	voc="carob-data/terminag"
-	trms <- vocal::accepted_variables(voc, c("all", "location", "weather"))	
-	answ <- check_combined(x, trms, answ, voc)
+	trms <- vocal::accepted_variables(c("all", "location", "weather"))	
+	answ <- check_combined(x, trms, answ)
 	if (is.null(x$date)) {
 		answ[nrow(answ)+1, ] <- c("weather", "variable 'date' is missing")			
 	}
@@ -173,10 +170,10 @@ check_weather <- function(x, answ) {
 }
 
 
-check_metadata <- function(x, answ, voc="carob-data/terminag") {
-	trms <- vocal::accepted_variables(voc, "metadata")
+check_metadata <- function(x, answ) {
+	trms <- vocal::accepted_variables("metadata")
 	x[is.na(x)] <- as.character(NA)
-	answ <- check_combined(x, trms, answ, voc)
+	answ <- check_combined(x, trms, answ)
 	if (grepl("http", x$uri)) {
 		answ[nrow(answ)+1, ] <- c("uri", "http in uri")
 	}
@@ -194,10 +191,9 @@ get_groupvars <- function(group) {
 
 
 check_records <- function(answ, x, group, check) {
-	voc <- "carob-data/terminag"
 	vars <- get_groupvars(group)
-	trms <- vocal::accepted_variables(voc, vars)
-	answ <- check_combined(x, trms, answ, voc)
+	trms <- vocal::accepted_variables(vars)
+	answ <- check_combined(x, trms, answ)
 
 	aw <- vocal::check_datespan(x, "planting_date", "harvest_date", smin=45, smax=366)
 	answ <- rbind(answ, aw)
@@ -230,8 +226,10 @@ check_records <- function(answ, x, group, check) {
 check_terms <- function(metadata=NULL, records=NULL, timerecs=NULL, wth=NULL, group="", check="all") {
 
 	check_packages("yuri", "0.1-6")
-	check_packages("vocal", "0.2-3")
-
+	check_packages("vocal", "0.2-4")
+	vocal::set_vocabulary("carob-data/terminag")
+	vocal::check_vocabulary(quiet=FALSE)
+	
 	answ <- data.frame(check="", msg="")[0,]
 	if (check == "none") {
 		return(answ)

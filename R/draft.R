@@ -18,7 +18,7 @@ grepr <- function(x) {
 }
 
 wdist <- function(x, trms) {
-	d <- adist(x, trms)
+	d <- utils::adist(x, trms)
 	a <- apply(d, 1, which.min)
 	z <- data.frame(from=x, to=trms[a], dist=d[cbind(1:nrow(d), a)])
 }
@@ -148,7 +148,7 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 		s <- gsub("_replacements_", txt, s)	
 	}
 
-	#trms <- vocal::accepted_variables("carob-data/terminag")	
+	#trms <- vocal::accepted_variables()	
 	#trms <- trms[!(trms$group %in% c("all", "metadata")), "name"]
 	
 	

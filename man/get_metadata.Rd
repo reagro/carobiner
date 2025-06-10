@@ -11,7 +11,7 @@ Read the meta-data file associated with a data set (from the associated json fil
 }
 
 \usage{
-get_metadata(uri, path, group, major=1, minor=0, ...)
+get_metadata(uri, path, group, major, minor, ...)
 }
  
 \arguments{
