@@ -27,6 +27,10 @@ grepr <- function(x) {
 	r$treatment <- grepaste("treat", x)
 	r$crop <- grepaste("crop", x)
 	r$variety <- grepaste("variety|variedad|cultivar|clone", x)
+	r$planting_date <- grepaste("plant.*date", x)
+	r$harvest_date <- grepaste("harv.*date", x)
+	r$flowering_date <- grepaste("flow.*date", x)
+	
 	empty <- character(0)
 	e <- sapply(r, \(i) identical(i, empty))
 	r[!e]
