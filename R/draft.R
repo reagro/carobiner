@@ -14,23 +14,24 @@ grepaste <- function(pattern, x) {
 }	
 
 grepr <- function(x) {
-	r <- list()
-	r$latitude <- grepaste("latitude", x)
-	r$longititude <- grepaste("longitude", x)
-	r$elevation <- grepaste("elevation|altitude", x)
-	r$country <- grepaste("country", x)
-	r$adm1 <- grepaste("adm1|region|state|estado", x)
-	r$adm2 <- grepaste("adm2|provinc|distri", x)
-	r$adm3 <- grepaste("adm3|ward|commun", x)
-	r$location <- grepaste("locat|village|site", x)
-	r$site <- grepaste("hamlet", x)
-	r$treatment <- grepaste("treat", x)
-	r$crop <- grepaste("crop", x)
-	r$variety <- grepaste("variety|variedad|cultivar|clone", x)
-	r$planting_date <- grepaste("plant.*date", x)
-	r$harvest_date <- grepaste("harv.*date", x)
-	r$flowering_date <- grepaste("flow.*date", x)
-	
+	r <- list(
+		country = grepaste("country", x),
+		adm1 = grepaste("adm1|region|state|estado", x),
+		adm2 = grepaste("adm2|provinc|distri", x),
+		adm3 = grepaste("adm3|ward|commun", x),
+		location = grepaste("locat|village|site", x),
+		site = grepaste("hamlet", x),
+		latitude = grepaste("latitude", x),
+		longititude = grepaste("longitude", x),
+		elevation = grepaste("elevation|altitude", x),
+		treatment = grepaste("treat", x),
+		crop = grepaste("crop", x),
+		variety = grepaste("variety|variedad|cultivar|clone", x),
+		planting_date = grepaste("plant.*date", x),
+		harvest_date = grepaste("harv.*date", x),
+		flowering_date = grepaste("flow.*date", x),
+		yield = grepaste("yield", x)
+	)
 	empty <- character(0)
 	e <- sapply(r, \(i) identical(i, empty))
 	r[!e]
@@ -157,9 +158,10 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 			bod <- paste0("\t\t", names(a), " = r", i, "[[\"", a)
 			j <- grep("crop", bod)
 			bod[j] <- gsub("]]", "]])", gsub("= r", "= tolower(r", bod[j]))
+			j <- length(bod)
+			bod[j] <- gsub("]],", "]]", bod[j])
 			bod <- paste(bod, collapse= "\n")
 			txti <- paste0("\td", i, " <- data.frame(\n", bod, "\n\t)\n")
-			txti <- gsub(",\n\t)\n", "\n\t)\n", txti)
 			txt <- c(txt, txti)
 		}
 	}
