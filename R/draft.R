@@ -19,10 +19,10 @@ grepr <- function(x) {
 	r$longititude <- grepaste("longitude", x)
 	r$elevation <- grepaste("elevation|altitude", x)
 	r$country <- grepaste("country", x)
-	r$adm1 <- grepaste("region|state|estado", x)
-	r$adm2 <- grepaste("provinc|distri", x)
-	r$adm3 <- grepaste("ward|commun", x)
-	r$location <- grepaste("village", x)
+	r$adm1 <- grepaste("adm1|region|state|estado", x)
+	r$adm2 <- grepaste("adm2|provinc|distri", x)
+	r$adm3 <- grepaste("adm3|ward|commun", x)
+	r$location <- grepaste("locat|village|site", x)
 	r$site <- grepaste("hamlet", x)
 	r$treatment <- grepaste("treat", x)
 	r$crop <- grepaste("crop", x)
@@ -150,8 +150,10 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	for (i in 1:length(g)) {
 		if (length(g[[i]]) > 0) {
 			a <- data.frame(g[[i]])
-			bod <- paste0("\t\t", names(a), " = r", i, "[[\"", a, collapse= "\n")
-			
+			bod <- paste0("\t\t", names(a), " = r", i, "[[\"", a)
+			j <- grep("crop", bod)
+			bod[j] <- gsub("]]", "]])", gsub("= r", "= tolower(r", bod[j]))
+			bod <- paste(bod, collapse= "\n")
 			txti <- paste0("\td", i, " <- data.frame(\n", bod, "\n\t)\n")
 			txti <- gsub(",\n\t)\n", "\n\t)\n", txti)
 			txt <- c(txt, txti)
