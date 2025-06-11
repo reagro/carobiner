@@ -21,23 +21,28 @@ _description_
 	meta <- carobiner::get_metadata(uri, path, group, major=_major_, minor=_minor_,
 		# include the data provider and/or all institutes listed as authors (if any)
 		data_organization = "_dataorg_",
-		publication = "_pub_",
+		publication = _pub_,
 		project = NA,
+		carob_date = "_today_",
+		# if available report the experimental or survey design
+		design = _design_,
+		
 		# data_type can be e.g. "on-farm experiment", "survey", "compilation"
-		data_type = "experiment",
+		data_type = NA,
+		
 		# treatment_vars has semi-colon separated variable names that represent the
 		# treatments if the data is from an experiment. E.g. "N_fertilizer;P_fertilizer;K_fertilizer"
 		treatment_vars = "",
-		# response variables of interest such as yield, fwy_residue, disease incidence, etc. Do not include variable that describe management for all treatments or other observations that were not related to the aim of the trial (e.g. the presence of a disease).
+		
+		# response variables of interest such as yield, fwy_residue, disease incidence, etc. Do not include variables
+		# that describe management for all treatments or other observations that were not related to the aim of 
+		# the trial (e.g. the presence of a disease).
 		response_vars = "", 
-		# The percentage of relevant variables that have been standardized (between 0 and 100%) 
-		completion = 0,
 		carob_contributor = "Your Name",
-		carob_date = "_today_",
+		# The percentage of relevant variables that have been standardized (between 0 and 100%) 
+		completion = 0,	
 		# notes for the end-user
-		notes = "", 
-		# if available report the experimental or survey design
-		design = NA
+		notes = ""
 	)
 	
 

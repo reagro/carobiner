@@ -1,17 +1,32 @@
 
-quotes <- function(x) paste0("\"", x, "\"") 
+quotes <- function(x) {
+	paste0("\"", x, "\"") 
+}
+
+grepaste <- function(pattern, x) {
+	v <- grep(pattern, x, ignore.case=TRUE, value=TRUE)
+	if (length(v) > 1) {
+		v <- paste0(v[1], "\"]], #", paste(v[-1], collapse=", "))
+	} else if (length(v) > 0) {
+		v <- paste0(v, "\"]],")
+	}
+	v
+}	
 
 grepr <- function(x) {
 	r <- list()
-	r$latitude <- grep("latitude", x, ignore.case=TRUE, value=TRUE)
-	r$longititude <- grep("longitude", x, ignore.case=TRUE, value=TRUE)
-	r$elevation <- grep("elevation|altitude", x, ignore.case=TRUE, value=TRUE)
-	r$country <- grep("country", x, ignore.case=TRUE, value=TRUE)
-	r$adm1 <- grep("region|state", x, ignore.case=TRUE, value=TRUE)
-	r$adm2 <- grep("province|district", x, ignore.case=TRUE, value=TRUE)
-	r$adm3 <- grep("ward|community", x, ignore.case=TRUE, value=TRUE)
-	r$location <- grep("village", x, ignore.case=TRUE, value=TRUE)
-	r$site <- grep("hamlet", x, ignore.case=TRUE, value=TRUE)
+	r$latitude <- grepaste("latitude", x)
+	r$longititude <- grepaste("longitude", x)
+	r$elevation <- grepaste("elevation|altitude", x)
+	r$country <- grepaste("country", x)
+	r$adm1 <- grepaste("region|state|estado", x)
+	r$adm2 <- grepaste("provinc|distri", x)
+	r$adm3 <- grepaste("ward|commun", x)
+	r$location <- grepaste("village", x)
+	r$site <- grepaste("hamlet", x)
+	r$treatment <- grepaste("treat", x)
+	r$crop <- grepaste("crop", x)
+	r$variety <- grepaste("variety|variedad|cultivar|clone", x)
 	empty <- character(0)
 	e <- sapply(r, \(i) identical(i, empty))
 	r[!e]
@@ -52,8 +67,9 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	s <- gsub("_uri_", uri, s)
 	s <- gsub("_group_", group, s)
 	s <- gsub("_dataorg_", meta$data_organization, s)
-	s <- gsub("_pub_", ifelse(is.na(meta$publication), "", meta$publication), s)
+	s <- gsub("_pub_", ifelse(is.na(meta$publication), NA, quotes(meta$publication)), s)
 	s <- gsub("_today_", as.character(as.Date(Sys.time())), s)
+	s <- gsub("_design_", ifelse(is.na(meta$design), NA, quotes(meta$design)), s)
 	
 
 	f <- NULL
@@ -134,7 +150,8 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	for (i in 1:length(g)) {
 		if (length(g[[i]]) > 0) {
 			a <- data.frame(g[[i]])
-			bod <- paste0("\t\t", names(a), " <- r", i, "[\"", a, "\"],", collapse= "\n")
+			bod <- paste0("\t\t", names(a), " = r", i, "[[\"", a, collapse= "\n")
+			
 			txti <- paste0("\td", i, " <- data.frame(\n", bod, "\n\t)\n")
 			txti <- gsub(",\n\t)\n", "\n\t)\n", txti)
 			txt <- c(txt, txti)
