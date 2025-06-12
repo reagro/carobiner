@@ -12,14 +12,14 @@ Write Carob dataset files. This calls \code{\link{check_terms}}
 
 
 \usage{
-write_files(path=NULL, metadata, records, timerecs=NULL, wth=NULL, options=NULL)
+write_files(path=NULL, metadata, wide, long=NULL, wth=NULL, options=NULL)
 }
  
 \arguments{
   \item{path}{character. \code{NULL}, or the path to the local Carob repo}
   \item{metadata}{data.frame. One row with dataset level descriptive variables}
-  \item{records}{data.frame. Dataset records}
-  \item{timerecs}{data.frame. Dataset with temporal records}
+  \item{wide}{data.frame. Dataset with records in the "wide" format (one row for each observational unit)}
+  \item{long}{data.frame. Dataset with records in the "long" format to capture multiple observations over time or depth for a single variable and observational unit}
   \item{wth}{data.frame with weather data}
   \item{options}{list}
 }

@@ -226,8 +226,8 @@ check_records <- function(answ, x, group, check) {
 check_terms <- function(metadata=NULL, records=NULL, timerecs=NULL, wth=NULL, group="", check="all") {
 
 	check_packages("yuri", "0.1-7")
-	check_packages("vocal", "0.2-4")
-	vocal::set_vocabulary("carob-data/terminag")
+	check_packages("vocal", "0.3-0")
+	vocal::set_vocabulary("github:carob-data/terminag")
 	vocal::check_vocabulary(quiet=FALSE)
 	
 	answ <- data.frame(check="", msg="")[0,]

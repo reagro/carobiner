@@ -3,8 +3,8 @@ quotes <- function(x) {
 	paste0("\"", x, "\"") 
 }
 
-grepaste <- function(pattern, x) {
-	v <- grep(pattern, x, ignore.case=TRUE, value=TRUE)
+grepaste <- function(pattern, x, ignore.case=TRUE) {
+	v <- grep(pattern, x, ignore.case=ignore.case, value=TRUE)
 	if (length(v) > 1) {
 		v <- paste0(v[1], "\"]], #", paste(v[-1], collapse=", "))
 	} else if (length(v) > 0) {
@@ -21,15 +21,22 @@ grepr <- function(x) {
 		adm3 = grepaste("adm3|ward|commun", x),
 		location = grepaste("locat|village|site", x),
 		site = grepaste("hamlet", x),
-		latitude = grepaste("latitude", x),
-		longititude = grepaste("longitude", x),
-		elevation = grepaste("elevation|altitude", x),
+		latitude = grepaste("latitude|^lat", x),
+		longititude = grepaste("longitude|^long", x),
+		elevation = grepaste("^elev|altitude", x),
 		treatment = grepaste("treat", x),
 		crop = grepaste("crop", x),
 		variety = grepaste("variety|variedad|cultivar|clone", x),
 		planting_date = grepaste("plant.*date", x),
 		harvest_date = grepaste("harv.*date", x),
 		flowering_date = grepaste("flow.*date", x),
+		N_fertilizer = grepaste("^N$", x, FALSE),
+		P_fertilizer = grepaste("^P$", x, FALSE),
+		K_fertilizer = grepaste("^K$", x, FALSE),
+		S_fertilizer = grepaste("^S$", x, FALSE),
+		B_fertilizer = grepaste("^B$", x, FALSE),
+		Mg_fertilizer = grepaste("^Mg$", x, FALSE),
+		Zn_fertilizer = grepaste("^Zn$", x, FALSE),
 		yield = grepaste("yield", x)
 	)
 	empty <- character(0)
@@ -63,6 +70,8 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 
 	meta <-	carobiner::get_metadata(uri, path, group, major=0, minor=0, draft=TRUE)
 	v <- c(unlist(strsplit(meta$version, "\\.")), NA, NA)
+	v <- as.character(v)
+	v[is.na(v)] <- "NA"
 
 	s <- readLines(system.file("tmp/tmp", package="carobiner"))
 
@@ -72,9 +81,9 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	s <- gsub("_uri_", uri, s)
 	s <- gsub("_group_", group, s)
 	s <- gsub("_dataorg_", meta$data_organization, s)
-	s <- gsub("_pub_", ifelse(is.na(meta$publication), NA, quotes(meta$publication)), s)
+	s <- gsub("_pub_", ifelse(is.na(meta$publication), "NA", quotes(meta$publication)), s)
 	s <- gsub("_today_", as.character(as.Date(Sys.time())), s)
-	s <- gsub("_design_", ifelse(is.na(meta$design), NA, quotes(meta$design)), s)
+	s <- gsub("_design_", ifelse(is.na(meta$design), "NA", quotes(meta$design)), s)
 	
 
 	f <- NULL
@@ -105,6 +114,7 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	r <- NULL
 	n <- 1
 	if (any(is_xls)) {
+	# if there is only one xls, and it has multiple sheets, these should be evaluated. 
 		for (i in 1:length(fxls)) {
 			sheets <- readxl::excel_sheets(fxls[i])
 			if (length(sheets) == 1) {	

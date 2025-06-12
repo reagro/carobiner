@@ -1,13 +1,13 @@
 
 
-write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, options=NULL) {
+write_files <- function(path=NULL, metadata, wide, long=NULL, wth=NULL, options=NULL) {
 
 	group <- metadata$group
 #	check_group(group)
 	cleanuri <- metadata$dataset_id
 	stopifnot(nrow(metadata) == 1)
-	if (!is.null(timerecs)) {
-		timerecs$dataset_id <- cleanuri
+	if (!is.null(long)) {
+		long$dataset_id <- cleanuri
 	}
 	if (!is.null(wth)) {
 		wth$dataset_id <- cleanuri
@@ -23,9 +23,9 @@ write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, o
 		dir.create(file.path(path, "data", "clean"), FALSE, FALSE)
 		file.remove(list.files(file.path(path, "data", "clean", group), cleanuri, full.names=TRUE))
 
-		if (missing(records)) {
+		if (missing(wide)) {
 			if (!grepl("_nodata$", cleanuri)) {
-				stop("records missing")
+				stop("wide records missing")
 			}
 			d <- data.frame(ignore=TRUE)
 			outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
@@ -36,18 +36,18 @@ write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, o
 		}
 	}
 
-	if (nrow(records) > 0) {
+	if (nrow(wide) > 0) {
 		dir.create(file.path(path, "data", "messages", group), FALSE, TRUE)
 		dir.create(file.path(path, "data", "evaluation", group), FALSE, TRUE)
-		records$dataset_id <- metadata$dataset_id
+		wide$dataset_id <- metadata$dataset_id
 		opt <- options("carobiner_check")
-		answ <- check_terms(metadata, records, timerecs, wth, group, check=opt)	
+		answ <- check_terms(metadata, wide, long, wth, group, check=opt)	
 		fmsg <- file.path(path, "data", "messages", group, paste0(cleanuri, ".csv"))
 		if (file.exists(fmsg)) file.remove(fmsg)
 		
 		feval <- file.path(path, "data", "evaluation", group, paste0(cleanuri, ".csv"))
 		if (file.exists(feval)) file.remove(feval)
-		e <- evaluate_quality(records, group)	
+		e <- evaluate_quality(wide, group)	
 		data.table::fwrite(e, feval, row.names=FALSE)		
 		
 		if (!to_mem) {
@@ -79,30 +79,30 @@ write_files <- function(path=NULL, metadata, records, timerecs=NULL, wth=NULL, o
 		} 
 	}
 
-	if (is.null(records$record_id) && (nrow(records) > 0)) {
-		records$record_id <- 1:nrow(records)
+	if (is.null(wide$record_id) && (nrow(wide) > 0)) {
+		wide$record_id <- 1:nrow(wide)
 	}
 	
-	records <- sort_by_terms(records, "records", group)
+	wide <- sort_by_terms(wide, "records", group)
 	metadata <- sort_by_terms(metadata, "metadata", group)
-	timerecs <- sort_by_terms(timerecs, "timerecs", group)
+	long <- sort_by_terms(long, "timerecs", group)
 
-	if (nrow(records) > 0) {
-		metadata$crops <- paste(sort(unique(records$crop)), collapse=";")
-		metadata$countries <- paste(sort(unique(records$country)), collapse=";")
+	if (nrow(wide) > 0) {
+		metadata$crops <- paste(sort(unique(wide$crop)), collapse=";")
+		metadata$countries <- paste(sort(unique(wide$country)), collapse=";")
 	}
 	
 	if (to_mem) {
-		return(list(meta=metadata, data=records, long=timerecs))
+		return(list(meta=metadata, wide=wide, long=long))
 	}
 	
 	outf <- file.path(path, "data", "clean", group, paste0(cleanuri, ".csv"))
 	dir.create(dirname(outf), FALSE, FALSE)
-	data.table::fwrite(records, outf, row.names=FALSE)
+	data.table::fwrite(wide, outf, row.names=FALSE)
 
-	if (!is.null(timerecs)) {
+	if (!is.null(long)) {
 		outfw <- file.path(path, "data", "clean", group, paste0(cleanuri, "_long.csv"))
-		data.table::fwrite(timerecs, outfw, row.names=FALSE)
+		data.table::fwrite(long, outfw, row.names=FALSE)
 	}
 
 	if (!is.null(wth)) {
