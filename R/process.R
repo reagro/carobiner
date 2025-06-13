@@ -11,6 +11,7 @@ get_function <- function(name, path, group="") {
 
 
 sort_by_terms <- function(x, type, group) {
+	if (is.null(x)) return(x)
 	if (type == "metadata") {
 		trms <- vocal::accepted_variables("metadata")
 	} else if (type == "weather") {

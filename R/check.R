@@ -81,37 +81,47 @@ check_pubs <- function(x, path, answ) {
 
 
 
-check_timerecs <- function(timerecs, records, answ) {
-	rcid <- !is.null(timerecs$record_id)
-	trid <- !is.null(timerecs$trial_id)
+check_longrecs <- function(longrecs, records, answ) {
+	rcid <- !is.null(longrecs$record_id)
+	trid <- !is.null(longrecs$trial_id)
 	if ((rcid + trid) != 1) {
-	    answ[nrow(answ)+1, ] <- c("id", "timerecs must have either record_id or trial_id")
+	    answ[nrow(answ)+1, ] <- c("id", "longrecs must have either record_id or trial_id")
 	} else if (rcid) {
 		if (is.null(records$record_id)) {
-			answ[nrow(answ)+1, ] <- c("id", "record_id in 'timerecs' but not in other records")
-	    } else if (any(!(timerecs$record_id %in% records$record_id))) {
+			answ[nrow(answ)+1, ] <- c("id", "record_id in 'longrecs' but not in other records")
+	    } else if (any(!(longrecs$record_id %in% records$record_id))) {
 			answ[nrow(answ)+1, ] <- c("id", "record_id(s) do not match")
 	    }
 	} else {
 	    if (is.null(records$trial_id)) {
-			answ[nrow(answ)+1, ] <- c("id", "trial_id in 'timerecs' but not in other records")
-	    } else if (any(!(timerecs$trial_id %in% records$trial_id))) {
+			answ[nrow(answ)+1, ] <- c("id", "trial_id in 'longrecs' but not in other records")
+	    } else if (any(!(longrecs$trial_id %in% records$trial_id))) {
 			answ[nrow(answ)+1, ] <- c("id", "trial_id(s) do not match")
 	    }
 	}
-	cns <- c(colnames(records), colnames(timerecs))
-	cns <- cns[!(cns %in% c("dataset_id", "record_id", "trial_id"))]  # date?
+	cns <- c(colnames(records), colnames(longrecs))
+
+	expected <- c("date", "soil_depth", "soil_depth_top", "soil_depth_bottom")
+	if (!any(cns %in% expected)) {
+		answ[nrow(answ)+1, ] <- c("time/depth", "no time/depth variables in long records?")	
+	}
+
+	cns <- cns[!(cns %in% c("dataset_id", "record_id", "trial_id", "date"))]  # date?
 	cns <- table(cns)
 	if (any(cns>1)) {
 		dups <- paste(names(cns[cns>1]), collapse=", ")
-		answ[nrow(answ)+1, ] <- c("duplicates", paste("duplicate variables in records and timerecs:", dups))
+		answ[nrow(answ)+1, ] <- c("duplicates", paste("duplicate variables in records and longrecs:", dups))
 	}
+	
+	
+	
+	
 	answ
 }
 
 
 
-## needs fixing. duplicates need to be considered together for recs and timerecs
+## needs fixing. duplicates need to be considered together for recs and longrecs
 find_duplicates <- function(answ, x, tmr=NULL) {
 	if (is.null(tmr)) {
 		if (nrow(x) != nrow(unique(x))) {
@@ -133,12 +143,13 @@ check_treatments <- function(answ, treatment, exp_type, vars, type) {
 		if (type == "treatment") {
 			if (grepl("experiment|trial", exp_type)) {
 				answ[nrow(answ)+1, ] <- c("metadata", "treatment_vars cannot be 'none' for experiments")
-			}
-			return(answ)
-		} else {
-			answ[nrow(answ)+1, ] <- c("metadata", "response_vars cannot be 'none'")
+				return(answ)
+			} 
 		}
+		treat <- treat[treat  != "none"]
+		if (length(treat) == 0) return(answ)
 	}
+	
 	i <- !(treat %in% vars)
 	if (any(i)) {
 		answ[nrow(answ)+1, ] <- c("metadata", 
@@ -186,6 +197,7 @@ get_groupvars <- function(group) {
 	if (grepl("maize", group)) vars <- c(vars, "maize")
 	if (grepl("wheat", group)) vars <- c(vars, "wheat")
 	if (grepl("survey", group)) vars <- c(vars, "survey")
+	if (grepl("soil", group)) vars <- vars[vars != "crop"	]
 	vars
 }
 
@@ -223,7 +235,7 @@ check_records <- function(answ, x, group, check) {
 
 
 
-check_terms <- function(metadata=NULL, records=NULL, timerecs=NULL, wth=NULL, group="", check="all") {
+check_terms <- function(metadata=NULL, records=NULL, longrecs=NULL, wth=NULL, group="", check="all") {
 
 	check_packages("yuri", "0.1-7")
 	check_packages("vocal", "0.3-0")
@@ -247,10 +259,10 @@ check_terms <- function(metadata=NULL, records=NULL, timerecs=NULL, wth=NULL, gr
 	}
 	if (!is.null(records)) {
 		answ <- check_records(answ, records, group=group, check=check)
-		answ <- find_duplicates(answ, records, timerecs)
+		answ <- find_duplicates(answ, records, longrecs)
 	}
-	if (!is.null(timerecs)) {
-		answ <- check_timerecs(timerecs, records, answ)
+	if (!is.null(longrecs)) {
+		answ <- check_longrecs(longrecs, records, answ)
 	}
 	
 	if (!is.null(wth)) {

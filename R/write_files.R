@@ -85,7 +85,8 @@ write_files <- function(path=NULL, metadata, wide, long=NULL, wth=NULL, options=
 	
 	wide <- sort_by_terms(wide, "records", group)
 	metadata <- sort_by_terms(metadata, "metadata", group)
-	long <- sort_by_terms(long, "timerecs", group)
+	long <- sort_by_terms(long, "longrecs", group)
+	wth <- sort_by_terms(wth, "weather", group)
 
 	if (nrow(wide) > 0) {
 		metadata$crops <- paste(sort(unique(wide$crop)), collapse=";")
