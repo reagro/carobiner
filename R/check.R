@@ -1,4 +1,7 @@
 
+.carob_environment <- new.env(parent=emptyenv())
+
+
 check_packages <- function(name, version) {
 	if (utils::packageVersion(name) < version) {
 		stop(paste0('please update package ', name, " with:\n   remotes::install.github('carob-data/", name, "')"))
@@ -234,12 +237,36 @@ check_records <- function(answ, x, group, check) {
 }
 
 
+carob_vocabulary <- function(x=NULL, save=FALSE) {
+	f <- file.path(rappdirs::user_data_dir(), ".carob/voc")
+	if (is.null(x)) {
+		if (is.null(.carob_environment$voc)) {
+			if (file.exists(f)) {
+				readLines(f)
+			} else {
+				"github:carob-data/terminag"
+			}
+		} else {
+			.carob_environment$voc
+		}
+	} else {
+		.carob_environment$voc <- x
+		if (save) {
+			dir.create(dirname(f), FALSE, FALSE)
+			writeLines(x, f)
+		}
+		invisible(NULL)
+	}
+}
+
 
 check_terms <- function(metadata=NULL, records=NULL, longrecs=NULL, wth=NULL, group="", check="all") {
 
 	check_packages("yuri", "0.1-7")
-	check_packages("vocal", "0.3-0")
-	vocal::set_vocabulary("github:carob-data/terminag")
+	check_packages("vocal", "0.3-1")
+	
+	voc <- carob_vocabulary()
+	vocal::set_vocabulary(voc)
 	vocal::check_vocabulary(quiet=FALSE)
 	
 	answ <- data.frame(check="", msg="")[0,]
