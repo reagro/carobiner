@@ -237,19 +237,32 @@ check_records <- function(answ, x, group, check) {
 }
 
 
-carob_vocabulary <- function(x=NULL, save=FALSE) {
+carob_vocabulary <- function(x=NULL, save=FALSE, add=TRUE, reset=FALSE) {
+
 	f <- file.path(rappdirs::user_data_dir(), ".carob/voc")
+	def <- "github:carob-data/terminag"
+
+	if (reset) {
+		if (file.exists(f)) file.remove(f)
+		.carob_environment$voc <- def
+		return(def)
+	}
+	
 	if (is.null(x)) {
 		if (is.null(.carob_environment$voc)) {
 			if (file.exists(f)) {
 				readLines(f)
 			} else {
-				"github:carob-data/terminag"
+				def
 			}
 		} else {
 			.carob_environment$voc
 		}
 	} else {
+		if (add) {
+			x <- unique(c(def, x))
+		}
+		vocal::set_vocabulary(x)
 		.carob_environment$voc <- x
 		if (save) {
 			dir.create(dirname(f), FALSE, FALSE)
