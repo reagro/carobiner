@@ -11,13 +11,13 @@ Check the terms used in a dataset. A warning is given if bad or missing terms or
 }
 
 \usage{
-check_terms(metadata, records, timerecs=NULL, wth=NULL, group="", check="all")
+check_terms(metadata=NULL, records=NULL, longrecs=NULL, wth=NULL, group="", check="all")
 }
  
 \arguments{
   \item{metadata}{data.frame with metadata}
-  \item{records}{data.frame with observations}
-  \item{timerecs}{data.frame with temporal data}
+  \item{records}{data.frame with observations in "wide" format}
+  \item{longrecs}{data.frame with "long" format observations, for when there are multiple observations in time or depth for a single observational unit}
   \item{wth}{data.frame with weather data}
   \item{group}{character. Optional group name}
   \item{check}{character. "none" to do no checking; "nogeo" to not check coordinates. "all" and all other values to do all checks}

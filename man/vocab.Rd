@@ -12,7 +12,7 @@ Adjust the Carob vocabulary. Normally by adding additional terms from another vo
 
 
 \usage{
-carob_vocabulary(x=NULL, save=FALSE, add=TRUE, restore=FALSE)
+carob_vocabulary(x=NULL, save=FALSE, add=TRUE, reset=FALSE)
 }
  
 \arguments{
@@ -28,6 +28,6 @@ character, if \code{is.null(x)}
 
 \examples{
 	f <- system.file("voc", package="vocal")
-	carob_vocabulary(c(f, "github:carob-data/terminag"))
-	get_vocabulary()
+	carob_vocabulary(f)
+	carob_vocabulary()
 }
