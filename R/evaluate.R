@@ -16,13 +16,17 @@ find_outliers <- function(x, fields, method="iqr") {
 
 evaluate_quality <- function(x, group) {
 	# are required variables present?
-	reqs <- c("planting_date", "harvest_date", "N_fertilizer", "P_fertilizer", "K_fertilizer", "irrigated", "latitude", "longitude", "location")
+	reqs1 <- c("planting_date", "harvest_date", "crop", "variety", "N_fertilizer", "P_fertilizer", "K_fertilizer", "irrigated", "latitude", "longitude", "location")
+	reqs2 <- c("adm1", "adm2", "adm3", "yield", "fw_yield", "dm_yield")
+	reqs <- c(reqs1, reqs2)
+	reqsout <- c(reqs1, c("adm", "yield"))
+	
 	if (group == "survey") {
 		reqs <- reqs[-c(1:2)]
 	}
 	if (is.null(x[["geo_from_source"]])) x[["geo_from_source"]] <- NA
-	out <- data.frame(matrix(nrow=1, ncol=length(reqs)))
-	names(out) <- reqs
+	out <- data.frame(matrix(nrow=1, ncol=length(reqsout)))
+	names(out) <- reqsout
 	for (r in reqs) {
 		if (is.null(x[[r]])) x[[r]] <- NA
 	}
@@ -37,9 +41,11 @@ evaluate_quality <- function(x, group) {
 	x$longitude[!x$geo_from_source] <- NA
 	x$latitude[!x$geo_from_source] <- NA
 
-	for (r in reqs) {
+	for (r in reqs1) {
 		out[[r]] <- mean(!is.na(x[[r]]))
 	}
+	out$adm <- max(colMeans(!is.na(x[, grep("adm", names(x))])))
+	out$yield <- max(colMeans(!is.na(x[, grep("yield", names(x))])))
 	
 	data.frame(dataset_id = x$dataset_id[1], out)
 }
