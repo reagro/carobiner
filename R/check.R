@@ -245,6 +245,7 @@ carob_vocabulary <- function(x=NULL, save=FALSE, add=TRUE, reset=FALSE) {
 	if (reset) {
 		if (file.exists(f)) file.remove(f)
 		.carob_environment$voc <- def
+		vocal::set_vocabulary(def)
 		return(def)
 	}
 	
@@ -262,8 +263,8 @@ carob_vocabulary <- function(x=NULL, save=FALSE, add=TRUE, reset=FALSE) {
 		if (add) {
 			x <- unique(c(def, x))
 		}
-		vocal::set_vocabulary(x)
 		.carob_environment$voc <- x
+		vocal::set_vocabulary(x)
 		if (save) {
 			dir.create(dirname(f), FALSE, FALSE)
 			writeLines(x, f)
