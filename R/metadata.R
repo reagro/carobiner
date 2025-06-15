@@ -38,7 +38,7 @@ get_metadata <- function(uri, path, group, major, minor, ...) {
 		return(LSMS_metadata(uri, path, major, minor))
 	}
 	dataset_id <- yuri::simpleURI(uri)
-	jpath <- file.path(path, "data", "raw", group, dataset_id)
+	jpath <- file.path(path, "data", "raw", group)
 	m <- yuri::extract_metadata(uri, jpath)
 	m$group <- group
 	
