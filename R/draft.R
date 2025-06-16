@@ -137,6 +137,11 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 		n <- n + nn
 	}
 	er <- r
+
+
+	# dta
+	# r <- haven::read_dta(f)
+
 	
 	if (any(is_other)) {
 		nn <- sum(is_other)

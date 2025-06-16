@@ -198,9 +198,8 @@ check_metadata <- function(x, answ) {
 get_groupvars <- function(group) {		
 	vars <- c("all", "location", "crop", "soil")
 	if (grepl("maize", group)) vars <- c(vars, "maize")
-	if (grepl("wheat", group)) vars <- c(vars, "wheat")
 	if (grepl("survey", group)) vars <- c(vars, "survey")
-	if (grepl("soil", group)) vars <- vars[vars != "crop"	]
+	if (grepl("soil", group)) vars <- vars[vars != "crop"]
 	vars
 }
 
