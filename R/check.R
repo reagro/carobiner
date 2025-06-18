@@ -162,8 +162,8 @@ check_treatments <- function(answ, treatment, exp_type, vars, type) {
 }
 
 
-check_combined <- function(x, trms, answ) {
-	a1 <- vocal::check_variables(x, trms)
+check_combined <- function(x, trms, answ, required=TRUE, duplicates=TRUE) {
+	a1 <- vocal::check_variables(x, trms, required, duplicates)
 	a2 <- vocal::check_values(x, trms)
 	answ <- rbind(answ, a1, a2) 
 	dats <- grep("_date", names(x), value=TRUE)
@@ -204,28 +204,29 @@ get_groupvars <- function(group) {
 }
 
 
-check_records <- function(answ, x, group, check) {
+check_records <- function(answ, x, group, check, required=TRUE, duplicates=TRUE) {
 	vars <- get_groupvars(group)
 	trms <- vocal::accepted_variables(vars)
-	answ <- check_combined(x, trms, answ)
+	answ <- check_combined(x, trms, answ, required=required, duplicates=duplicates)
 
 	aw <- vocal::check_datespan(x, "planting_date", "harvest_date", smin=45, smax=366)
 	answ <- rbind(answ, aw)
 	answ <- check_consistency(x, answ)
 	answ <- check_cropyield(x, answ)
 
-	if (check != "nogeo") {
+	if (!("nogeo" %in% check)) {
 		if (all(c("longitude", "latitude") %in% colnames(x))) {
 			aw <- vocal::check_lonlat(x)	
 			answ <- rbind(answ, aw)
 		}
 	}
-	if (!is.null(x$record_id)) {
-		if (nrow(x) != length(unique(x$record_id))) {
-			answ[nrow(answ)+1, ] <- c("duplicates", "duplicates in record_id")
-		}		
+	if (duplicates) {
+		if (!is.null(x$record_id)) {
+			if (nrow(x) != length(unique(x$record_id))) {
+				answ[nrow(answ)+1, ] <- c("duplicates", "duplicates in record_id")
+			}		
+		}
 	}
-		
 	locvars <- c(paste0("adm", 1:5), "site", "location")
 	locvars <- locvars[locvars %in% names(x)]
 	answ <- rbind(answ, vocal::check_caps(x, locvars, minchar=5, frac=0.1))
@@ -275,8 +276,8 @@ carob_vocabulary <- function(x=NULL, save=FALSE, add=TRUE, reset=FALSE) {
 
 check_terms <- function(metadata=NULL, records=NULL, longrecs=NULL, wth=NULL, group="", check="all") {
 
-	check_packages("yuri", "0.1-8")
-	check_packages("vocal", "0.3-2")
+	check_packages("yuri", "0.2-0")
+	check_packages("vocal", "0.3-3")
 	
 	voc <- carob_vocabulary()
 	vocal::set_vocabulary(voc)
@@ -302,6 +303,7 @@ check_terms <- function(metadata=NULL, records=NULL, longrecs=NULL, wth=NULL, gr
 		answ <- find_duplicates(answ, records, longrecs)
 	}
 	if (!is.null(longrecs)) {
+		answ <- check_records(answ, longrecs, group=group, check=check, required=FALSE, duplicates=FALSE)
 		answ <- check_longrecs(longrecs, records, answ)
 	}
 	
