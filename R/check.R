@@ -84,7 +84,7 @@ check_pubs <- function(x, path, answ) {
 
 
 
-check_longrecs <- function(longrecs, records, answ) {
+check_longrecs <- function(answ, longrecs, records) {
 	rcid <- !is.null(longrecs$record_id)
 	trid <- !is.null(longrecs$trial_id)
 	if ((rcid + trid) != 1) {
@@ -162,8 +162,8 @@ check_treatments <- function(answ, treatment, exp_type, vars, type) {
 }
 
 
-check_combined <- function(x, trms, answ, required=TRUE, duplicates=TRUE) {
-	a1 <- vocal::check_variables(x, trms, required, duplicates)
+check_combined <- function(x, trms, answ, required=TRUE) {
+	a1 <- vocal::check_variables(x, trms, required)
 	a2 <- vocal::check_values(x, trms)
 	answ <- rbind(answ, a1, a2) 
 	dats <- grep("_date", names(x), value=TRUE)
@@ -204,10 +204,10 @@ get_groupvars <- function(group) {
 }
 
 
-check_records <- function(answ, x, group, check, required=TRUE, duplicates=TRUE) {
+check_records <- function(answ, x, group, check, required=TRUE, dupid=TRUE) {
 	vars <- get_groupvars(group)
 	trms <- vocal::accepted_variables(vars)
-	answ <- check_combined(x, trms, answ, required=required, duplicates=duplicates)
+	answ <- check_combined(x, trms, answ, required=required)
 
 	aw <- vocal::check_datespan(x, "planting_date", "harvest_date", smin=45, smax=366)
 	answ <- rbind(answ, aw)
@@ -220,7 +220,7 @@ check_records <- function(answ, x, group, check, required=TRUE, duplicates=TRUE)
 			answ <- rbind(answ, aw)
 		}
 	}
-	if (duplicates) {
+	if (dupid) {
 		if (!is.null(x$record_id)) {
 			if (nrow(x) != length(unique(x$record_id))) {
 				answ[nrow(answ)+1, ] <- c("duplicates", "duplicates in record_id")
@@ -290,13 +290,11 @@ check_terms <- function(metadata=NULL, records=NULL, longrecs=NULL, wth=NULL, gr
 	if (!is.null(metadata)) {
 		answ <- check_metadata(metadata, answ)
 		recnms <- c(names(records), names(longrecs))
-		if (!missing(records)) {
-			if (!is.null(metadata$treatment_vars)) {
-				answ <- check_treatments(answ, metadata$treatment_vars, metadata$data_type, recnms, "treatment")
-			}
-			if (!is.null(metadata$response_vars)) {
-				answ <- check_treatments(answ, metadata$response_vars, metadata$data_type, recnms, "response")
-			}
+		if (!is.null(metadata$treatment_vars)) {
+			answ <- check_treatments(answ, metadata$treatment_vars, metadata$data_type, recnms, "treatment")
+		}
+		if (!is.null(metadata$response_vars)) {
+			answ <- check_treatments(answ, metadata$response_vars, metadata$data_type, recnms, "response")
 		}
 	}
 	if (!is.null(records)) {
@@ -304,8 +302,11 @@ check_terms <- function(metadata=NULL, records=NULL, longrecs=NULL, wth=NULL, gr
 		answ <- find_duplicates(answ, records, longrecs)
 	}
 	if (!is.null(longrecs)) {
-		answ <- check_records(answ, longrecs, group=group, check=check, required=FALSE, duplicates=FALSE)
-		answ <- check_longrecs(longrecs, records, answ)
+		if (!is.null(records)) {
+			answ <- check_longrecs(answ, longrecs, records)
+		}
+		answ <- check_records(answ, longrecs, group=group, check=check, required=FALSE, dupid=FALSE)
+		answ <- find_duplicates(answ, records, longrecs)
 	}
 	
 	if (!is.null(wth)) {
