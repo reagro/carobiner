@@ -289,12 +289,13 @@ check_terms <- function(metadata=NULL, records=NULL, longrecs=NULL, wth=NULL, gr
 	}
 	if (!is.null(metadata)) {
 		answ <- check_metadata(metadata, answ)
+		recnms <- c(names(records), names(longrecs))
 		if (!missing(records)) {
 			if (!is.null(metadata$treatment_vars)) {
-				answ <- check_treatments(answ, metadata$treatment_vars, metadata$data_type, names(records), "treatment")
+				answ <- check_treatments(answ, metadata$treatment_vars, metadata$data_type, recnms, "treatment")
 			}
 			if (!is.null(metadata$response_vars)) {
-				answ <- check_treatments(answ, metadata$response_vars, metadata$data_type, names(records), "response")
+				answ <- check_treatments(answ, metadata$response_vars, metadata$data_type, recnms, "response")
 			}
 		}
 	}

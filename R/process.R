@@ -357,6 +357,8 @@ process_carob <- function(path, group="", quiet=FALSE, check=NULL, cache=TRUE) {
 			# remove compiled data for which there is no matching script
 			file.remove(have$csvfile[i])
 			file.remove(gsub("_meta", "", have$csvfile[i]))
+			suppressWarnings(file.remove(gsub("_meta", "_long", have$csvfile[i])))
+			suppressWarnings(file.remove(gsub("\\.csv$", ".html", have$csvfile[i])))
 			have <- have[-i, ,drop=FALSE]
 		}
 		
