@@ -136,6 +136,11 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 	dir.create(file.path(path, "data", "compiled"), showWarnings = FALSE, recursive = TRUE)
 	fff <- list.files(file.path(path, "data", "clean", group), pattern=".csv$", recursive=TRUE)
 
+	voc <- carob_vocabulary()
+	vocal::set_vocabulary(voc)
+	vocal::check_vocabulary(quiet=FALSE)
+
+
 	if (group == "") {
 		grps <- unique(sapply(strsplit(fff, "/"), function(i) ifelse(length(i) > 1, i[1], "doi")))
 	} else {
