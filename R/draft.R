@@ -24,7 +24,7 @@ grepr <- function(x) {
 		location = grepaste("locat|village|site", x),
 		site = grepaste("hamlet", x),
 		latitude = grepaste("latitude|^lat", x),
-		longititude = grepaste("longitude|^long", x),
+		longitude = grepaste("longitude|^long", x),
 		elevation = grepaste("^elev|altitude", x),
 		treatment = grepaste("treat", x),
 		crop = grepaste("crop", x),
@@ -191,10 +191,10 @@ match_names <- function(r, n) {
 		gg <- data.frame(new=names(gg), old=gg)
 		gg <- make_unique(gg)
 		bod <- unlist(lapply(1:nrow(gg), \(i) paste0("\t\t", gg[i, 1], " = r", n, "[[\"", gg[i,2], "\"]]")))
-		j <- grep("crop", bod)
+		j <- grep("crop|soil_texture", gg$new)
 		bod[j] <- gsub("]]", "]])", gsub("= ", "= tolower(", bod[j]))
-		j <- grep("$adm", bod)
-		bod[j] <- gsub("]]", "]], \"title\")", gsub("= ", "= fix_name(", bod[j]))
+		j <- grep("^adm", gg$new)
+		bod[j] <- gsub("]]", "]], \"title\")", gsub("= ", "= carobiner::fix_name(", bod[j]))
 				
 		bod <- paste(bod, collapse= ",\n")
 		txt <- paste0("\td", n, " <- data.frame(\n", bod, "\n\t)\n")
