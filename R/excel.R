@@ -41,7 +41,7 @@ read.excel.hdr <- function(f, skip, hdr=1, fix_names=TRUE, lower=FALSE, ...) {
 
 
 
-excel.textbox <- function(filename) {
+excel_textbox <- function(filename) {
 	if (!grepl("\\.xlsx$", filename)) {
 		stop("this only works for xlsx files")
 	}

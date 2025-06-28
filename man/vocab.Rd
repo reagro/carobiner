@@ -3,7 +3,7 @@
 \alias{carob_vocabulary}
 
 \title{
-Generate a carob_vocabulary Carob script
+Add terms to the Carob vocabulary
 }
 
 \description{

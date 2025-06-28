@@ -15,12 +15,13 @@ grepaste <- function(pattern, x, ignore.case=TRUE) {
 
 grepr <- function(x) {
 	r <- list(
-		farmer = grepaste("farmer", x),
-		plot = grepaste("plot", x),
+		hhid = grepaste("farmer", x),
+		plot_id = grepaste("plot", x),
 		country = grepaste("country", x),
-		adm1 = grepaste("adm1|region|state|estado", x),
-		adm2 = grepaste("adm2|munic|provinc|distri", x),
-		adm3 = grepaste("adm3|ward|commun", x),
+		adm1 = grepaste("adm.*1|admin.*1|region|state|estado", x),
+		adm2 = grepaste("adm.*2|admin.*2|munic|provin|distri", x),
+		adm3 = grepaste("adm.*3|admin.*3|ward|commun", x),
+		adm4 = grepaste("adm.*4|admin.*4", x),
 		location = grepaste("locat|village|site", x),
 		site = grepaste("hamlet", x),
 		latitude = grepaste("latitude|^lat", x),
@@ -34,14 +35,14 @@ grepr <- function(x) {
 		harvest_date = grepaste("harv.*date", x),
 		maturity_date = grepaste("mat.*date", x),
 		flowering_date = grepaste("flow.*date", x),
-		N_fertilizer = grepaste("^N$", x, FALSE),
-		P_fertilizer = grepaste("^P$", x, FALSE),
-		K_fertilizer = grepaste("^K$", x, FALSE),
-		S_fertilizer = grepaste("^S$", x, FALSE),
-		B_fertilizer = grepaste("^B$", x, FALSE),
-		Mg_fertilizer = grepaste("^Mg$", x, FALSE),
-		Zn_fertilizer = grepaste("^Zn$", x, FALSE),
-		soil_texture =  grepaste("texture", x, FALSE),
+		N_fertilizer = grepaste("^N$|nitrogen", x),
+		P_fertilizer = grepaste("^P$|phosph", x),
+		K_fertilizer = grepaste("^K$|potas", x),
+		S_fertilizer = grepaste("^S$|sulf", x),
+		B_fertilizer = grepaste("^B$|boron", x),
+		Mg_fertilizer = grepaste("^Mg$|magnesium", x),
+		Zn_fertilizer = grepaste("^Zn$|zinc", x),
+		soil_texture =  grepaste("texture", x),
 		yield = grepaste("yield", x)
 	)
 	empty <- character(0)
@@ -66,7 +67,7 @@ get_raw_data <- function(ff) {
 		names(xls) <- basename(fxls)
 		for (i in 1:length(fxls)) {
 			sheets <- readxl::excel_sheets(fxls[i])
-			ds <- lapply(sheets, \(s) carobiner::read.excel(fxls[i], sheet=s))
+			ds <- lapply(sheets, \(s) suppressWarnings(carobiner::read.excel(fxls[i], sheet=s)))
 			names(ds) <- sheets
 			xls[[i]] <- ds
 		}
@@ -76,7 +77,7 @@ get_raw_data <- function(ff) {
 	is_csv <- grepl("\\.csv$", ff)
 	if (any(is_csv)) {
 		fcsv <- ff[is_csv]
-		out$csv <- lapply(fscv, \(f) utils::read.csv(f))
+		out$csv <- lapply(fcsv, \(f) utils::read.csv(f))
 		names(out$csv) <- basename(fcsv)
 	}
 
@@ -132,13 +133,8 @@ read_files <- function(d) {
 			if (length(sheets) == 1) {	
 				r <- c(r, paste0(paste0("\tr", n), " <- carobiner::read.excel(f", n, ")"))
 			} else {
-				dst <- utils::adist("data", sheets, ignore.case=TRUE)
-				j <- which.min(dst)
-				sels <- sheets[j]
-				r <- c(r, paste0(paste0("\tr", n, "a"), " <- carobiner::read.excel(f", n, ", sheet=\"", sels, "\")"))
-				sheets <- sheets[-j]
-				for (k in 1:length(sheets)) {
-					r <- c(r, paste0(paste0("\tr", n, letters[k+1]), " <- carobiner::read.excel(f", n, ", sheet=\"", sheets[k], "\")"))
+				for (j in 1:length(sheets)) {
+					r <- c(r, paste0(paste0("\tr", n, letters[j]), " <- carobiner::read.excel(f", n, ", sheet=\"", sheets[j], "\")"))
 				}
 			}
 			n <- n + 1
