@@ -115,7 +115,7 @@ get_filenames <- function(d) {
 		f <- c(f, paste0(paste0("\tf", (length(f)+1):n), ' <- ff[basename(ff) == "', basename(fdta), '"]'))
 	}
 	if (!is.null(d$other)) {
-		foth <- names(d$other)
+		foth <- d$other
 		n <- n+length(foth)
 		f <- c(f, paste0(paste0("\tf", (length(f)+1):n), ' <- ff[basename(ff) == "', basename(foth), '"]'))
 	}
@@ -143,22 +143,22 @@ read_files <- function(d) {
 
 	if (any(!is.null(d$csv))) {
 		nn <- length(d$csv)
-		sq <- (n+1):(n+nn)
+		sq <- n:(n+nn-1)
 		r <- c(r, paste0(paste0("\tr", sq), " <- read.csv(f", sq, ")"))
 		n <- n + nn
 	}
 
 	if (any(!is.null(d$dta))) {
 		nn <- length(is_dta)
-		sq <- (n+1):(n+nn)
+		sq <- n:(n+nn-1)
 		r <- c(r, paste0(paste0("\tr", sq), " <- read.dta(f", sq, ")"))
 		n <- n + nn
 	}
 	
 	if (any(!is.null(d$other))) {
 		nn <- length(d$other)
-		sq <- (n+1):(n+nn)
-		r <- c(r, paste0(paste0("\tr", sq), " <- read.???(f", sq, ")"))	
+		sq <- n:(n+nn-1)
+		r <- c(r, paste0(paste0("\t#r", sq), " <- read.???(f", sq, ")"))	
 	}
 	
 	paste(r, collapse="\n")
@@ -268,6 +268,16 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 					nms <- c(nms, match_names(d$xls[[i]][[j]], paste0(i, letters[j])))
 				}
 			}
+		}
+	}
+	if (!is.null(d$csv)) {
+		for (i in 1:length(d$csv)) {
+			nms <- c(nms, match_names(d$csv[[i]], i))
+		}
+	}
+	if (!is.null(d$dta)) {
+		for (i in 1:length(d$dta)) {
+			nms <- c(nms, match_names(d$dta[[i]], i))
 		}
 	}
 	
