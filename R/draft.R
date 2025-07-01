@@ -57,6 +57,20 @@ wdist <- function(x, trms) {
 }
 
 
+
+read_format <- function(files, format, fun) { 
+	is_fmt <- grepl(paste0("\\.", format, "$"), files, ignore.case=TRUE)
+	if (any(is_fmt)) {
+		ff <- files[is_fmt]
+		out <- lapply(ff, \(f) fun(f))
+		names(out) <- basename(ff)
+	} else {
+		out <- NULL
+	}
+	out
+}
+	
+
 get_raw_data <- function(ff) {
 
 	is_xls <- grepl("\\.xlsx$|\\.xls$", ff)
@@ -74,21 +88,13 @@ get_raw_data <- function(ff) {
 		out$xls <- xls
 	}
 
-	is_csv <- grepl("\\.csv$", ff)
-	if (any(is_csv)) {
-		fcsv <- ff[is_csv]
-		out$csv <- lapply(fcsv, \(f) utils::read.csv(f))
-		names(out$csv) <- basename(fcsv)
-	}
 
-	is_dta <- grepl("\\.dta$", ff)
-	if (any(is_dta)) {
-		fdta <- ff[is_dta]
-		out$dta <- lapply(fdta, \(f) haven::read_dta(f))
-		names(out$dta) <- basename(fdta)
-	}
+	out$csv <- read_format(ff, "csv", utils::read.csv) 
+	out$rds <- read_format(ff, "rds", readRDS) 
+	out$dta <- read_format(ff, "dta", haven::read_dta) 
 
-	is_other <- !(is_xls | is_csv | is_dta)
+	is_known <- is_xls | grepl("\\.csv$|\\.rds$|\\.dta$", ff, ignore.case=TRUE)
+	is_other <- !is_known
 	if (any(is_other)) {
 		foth <- ff[is_other]
 		out$other <- basename(foth)
@@ -108,6 +114,11 @@ get_filenames <- function(d) {
 		fcsv <- names(d$csv)
 		n <- n+length(fcsv)
 		f <- c(f, paste0(paste0("\tf", (length(f)+1):n), ' <- ff[basename(ff) == "', fcsv, '"]'))
+	}
+	if (!is.null(d$rds)) {
+		frds <- names(d$rds)
+		n <- n+length(frds)
+		f <- c(f, paste0(paste0("\tf", (length(f)+1):n), ' <- ff[basename(ff) == "', basename(frds), '"]'))
 	}
 	if (!is.null(d$dta)) {
 		fdta <- names(d$dta)
@@ -148,8 +159,15 @@ read_files <- function(d) {
 		n <- n + nn
 	}
 
+	if (any(!is.null(d$rds))) {
+		nn <- length(d$rds)
+		sq <- n:(n+nn-1)
+		r <- c(r, paste0(paste0("\tr", sq), " <- readRDS(f", sq, ")"))
+		n <- n + nn
+	}
+
 	if (any(!is.null(d$dta))) {
-		nn <- length(is_dta)
+		nn <- length(d$dta)
 		sq <- n:(n+nn-1)
 		r <- c(r, paste0(paste0("\tr", sq), " <- read.dta(f", sq, ")"))
 		n <- n + nn
@@ -249,7 +267,7 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	r <- read_files(d)
 	s <- gsub("_read_", r, s)
 
-	can_read <- grepl("\\.xlsx$|\\.xls$|\\.csv$|\\.dta", ff)
+	can_read <- grepl("\\.xlsx$|\\.xls$|\\.csv$|\\.dta|\\.rds", ff)
 	
 	if (!any(can_read)) {
 		writeLines(s, fscript)
