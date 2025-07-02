@@ -98,7 +98,7 @@ get_pwds <- function(path) {
 }
 
 
-get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
+get_data <- function(uri, path, group, files=NULL, cache=TRUE, recursive=FALSE, filter=TRUE) {
 	if (is.null(path)) {
 		dpath <- file.path(tempdir(), "carob", fsep="/")
 	} else {
@@ -121,9 +121,10 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE) {
 			dpath <- file.path(dpath, uname)
 			ff <- get_LSMS(uri, dpath, pwds, cache=cache)		
 		} else {
-			ff <- yuri::dataURI(uri, dpath, unzip=TRUE, cache=cache)
+			ff <- yuri::dataURI(uri, dpath, unzip=TRUE, cache=cache, recursive=recursive, filter=FALSE)
 		}
-		filter_files(ff)
+		if (filter) ff <- filter_files(ff)
+		ff
 	}
 }
 

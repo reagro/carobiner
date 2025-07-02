@@ -33,7 +33,8 @@ make_reports <- function(path, group="", cache=TRUE) {
 		if (length(fff) == 0) return()
 	}
 
-	rmd <- file.path(path, "misc", "reports", "dataset.Rmd")
+
+	rmd <- system.file("reports/dataset.Rmd", package="carobiner")
 	if (file.exists(rmd)) {
 		rmd <- readLines(rmd, warn=FALSE)
 
@@ -60,8 +61,8 @@ make_reports <- function(path, group="", cache=TRUE) {
 			}
 		}
 	}
-		
-	rmd <- file.path(path, "misc", "reports", "aggregate.Rmd")	
+
+	rmd <- system.file("reports/aggregate.Rmd", package="carobiner")
 	if (!file.exists(rmd)) return()
 	
 	rmd <- readLines(rmd, warn=FALSE)
