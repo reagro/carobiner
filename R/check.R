@@ -104,7 +104,7 @@ check_longrecs <- function(answ, longrecs, records) {
 	}
 	cns <- c(colnames(records), colnames(longrecs))
 
-	expected <- c("date", "soil_depth", "soil_depth_top", "soil_depth_bottom")
+	expected <- c("date", "depth", "depth_top", "depth_bottom")
 	if (!any(cns %in% expected)) {
 		answ[nrow(answ)+1, ] <- c("time/depth", "no time/depth variables in long records?")	
 	}
@@ -115,10 +115,7 @@ check_longrecs <- function(answ, longrecs, records) {
 		dups <- paste(names(cns[cns>1]), collapse=", ")
 		answ[nrow(answ)+1, ] <- c("duplicates", paste("duplicate variables in records and longrecs:", dups))
 	}
-	
-	
-	
-	
+
 	answ
 }
 
@@ -304,6 +301,14 @@ check_terms <- function(metadata=NULL, records=NULL, longrecs=NULL, wth=NULL, gr
 	if (!is.null(longrecs)) {
 		if (!is.null(records)) {
 			answ <- check_longrecs(answ, longrecs, records)
+		}
+		if ("variable" %in% names(longrecs)) {
+			vars <- get_groupvars(group)
+			trms <- vocal::accepted_variables(vars)
+			a <- vocal::check_variables(unique(longrecs$variable), trms, FALSE)
+			answ <- rbind(answ, a) 
+			## also need to check the values, by variable. 
+			## should there be different value variables for different dataytypes?
 		}
 		answ <- check_records(answ, longrecs, group=group, check=check, required=FALSE, dupid=FALSE)
 		answ <- find_duplicates(answ, records, longrecs)
