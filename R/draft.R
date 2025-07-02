@@ -248,7 +248,8 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 
 	s <- readLines(system.file("tmp/tmp", package="carobiner"))
 
-	s <- gsub("_description_", meta$description, s)
+	s <- gsub("_title_", gsub("\"", "'", meta$title), s)
+	s <- gsub("_description_", gsub("\"", "'", meta$description), s)
 	s <- gsub("_major_", v[1], s)
 	s <- gsub("_minor_", v[2], s)
 	s <- gsub("_uri_", uri, s)

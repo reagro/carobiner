@@ -8,6 +8,8 @@
 carob_script <- function(path) {
 
 "
+_title_
+
 _description_
 "
 
