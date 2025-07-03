@@ -178,7 +178,7 @@ if (nrow(locs) > 0) {
 ```{r msg, include=have_msg}
 if (have_msg) {
   msg <- msg[,c("check", "msg")]
-  names(msg) <- "message"
+  names(msg) <- c("type", "message")
   ktab(msg, "")
 }
 ```

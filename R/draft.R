@@ -222,6 +222,24 @@ match_names <- function(r, n) {
 	txt
 }	
 
+match_org <- function(x) {
+	if (length(x) == 0) {
+		return(x)
+	}
+	vocal::set_vocabulary("github:carob-data/terminag")
+	v <- vocal::accepted_values("organization")
+	long <- v$longname
+	
+	x <- trimws(unlist(strsplit(x, ";")))
+	for (i in 1:length(x)) {
+		if (x[i] == "") next
+		d <- adist(x[i], v$longname)
+		if ((min(d, na.rm=TRUE) / nchar(x[i])) < 0.2) {
+			x[i] <- v[which.min(d), 1]
+		}
+	}
+	paste(x, collapse="; ")
+}
 
 
 draft <- function(uri, path, group="draft", overwrite=FALSE) {
@@ -254,13 +272,20 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 	s <- gsub("_minor_", v[2], s)
 	s <- gsub("_uri_", uri, s)
 	s <- gsub("_group_", group, s)
-	s <- gsub("_dataorg_", meta$data_organization, s)
+	s <- gsub("_dataorg_", match_org(meta$data_organization), s)
 	s <- gsub("_pub_", ifelse(is.na(meta$publication), "NA", quotes(meta$publication)), s)
 	s <- gsub("_today_", as.character(as.Date(Sys.time())), s)
 	s <- gsub("_design_", ifelse(is.na(meta$design), "NA", quotes(meta$design)), s)
 
 
-	d <- get_raw_data(ff)
+	d <- try(get_raw_data(ff))
+	
+	if (inherits(d, "try-error")) {
+		writeLines(s, fscript)
+		message(fscript)
+		return(invisible(fscript))
+	}
+	
 	wf <- get_filenames(d)
 
 	s <- gsub("_filename_", wf, s)
