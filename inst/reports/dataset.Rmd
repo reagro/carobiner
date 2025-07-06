@@ -3,6 +3,7 @@ title: Carob report
 output: html_document
 editor_options: 
   chunk_output_type: console
+md_extensions: -autolink_bare_uris
 ---
 
 
