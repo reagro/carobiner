@@ -245,6 +245,9 @@ draft <- function(uri, path, group="draft", overwrite=FALSE) {
 #group <- "survey"
 #overwrite <- TRUE
 
+	voc <- carob_vocabulary()
+	vocal::set_vocabulary(voc)
+
 	did <- yuri::simpleURI(uri)
 	## check on_carob ...
 	
