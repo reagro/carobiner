@@ -12,7 +12,7 @@ Download the files associated with a URI.
 
 
 \usage{
-get_data(uri, path, group, files=NULL, cache=TRUE, recursive=FALSE, filter=TRUE)
+get_data(uri, path, group, files=NULL, cache=TRUE, recursive=FALSE, filter=TRUE, protocol="", username, password)
 }
  
 \arguments{
@@ -24,6 +24,10 @@ get_data(uri, path, group, files=NULL, cache=TRUE, recursive=FALSE, filter=TRUE)
   \item{cache}{logical. if \code{TRUE} the data are only downloaded again if they are not locally available}
   \item{recursive}{logical. if \code{TRUE} also return filenames in sub-directories}
   \item{filter}{logical. if \code{TRUE} files that probably do not have the primary data are filtered out (files ending on .pdf, .doc(x), .json)}
+ 
+  \item{protocol}{character}
+  \item{username}{character}
+  \item{password}{character}
 }
 
 \value{

@@ -34,8 +34,8 @@ checkVersion <- function(vmeta, major, minor) {
 }
 
 get_metadata <- function(uri, path, group, major, minor, ...) {
-	if (group == "LSMS") {
-		return(LSMS_metadata(uri, path, major, minor))
+	if (isTRUE(grepl("doi:10.48529", uri))) {
+		return(LSMS_metadata(uri, group, path, major, minor, ...))
 	}
 	dataset_id <- yuri::simpleURI(uri)
 	jpath <- file.path(path, "data", "raw", group)
@@ -47,7 +47,7 @@ get_metadata <- function(uri, path, group, major, minor, ...) {
 	draft <- isTRUE(d$draft)	
 	if (!draft) {
 		checkVersion(m$version, major=major, minor=minor)
-		m$data_publisher <- NULL 
+		#m$publisher <- NULL 
 	}
 	d$draft <- NULL
 	

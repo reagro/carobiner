@@ -81,24 +81,36 @@ file_downloads <- function(files, path, cache) {
 
 
 
-get_pwds <- function(path) {
-	fpwd <- file.path(path, "passwords.R")
-	if (file.exists(fpwd)) {
-		pwds <- function(){NULL}
-		source(fpwd, local=TRUE)
-		p <- pwds()
-		if (is.null(p)) {
-			warning("invalid passwords file")
-			data.frame()
+usr_pwd <- function(path, protocol) {
+
+	if (is.null(.carob_environment$passwords)) {
+		fpwd <- file.path(path, "passwords.R")
+		if (file.exists(fpwd)) {
+			pwds <- function(){NULL}
+			source(fpwd, local=TRUE)
+			p <- pwds()
+			if (is.null(p)) {
+				p <- list()
+			}
+			.carob_environment$passwords <- p
 		}
-		p
-	} else {
-		data.frame()
 	}
+	
+	up <- .carob_environment$passwords[[protocol]]
+	if (!is.null(up)) {
+		up <- as.data.frame(as.list(up))
+		if (is.null(up$username)) {
+			stop("'username' not found")
+		}
+		if (is.null(up$password)) {
+			stop("'password' not found")
+		}
+	}
+	up
 }
 
 
-get_data <- function(uri, path, group, files=NULL, cache=TRUE, recursive=FALSE, filter=TRUE) {
+get_data <- function(uri, path, group, files=NULL, cache=TRUE, recursive=FALSE, filter=TRUE, protocol="", username, password) {
 	if (is.null(path)) {
 		dpath <- file.path(tempdir(), "carob", fsep="/")
 	} else {
@@ -116,10 +128,9 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE, recursive=FALSE, 
 	if (!is.null(files)) {
 		file_downloads(files, dpath, cache)
 	} else {
-		if (group == "LSMS") {
-			pwds <- get_pwds(path)
+		if (protocol == "LSMS") {
 			dpath <- file.path(dpath, uname)
-			ff <- get_LSMS(uri, dpath, pwds, cache=cache)		
+			ff <- get_LSMS(uri, dpath, username, password, cache=cache)		
 		} else {
 			ff <- yuri::dataURI(uri, dpath, unzip=TRUE, cache=cache, recursive=recursive, filter=FALSE)
 		}

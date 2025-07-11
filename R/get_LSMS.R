@@ -1,30 +1,17 @@
 
 
-get_LSMS <- function(uri, path, pwds, cache=TRUE) {
+
+
+get_LSMS <- function(uri, path, username, password, cache=TRUE) {
 
 	fok <- file.path(path, "ok.txt")
 	if (cache && file.exists(fok)) {
 		return(list.files(path, recursive=TRUE, full.names=TRUE))
 	}
 
-	if (!exists("LSMS_email")) {
-		if (isTRUE(nchar(pwds$LSMS_email) > 4)) {
-			LSMS_email <- pwds$LSMS_email
-		} else {
-			stop("'LSMS_email' not found; you can provide it in the global environment or in 'passwords.R'")
-		}
-	}
-	if (!exists("LSMS_password")) {
-		if (isTRUE(nchar(pwds$LSMS_password) > 1)) {
-			LSMS_password <- pwds$LSMS_password
-		} else {
-			stop("'LSMS_password' not found; you can provide it in the global environment or in 'passwords.R'")		
-		}
-	}
-
 	dir.create(path, FALSE, FALSE)
 	lsms_login = "https://microdata.worldbank.org/index.php/auth/login"
-	p <- httr::POST(lsms_login, body = list('email' = pwds$LSMS_email, 'password' = pwds$LSMS_password))
+	p <- httr::POST(lsms_login, body = list('email' = username, 'password' = password))
 	if (p$status != 200) {
 		stop(paste0("bad POST response, status=", p$status, ". invalid email/password?"))
 	} else if (!(is.null(p$headers$refresh))) {
@@ -90,7 +77,7 @@ get_LSMS <- function(uri, path, pwds, cache=TRUE) {
 
 
 
-LSMS_metadata <- function(uri, path, major, minor) {
+LSMS_metadata <- function(uri, group, path, major, minor, ...) {
 
 	suri <- yuri::simpleURI(uri)
 	mf <- readLines(file.path(path, "data/raw/LSMS", suri, "study-description.html"))
@@ -102,21 +89,32 @@ LSMS_metadata <- function(uri, path, major, minor) {
 	des <- gsub('\"|\\\\r|\\\\n', "", des)
 	des <- gsub("description: Abstract---------------------------", "", des)
 
-	data.frame(
+	m <- data.frame(
 		dataset_id = suri,
-		group="LSMS",
 		uri=uri,
-		license="bespoke: acknowledge source, no redistribution, report data use",
+		group=group,
+		license="acknowledge source, no redistribution, report data use",
 		title= tit,
 		authors=NA,
-		data_published=dat,
+		publication=NA,
+		date_published=dat,
 		description=des,
 		data_citation=NA,
-		data_institute = "World Bank",
 		project = "LSMS",
 		data_type = "survey",
 		treatment_vars = "none",
 		response_vars = "none"
 	)
+	
+	d <- data.frame(list(...))
+	d$draft <- NULL
+	
+	if (nrow(d) == 1) {
+		m[names(d)] <- d
+	} else if (nrow(d) > 1) {
+		warning("additional arguments must all have length 1")
+	}
+	m
+		
 }
 
