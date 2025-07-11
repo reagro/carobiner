@@ -80,7 +80,7 @@ get_LSMS <- function(uri, path, username, password, cache=TRUE) {
 LSMS_metadata <- function(uri, group, path, major, minor, ...) {
 
 	suri <- yuri::simpleURI(uri)
-	mf <- readLines(file.path(path, "data/raw/LSMS", suri, "study-description.html"))
+	mf <- readLines(file.path(path, "data/raw", group, suri, "study-description.html"))
 	tit <- gsub("<title>|</title>", "", grep("<title>", mf, value=TRUE))
 	dat <- trimws(mf[grep("Date of Metadata Production", mf)+2])
 	dat <- gsub("<p>|</p>|<span>|</span>", "", dat)
@@ -100,7 +100,7 @@ LSMS_metadata <- function(uri, group, path, major, minor, ...) {
 		date_published=dat,
 		description=des,
 		data_citation=NA,
-		project = "LSMS",
+		project = "LSMS-ISA",
 		data_type = "survey",
 		treatment_vars = "none",
 		response_vars = "none"
