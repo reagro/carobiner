@@ -5,6 +5,7 @@
 
 
 filter_files <- function(x) { 
+	if (is.null(x)) return(x)
 	x <- grep("\\.json$|ok\\.txt$|\\.pdf$|_files.txt$|\\.zip$|\\.doc$|\\.docx$|/old_", x, value=TRUE, invert=TRUE)
 	# remove opened excel files
 	grep("/~$", x, fixed=TRUE, invert=TRUE, value=TRUE)
@@ -130,7 +131,7 @@ get_data <- function(uri, path, group, files=NULL, cache=TRUE, recursive=FALSE, 
 	} else {
 		if (protocol == "LSMS") {
 			dpath <- file.path(dpath, uname)
-			ff <- get_LSMS(uri, dpath, username, password, cache=cache)		
+			ff <- get_LSMS(uri, dpath, username, password, cache=cache)
 		} else {
 			ff <- yuri::dataURI(uri, dpath, unzip=TRUE, cache=cache, recursive=recursive, filter=FALSE)
 		}
