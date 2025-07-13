@@ -4,6 +4,10 @@
 
 get_LSMS <- function(uri, path, username, password, cache=TRUE) {
 
+	if (is.null(username) | is.null(password)) {
+		return(NULL)
+	}
+
 	fok <- file.path(path, "ok.txt")
 	if (cache && file.exists(fok)) {
 		return(list.files(path, recursive=TRUE, full.names=TRUE))
