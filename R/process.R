@@ -143,6 +143,7 @@ compile_carob <- function(path, group="", split_license=FALSE, zip=FALSE, excel=
 
 	if (group == "") {
 		grps <- unique(sapply(strsplit(fff, "/"), function(i) ifelse(length(i) > 1, i[1], "doi")))
+		grps <- grps[grps != "draft"]
 	} else {
 		fff <- file.path(group, fff)
 		grps <- group
