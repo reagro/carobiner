@@ -273,7 +273,7 @@ carob_vocabulary <- function(x=NULL, save=FALSE, add=TRUE, reset=FALSE) {
 
 check_terms <- function(metadata=NULL, records=NULL, longrecs=NULL, wth=NULL, group="", check="all") {
 
-	check_packages("yuri", "0.2-3")
+	check_packages("yuri", "0.2-4")
 	check_packages("vocal", "0.3-4")
 	
 	voc <- carob_vocabulary()
